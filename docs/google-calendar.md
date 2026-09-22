@@ -2,7 +2,7 @@
 
 Users choose **Settings → Calendars → Connect Google**, authorize Toby in their browser and select calendars. They can add multiple Google accounts. Users never create Cloud projects, import client JSON or manage OAuth credentials.
 
-## Maintainer setup (pending for 0.8.0)
+## Maintainer setup
 
 The maintainer creates one Google Cloud project, enables the Calendar API, configures the OAuth app’s branding/audience and creates a **Desktop app** OAuth client. For personal testing, add the intended accounts as test users. Request OpenID/email identity plus `calendar.calendarlist.readonly` and `calendar.events.readonly`. The app cannot write calendar events.
 
@@ -29,4 +29,4 @@ Calendar calls are combined with optional EventKit calendars by conference URL/s
 - [Calendar lists](https://developers.google.com/workspace/calendar/api/v3/reference/calendarList/list)
 - [Event lists](https://developers.google.com/workspace/calendar/api/v3/reference/events/list)
 
-No live sign-in or account access was tested by the agent. Configure the application client before final packaging.
+No live sign-in or account access was tested by the agent. The local 0.8.0 bundle includes the supplied application client; browser consent and multi-account access still require user validation.

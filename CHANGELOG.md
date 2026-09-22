@@ -1,12 +1,12 @@
 # Changelog
 
-## 0.8.0 — pending Google configuration
+## 0.8.0 — 2026-09-22
 
 - Add workspace-scoped two-finger horizontal navigation, back/forward history, keyboard commands, and page switching; preserve normal vertical scrolling and editor interactions.
 - Start voice from the menu bar without bringing the main workspace forward. Show transcript, written replies, Send now and End voice; keep background sessions alive when the workspace closes.
 - Redesign Settings into Models, Capture, Calendars and General with concise copy, progressive disclosures, custom language selection and white OpenAI/xAI provider marks.
 - Display Codex account-wide usage windows and reset times via the authenticated CLI. Grok account quota is explicitly unavailable, not inferred from session token usage.
-- Replace user-imported OAuth setup with Toby-owned bundled Google configuration and Connect Google. Final packaging requires the maintainer’s Desktop OAuth client.
+- Replace user-imported OAuth setup with Toby-owned bundled Google configuration and Connect Google. The maintainer’s Desktop OAuth client is bundled in the signed app; the source configuration stays outside Git.
 - Compilation/static checks only. No app launch, visual QA, recording, live provider quota or Google sign-in tests.
 
 ## 0.7.1 — 2026-09-22
