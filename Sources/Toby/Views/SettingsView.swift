@@ -57,9 +57,10 @@ struct SettingsView: View {
                     }
                     SettingsSection(title: "Meetings") {
                         HStack {
-                            Text(
-                                model.schedule.hasAccess
-                                    ? "Mac calendars connected" : "Calendar access not granted")
+                            StatusLabel(
+                                text: model.schedule.hasAccess
+                                    ? "Calendar connected" : "Calendar not connected",
+                                tone: model.schedule.hasAccess ? .success : .warning)
                             Spacer()
                             Button("Connect Calendar") { Task { await model.schedule.requestAccess() } }
                         }
@@ -108,12 +109,12 @@ struct SettingsView: View {
                         LabeledContent(
                             "Version",
                             value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-                                ?? "0.5.0")
+                                ?? "0.6.0")
                         Text(
                             "This fresh app has its own library. Existing Toby data is not imported or modified."
                         )
                         .font(.caption).foregroundStyle(.secondary)
-                        if let error { Text(error).font(.caption).foregroundStyle(.orange) }
+                        if let error { Text(error).font(.caption).foregroundStyle(Theme.failure) }
                     }
                 }.padding(.horizontal, 24).padding(.bottom, 28)
             }
@@ -134,7 +135,9 @@ private struct SettingsSection<Content: View>: View {
         VStack(alignment: .leading, spacing: 14) {
             Text(title).font(Theme.heading(19)).foregroundStyle(Theme.accent)
             content
-        }.font(.system(size: 13)).frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top, 16).overlay(alignment: .top) { Rectangle().fill(Theme.line).frame(height: 1) }
+        }.buttonStyle(QuietButtonStyle()).font(.system(size: 13)).frame(
+            maxWidth: .infinity, alignment: .leading
+        )
+        .padding(.top, 16).overlay(alignment: .top) { Rectangle().fill(Theme.line).frame(height: 1) }
     }
 }

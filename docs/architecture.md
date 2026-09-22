@@ -1,70 +1,43 @@
-# Architecture — 0.5.0
+# Toby design language
 
-## Product
+## Scene and direction
 
-Toby is a native, local-first personal workspace. Voice is an entry point, meetings are source material, and notes/files are durable outcomes. Navigation is top-level and content-led; conversation history belongs to an item rather than a permanent sidebar.
+A personal Mac workspace for thinking between calls and returning to unfinished ideas in the evening. Flat black surfaces, restrained solid borders and soft native typography give Toby a distinct personal Mac identity. The original Toby logo sits immediately left of the header wordmark.
 
-## Ownership
+## Palette
 
-- `AppModel`: dependency composition, navigation and cross-feature handoffs.
-- `Library`: one SwiftData model context, mutations, bounded checkpoints, import/export and recovery.
-- `AgentSession`: one active run with generation ownership, event projection, approvals and completion callbacks.
-- `CLITransport`: one Codex app-server or Grok ACP process, serialized stdout framing, request deadlines, cancellation and stale-process isolation.
-- `AccountConnection`: a separate, short-lived transport for CLI authentication checks and provider model discovery. It cannot stop a task’s process.
-- `VoiceSession`: talking lifecycle, silence boundary and microphone resumption after written replies.
-- `MeetingSession`: meeting lifecycle, transcript assembly and local recording ownership.
-- `AudioCapture`: permissions, AVAudioEngine and ScreenCaptureKit. No video output is registered or persisted.
-- `AudioSink`: off-render-thread serialized audio file writes and recognition. Recognition rolls every 45 seconds to keep meeting sessions bounded.
-- `MeetingSchedule`: read-only EventKit projection and explicit calendar-based automatic recording policy.
+Neutral black canvas #000000, surfaces around #0E0E0E, drawer #131313, text #F5F5F5, secondary #A3A3A3, silver-blue accent #D4E0F0. No gradients anywhere, including background, surface borders or hover states. Use solid black/neutral fills and thin solid borders. The header logo is 48 points.
 
-## Persistence schema 1
+## Type
 
-`LibraryItem` has a stable UUID, kind, title, source body, generated notes, draft, timestamps, pin/memory flags, runtime thread ID, recording state, attachment names and a cascade relationship to messages. `Message` has its own UUID, role, text, state, timestamp and runtime item ID.
+Use one native SF family throughout; semibold for headings and titles, regular for prose, medium for controls. No serif display headings, uppercase letterspaced labels or monospaced decorative shortcuts. Home hero 36, onboarding/page titles 30–32, item titles 28, section headings 18–20, row titles 15, body 14–16, metadata 12–13. Body columns capped around 760 points.
 
-The initial SwiftData model is the baseline schema. Do not rename/remove stored properties or change relationship semantics without adding a versioned schema and migration. The app refuses to open a damaged/incompatible store rather than deleting it or silently creating an empty replacement.
+## Layout
 
-Audio lives outside the database. Each item owns one directory under `Workspaces/<UUID>`. Audio source tracks are separate CAF files. The app deliberately uses a new bundle ID and a new Application Support root; the previous Toby library is not touched.
+Top navigation uses a larger logo next to Toby. Provider selection uses custom segments; models use a searchable custom list. Search fields have custom solid backgrounds, focus borders and clear actions. Home has a clear voice entry, an understated writing input, and a chronological shelf of actual work. Notes and meetings use grouped rows rather than a repeated card grid. Thread content is readable, left-aligned and centered within the available page.
 
-Streaming updates are checkpointed at most 500ms after the first unsaved change, including during continuous streaming. Completed messages and runtime IDs are saved immediately. On relaunch, streaming messages and recording states become interrupted. This is recovery of saved work, not resumption of a terminated process.
+## Voice
 
-## Runtime protocol
+Talk opens a new thread in the workspace. An inline capture surface expands with a short fade/translation and real audio-level animation. Mic status, recognized words, Send now and End voice are together. Replies always appear in text. The microphone returns after a completed answer, until End voice. An active capture remains accessible when browsing other pages.
 
-The local app-server uses newline-delimited JSON over stdio. Each request has a 30-second deadline and cancellation cleanup. Process identity is generation-scoped to prevent callbacks from a terminated child affecting a new owner. Each task resumes the item’s runtime thread or creates one in that same item’s workspace. User-configured models apply to the next task. Command/file approvals are one-time; unknown server requests are explicitly rejected. User-input questions are presented in a native sheet.
+## Settings and recording
 
-Agent messages retain their runtime item identity. Completed message text can reconcile missed deltas. Status checks are isolated. Stop closes stdin, terminates the child and schedules a force kill if it remains alive. Launch performs isolated CLI authentication, model-catalog and default-model discovery, without sending any prompt.
+Settings slide in from the right with no dimming scrim and no separate window. Existing workspace state remains in place. Automatic-recording consent is inline in that drawer. Meeting recording stays on its thread page with persistent controls. macOS permission dialogs remain system-managed.
 
-A three-minute event-silence watchdog stops unresponsive work, except while the app waits for an approval or a user answer. The UI exposes status and errors and retains the user prompt for a subsequent follow-up.
+## Motion and interactions
 
-## Capture policy
+220–280ms ease-out transitions, no spring bounce. Voice opening animates once per capture start; wave activity follows microphone input. Reduced Motion removes movement and continuous waveform animation. Buttons have visible hover, press, focus and disabled states. Native controls handle keyboard focus.
 
-Talk and the global shortcut create a new conversation and select it in the main workspace. Reinvoking Talk during capture returns to that active thread. A short pause submits the utterance. Microphone capture pauses during execution; replies render only as text, then listening resumes. Explicit interruption stops execution and resumes listening. End voice or closing the main workspace ends the voice session. Navigating to another page retains a visible return/end control.
+## First-launch setup
 
-Settings is a trailing in-app drawer, with Command–Comma routing to the same state. Automatic recording consent appears inline in the drawer. There is no Settings scene or voice window. Voice entry and drawer transitions respect Reduce Motion. Meetings retain inline recording controls and transcripts. Provider approvals and questions retain their existing sheets.
+A full in-app page uses the existing flat black surfaces, logo and consistent SF typography. Three numbered steps cover voice, files and providers; a fixed footer offers Back, Continue/Finish and Skip, with an explicit dismiss control in the header. Each permission has a plain-language purpose and current status. Provider setup links sit beside actionable login/recheck controls. No app-owned onboarding modal or new window is used.
 
-Meeting capture records microphone and all system audio except this app. Both sources are transcribed on-device. Calendar automation is opt-in and checks every 20 seconds while the app is open. Supported conferencing events begin recording near their scheduled start and finish at the scheduled end. A persisted event-occurrence key prevents immediate re-recording after relaunch. Skipping an event persists the same exclusion. No browser/app surveillance or inferred call detection is performed.
+## Semantic states and hierarchy
 
-## Build/distribution
+Success uses green (#5ED194) with a check icon; failure or denied/restricted access uses red (#FA666E) with a cross; unresolved choices, missing decisions and deferred optional access use yellow (#F0C24F) with an attention icon. Loading stays neutral. No state relies solely on color. Provider errors and failed task messages are red; user interruption is yellow.
 
-SwiftPM builds the executable. `scripts/build-app.sh` creates an app bundle with its icon, Info.plist usage descriptions and ad-hoc signature. It does not launch or install the app. Developer ID signing/notarization and a fully packaged Codex runtime remain distribution work.
+A light solid primary button identifies the main next action; secondary actions use quiet dark controls, tertiary details use text buttons. Successful permissions replace disabled controls with a green state. Connected providers show a concise status; executable paths and repair controls live under Connection details.
 
-## CLI authentication and Grok (0.2.0)
+Use one purposeful writing surface on Home, with model controls inside it. Onboarding permissions and providers use aligned sections, not repetitive rounded cards. Conversations use open prose and role labels, reserving a surface for the composer. Borders remain subtle and solid; no gradients.
 
-No credentials are imported into Toby. Each subprocess inherits the current user's environment and home directory. Executable discovery honors explicit selections, then PATH and standard per-user/system installs. Account checks use separate processes and never send a model prompt. Sign-in belongs to Terminal (`codex login` / `grok login`); the app can copy the command but does not run it automatically.
-
-Codex uses `account/read` on its authenticated app-server. Grok runs `agent --no-leader stdio`, initializes ACP version 1, requires the advertised `cached_token` method, and calls `authenticate` with headless metadata. Missing/expired credentials fail visibly; Toby does not select API-key authentication. Grok task sessions are fresh with bounded visible-history bridging; no SwiftData schema change was required. Native Grok tool-permission requests map only to advertised allow-once/reject-once options; unsupported client methods are rejected. Check/stop are scoped to Toby's child process, never the user's shared CLI leader.
-
-Protocol references: [xAI headless/ACP documentation](https://docs.x.ai/build/cli/headless-scripting), [official agent-mode documentation](https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-pager/docs/user-guide/15-agent-mode.md). Installed CLI help was inspected; provider sessions were not exercised.
-
-Home and Settings share persisted `agentProvider`, `codexModel` and `grokModel` defaults through the same picker component. Both provider catalogs load once on app launch in separate account connections. Settings can retry failed checks. Grok discovery calls `_x.ai/models/list` after cached-token authentication and reads the extension result envelope’s `availableModels` (`modelId`, `name`). Before prompting a new Grok session, a nonempty selected model is applied with `session/set_model`; rejection stops the task before the prompt, without a fallback to another model. Unset choices are resolved and saved as concrete IDs: Codex uses `config/read.config.model`, falling back to the catalog `isDefault` only when no model is configured; Grok uses `currentModelId`. Existing explicit choices are preserved. A task cannot run with an unresolved empty model. See [Grok model research](grok-models.md).
-
-The main header reads the existing `Toby.icns` image directly from the packaged app resources. It adds no asset dependency and preserves the Dock icon. The canvas, surface outlines, and hover fills contain no gradients. The header logo is 48 points. Custom model popovers provide search, arrow navigation, Return selection, Escape dismissal and selected-state accessibility. Search fields use plain text editing with custom solid fill, focus border and clear buttons.
-
-## Onboarding (0.5.0)
-
-`OnboardingState` persists the current step and an explicit outcome (`pending`, `completed`, `skipped`, `dismissed`) in UserDefaults. The default is pending; closing/quitting a window does not mark completion. The in-app setup surface covers the workspace until a terminal outcome. Settings can reopen it without resetting existing permissions or credentials. Workspace commands, global talk and meeting auto-start cannot bypass an open setup flow.
-
-Permission controls request AVFoundation microphone access, Speech authorization, CoreGraphics screen-capture authorization used by the existing ScreenCaptureKit audio path, and optional EventKit access. Requests are user-triggered, statuses refresh on activation, and setup does not instantiate a recorder. The system permission panel remains macOS-owned. System-audio changes may require a relaunch. Setup never enables automatic meeting recording.
-
-`LocalFolderAccess` stores a minimal bookmark to an optional default attachment folder. Library attachment panels start there, while the user still selects each file. It neither grants blanket filesystem access nor imports/indexes the chosen folder. Unreachable bookmarks resolve to no default, allowing the user to choose another folder.
-
-AccountConnection separately tracks authentication and full readiness. Completing setup requires authentication, completed discovery, no current error, and a catalog entry matching the selected provider’s saved model. Both providers are checked, but only one is required. Missing CLIs and signed-out sessions point to official setup guides; Toby does not install CLIs or initiate browser login itself.
+Shared presentation uses `StatusTone`/`StatusLabel` for semantic colors and symbols, `PrimaryButtonStyle` for the next action, and `QuietButtonStyle` for secondary controls. Permission states come from authorization enums; provider readiness/errors and message failure state drive their own explicit tone. No persistence or runtime protocol changes in the visual pass.

@@ -21,7 +21,7 @@ struct LibraryView: View {
             Eyebrow(text: memoryOnly ? "What Toby remembers" : "Your personal collection")
             HStack {
                 Text(memoryOnly ? "Things worth remembering." : "All the pieces, together.").font(
-                    Theme.heading(37))
+                    Theme.heading(30))
                 Spacer()
                 Button("New note", action: model.newNote).buttonStyle(QuietButtonStyle())
             }

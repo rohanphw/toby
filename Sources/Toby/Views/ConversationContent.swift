@@ -7,12 +7,20 @@ struct ConversationContent: View {
             ForEach(messages) { message in
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Eyebrow(
-                            text: message.role == "user"
-                                ? "You" : message.role == "system" ? "Needs attention" : "Toby")
+                        if message.role == "system" {
+                            StatusLabel(
+                                text: message.state == "failed" && message.text != "Stopped"
+                                    ? "Task failed" : "Needs attention",
+                                tone: message.state == "failed" && message.text != "Stopped"
+                                    ? .failure : .warning)
+                        } else {
+                            Image(systemName: message.role == "user" ? "person.crop.circle" : "sparkle")
+                                .foregroundStyle(Theme.secondary)
+                            Text(message.role == "user" ? "You" : "Toby").font(Theme.label)
+                        }
                         if message.state == "streaming" { ProgressView().controlSize(.mini) }
                         if message.state == "interrupted" {
-                            Text("Interrupted").font(.caption).foregroundStyle(Theme.secondary)
+                            StatusLabel(text: "Interrupted", tone: .warning)
                         }
                         Spacer()
                         Button {
@@ -25,11 +33,13 @@ struct ConversationContent: View {
                             "Copy response")
                     }
                     MarkdownDocument(text: message.text)
+                        .foregroundStyle(
+                            message.state == "failed" && message.text != "Stopped" ? Theme.failure : Theme.ink
+                        )
                 }
-                .padding(message.role == "user" ? 20 : 4)
+                .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(
-                    message.role == "user" ? Theme.surface : .clear, in: RoundedRectangle(cornerRadius: 20))
+
             }
         }
     }
@@ -40,7 +50,7 @@ struct ApprovalView: View {
     let approval: RuntimeApproval
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
-            Image(systemName: "hand.raised").font(.system(size: 26)).foregroundStyle(Theme.accent)
+            Image(systemName: "hand.raised").font(.system(size: 26)).foregroundStyle(Theme.warning)
             Text(approval.title).font(Theme.heading(29))
             Text("Toby needs your permission to continue this action.").foregroundStyle(Theme.secondary)
             ScrollView {
@@ -50,13 +60,18 @@ struct ApprovalView: View {
                 ).font(.system(size: 12, design: .monospaced)).textSelection(.enabled).frame(
                     maxWidth: .infinity, alignment: .leading)
             }.frame(maxHeight: 220)
+            if approval.method == "session/request_permission", approval.allowOptionID == nil {
+                StatusLabel(text: "This provider has not offered an Allow decision.", tone: .warning)
+            }
             HStack {
                 Button("Stop task", role: .destructive) { agent.stop() }
                 Spacer()
                 Button("Deny") { agent.resolve(approval, allow: false) }
-                Button("Allow once") { agent.resolve(approval, allow: true) }.buttonStyle(.borderedProminent)
-                    .disabled(
-                        approval.method == "session/request_permission" && approval.allowOptionID == nil)
+                Button("Allow once") { agent.resolve(approval, allow: true) }.buttonStyle(
+                    PrimaryButtonStyle()
+                )
+                .disabled(
+                    approval.method == "session/request_permission" && approval.allowOptionID == nil)
             }
         }.padding(30).frame(width: 560).background(Theme.canvas).foregroundStyle(Theme.ink)
             .interactiveDismissDisabled()
@@ -85,7 +100,7 @@ struct QuestionView: View {
             HStack {
                 Button("Stop task", role: .destructive) { agent.stop() }
                 Spacer()
-                Button("Continue") { agent.answer(answers) }.disabled(
+                Button("Continue") { agent.answer(answers) }.buttonStyle(PrimaryButtonStyle()).disabled(
                     question.questions.contains { (answers[$0.id] ?? "").isEmpty })
             }
         }.padding(30).frame(width: 560).background(Theme.canvas).interactiveDismissDisabled()

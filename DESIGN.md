@@ -10,7 +10,7 @@ Neutral black canvas #000000, surfaces around #0E0E0E, drawer #131313, text #F5F
 
 ## Type
 
-Native SF rounded for prominent titles and the wordmark; regular SF for prose and controls. No serif display headings, uppercase letterspaced labels or monospaced decorative shortcuts. Hero 58, titles 28–40, section headings 19–22, body 14–16, metadata 12–13. Body columns capped around 760 points.
+Use one native SF family throughout; semibold for headings and titles, regular for prose, medium for controls. No serif display headings, uppercase letterspaced labels or monospaced decorative shortcuts. Home hero 36, onboarding/page titles 30–32, item titles 28, section headings 18–20, row titles 15, body 14–16, metadata 12–13. Body columns capped around 760 points.
 
 ## Layout
 
@@ -30,4 +30,12 @@ Settings slide in from the right with no dimming scrim and no separate window. E
 
 ## First-launch setup
 
-A full in-app page uses the existing flat black surfaces, logo and rounded typography. Three numbered steps cover voice, files and providers; a fixed footer offers Back, Continue/Finish and Skip, with an explicit dismiss control in the header. Each permission has a plain-language purpose and current status. Provider setup links sit beside actionable login/recheck controls. No app-owned onboarding modal or new window is used.
+A full in-app page uses the existing flat black surfaces, logo and consistent SF typography. Three numbered steps cover voice, files and providers; a fixed footer offers Back, Continue/Finish and Skip, with an explicit dismiss control in the header. Each permission has a plain-language purpose and current status. Provider setup links sit beside actionable login/recheck controls. No app-owned onboarding modal or new window is used.
+
+## Semantic states and hierarchy
+
+Success uses green (#5ED194) with a check icon; failure or denied/restricted access uses red (#FA666E) with a cross; unresolved choices, missing decisions and deferred optional access use yellow (#F0C24F) with an attention icon. Loading stays neutral. No state relies solely on color. Provider errors and failed task messages are red; user interruption is yellow.
+
+A light solid primary button identifies the main next action; secondary actions use quiet dark controls, tertiary details use text buttons. Successful permissions replace disabled controls with a green state. Connected providers show a concise status; executable paths and repair controls live under Connection details.
+
+Use one purposeful writing surface on Home, with model controls inside it. Onboarding permissions and providers use aligned sections, not repetitive rounded cards. Conversations use open prose and role labels, reserving a surface for the composer. Borders remain subtle and solid; no gradients.

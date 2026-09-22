@@ -1,57 +1,47 @@
-# Manual QA handoff — 0.5.0
+# Toby design language
 
-Per Rohan’s instruction, the agent did not launch the app, capture screenshots, perform visual QA, control the app/device, or run functionality tests. Build success does not establish any of the behaviors below on a real device.
+## Scene and direction
 
-Use the packaged `dist/Toby.app`, not the bare SwiftPM executable, for your pass.
+A personal Mac workspace for thinking between calls and returning to unfinished ideas in the evening. Flat black surfaces, restrained solid borders and soft native typography give Toby a distinct personal Mac identity. The original Toby logo sits immediately left of the header wordmark.
 
-## Your first pass
+## Palette
 
-1. Open Settings using the toolbar and Command–Comma; verify both open the in-app drawer, Close/Escape dismiss it, and auto-record consent appears inline. Check the Codex connection, select a model if desired. Start a typed task. Confirm separate progress/answer messages, a usable final response and a generated file under Outputs.
-2. Stop during Connecting, during response streaming and during a command. Start another task immediately afterward. Refresh the connection during a run; the run should continue.
-3. Ask for an action that needs approval. Inspect the requested command/scope, deny it, then try a separate task and approve once. Confirm the UI remains usable.
-4. Open Talk or use Control–Option–Space. Grant microphone and speech permissions. Verify a new thread opens with an animated listening area. Speak, pause, read the reply (no audio output), interrupt it, then End voice. Try again and close the main window. Verify microphone capture stops and the conversation remains in Library.
-5. Record a meeting with headphones. Verify both local and remote speech, record longer than one minute, finish, and inspect transcript, source audio tracks and generated notes. Edit notes and reopen them.
-6. Connect Calendar. Confirm conference events appear, explicitly enable auto-recording and try a short scheduled event. Confirm visible capture at its start, Finish, per-event Skip and scheduled-end behavior. Verify it does not repeatedly record the same event after relaunch.
-7. Deny/revoke microphone, Speech Recognition and system-audio permissions independently. Confirm actionable errors and saved partial data rather than a stuck capture state.
-8. Create/edit a note, mark it Remember, ask a relevant question in a different item, unmark it, pin/unpin, search, export, attach files and inspect generated files in Finder.
-9. Quit during capture and during a task. Relaunch, inspect saved drafts/responses and interrupted states. Verify no recording or task restarts without a new action.
-10. Evaluate typography, spacing, window resizing, keyboard access, VoiceOver labels, reduced motion/transparency and the inline voice area. No visual fidelity claims have been made by the agent.
+Neutral black canvas #000000, surfaces around #0E0E0E, drawer #131313, text #F5F5F5, secondary #A3A3A3, silver-blue accent #D4E0F0. No gradients anywhere, including background, surface borders or hover states. Use solid black/neutral fills and thin solid borders. The header logo is 48 points.
 
-## Known first-release limits
+## Type
 
-See README’s Current boundaries. In particular: calendar-triggered recording is not live call detection; voice uses explicit turn boundaries; speech is dependent on installed on-device language support; there is no speaker diarization; very long meeting summaries are bounded; cloud/sync/Google helpers/playbooks are not implemented.
+Use one native SF family throughout; semibold for headings and titles, regular for prose, medium for controls. No serif display headings, uppercase letterspaced labels or monospaced decorative shortcuts. Home hero 36, onboarding/page titles 30–32, item titles 28, section headings 18–20, row titles 15, body 14–16, metadata 12–13. Body columns capped around 760 points.
 
-## CLI authentication follow-up
+## Layout
 
-- With both CLIs already authenticated in Terminal, use Check CLI session for each in Settings. Neither should ask for an API key or a second account registration.
-- Select each provider in turn. Verify typed tasks, voice replies and meeting notes run through the chosen CLI; verify continuation when switching providers.
-- Verify a missing executable and a signed-out/expired CLI session report an actionable error. Check a connection during a task; it must not terminate active work.
-- For Grok, verify streaming, one-time allow/deny, stop during startup/prompt/approval, and subsequent reuse. Grok session history is bridged from visible messages, not resumed natively.
+Top navigation uses a larger logo next to Toby. Provider selection uses custom segments; models use a searchable custom list. Search fields have custom solid backgrounds, focus borders and clear actions. Home has a clear voice entry, an understated writing input, and a chronological shelf of actual work. Notes and meetings use grouped rows rather than a repeated card grid. Thread content is readable, left-aligned and centered within the available page.
 
-These checks have not been run by the agent.
+## Voice
 
-## 0.3.0 design pass
+Talk opens a new thread in the workspace. An inline capture surface expands with a short fade/translation and real audio-level animation. Mic status, recognized words, Send now and End voice are together. Replies always appear in text. The microphone returns after a completed answer, until End voice. An active capture remains accessible when browsing other pages.
 
-Rohan reported voice working before this iteration. This redesign has compile/package validation only. Check the 880-point minimum window width, the Settings drawer, long titles/transcripts, Reduce Motion, repeated Talk invocation, navigation during listening, and written replies from both CLIs. The original app icon is unchanged.
+## Settings and recording
 
-## Home model selector
+Settings slide in from the right with no dimming scrim and no separate window. Existing workspace state remains in place. Automatic-recording consent is inline in that drawer. Meeting recording stays on its thread page with persistent controls. macOS permission dialogs remain system-managed.
 
-Wait for automatic model discovery on Home, choose a default, confirm Settings reflects it, and verify the next typed/voice task uses it. Relaunch and confirm the choice persists. Switch to Grok, inspect its automatically loaded models, save a specific choice and verify the next task uses it. With no saved Toby choice, confirm the real CLI-configured model is selected. Verify loading failures appear inline and Home selection is disabled during an active task. These checks are for Rohan; the agent has not exercised provider sessions.
+## Motion and interactions
 
-## Grok model and black-theme update
+220–280ms ease-out transitions, no spring bounce. Voice opening animates once per capture start; wave activity follows microphone input. Reduced Motion removes movement and continuous waveform animation. Buttons have visible hover, press, focus and disabled states. Native controls handle keyboard focus.
 
-Verify Home and Settings synchronize each provider’s separate saved choice, including after relaunch. Try model-load failure, stale/unavailable selection and switching providers; a rejected explicit Grok model must not silently run a different one. Confirm the logo appears to the left of Toby in the packaged app header, black surfaces remain readable at minimum window size, and Reduce Transparency removes the background gloss. These are manual checks for Rohan, not agent-verified behavior.
+## First-launch setup
 
-## Custom controls and automatic defaults
+A full in-app page uses the existing flat black surfaces, logo and consistent SF typography. Three numbered steps cover voice, files and providers; a fixed footer offers Back, Continue/Finish and Skip, with an explicit dismiss control in the header. Each permission has a plain-language purpose and current status. Provider setup links sit beside actionable login/recheck controls. No app-owned onboarding modal or new window is used.
 
-Verify both catalogs load at launch without a button, failed discovery stays visible and retry works in Settings. With an unset Toby model, confirm Codex honors its configured model and Grok its current model ID; existing explicit choices must survive relaunch. Check model-search typing, Up/Down/Return/Escape, outside dismissal, VoiceOver selection, and long names. Check library/search clear buttons, keyboard focus, larger header logo, flat backgrounds and solid hover fills. Not run by the agent.
+## Semantic states and hierarchy
 
-## First-launch onboarding
+Success uses green (#5ED194) with a check icon; failure or denied/restricted access uses red (#FA666E) with a cross; unresolved choices, missing decisions and deferred optional access use yellow (#F0C24F) with an attention icon. Loading stays neutral. No state relies solely on color. Provider errors and failed task messages are red; user interruption is yellow.
 
-On a fresh app preference profile, verify setup opens at step one. Quit midway and confirm the same step returns. Check Skip, Dismiss, and Finish separately: each should prevent automatic reappearance; Settings → Reopen setup should restore it. Finish should require the selected provider’s authenticated model, but deferred permissions should not block it. Existing installations without an onboarding outcome also see setup once.
+A light solid primary button identifies the main next action; secondary actions use quiet dark controls, tertiary details use text buttons. Successful permissions replace disabled controls with a green state. Connected providers show a concise status; executable paths and repair controls live under Connection details.
 
-Grant and deny microphone, Speech Recognition, meeting-audio and Calendar permissions independently. Confirm no microphone or recording starts during setup, status refreshes after returning from System Settings, and denied access can be deferred. Verify window close/global hotkey/menu actions cannot bypass pending setup or start a recording. If macOS requests relaunch after audio permission, resume the saved step afterward.
+Use one purposeful writing surface on Home, with model controls inside it. Onboarding permissions and providers use aligned sections, not repetitive rounded cards. Conversations use open prose and role labels, reserving a surface for the composer. Borders remain subtle and solid; no gradients.
 
-Choose a folder, cancel a choice, relaunch, and attach a file: the picker should begin in the chosen location without importing any folder contents. Test a moved/deleted folder and reselect it.
+Shared presentation uses `StatusTone`/`StatusLabel` for semantic colors and symbols, `PrimaryButtonStyle` for the next action, and `QuietButtonStyle` for secondary controls. Permission states come from authorization enums; provider readiness/errors and message failure state drive their own explicit tone. No persistence or runtime protocol changes in the visual pass.
 
-For both providers, check missing executable, signed-out session, authenticated session, failed model discovery, stale model choice and successful retry. Open the official guide, copy the login command, sign in in Terminal and recheck. Confirm one connected provider is sufficient and no API key is requested. These are manual QA instructions; no permissions were requested or app launched by the agent.
+## 0.6.0 visual hierarchy pass
+
+Using the supplied four screenshots as the baseline, compare onboarding density, provider details, Home action hierarchy and conversation typography. Confirm allowed/connected is green, denied/restricted and terminal/CLI task failures are red, and unresolved choices/unavailable approval decisions are yellow. Color must always accompany a readable state and icon. Verify completed permissions no longer show disabled action buttons; connection details still expose executable choice and recheck. Check Home controls and setup rows at minimum width, long folder paths, long error messages, keyboard focus, and dynamic state updates. No new screenshots or app launches were performed by the agent.

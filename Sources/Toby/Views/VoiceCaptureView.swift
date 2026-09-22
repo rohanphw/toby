@@ -46,8 +46,8 @@ struct VoiceCaptureView: View {
                     .disabled(model.voice.phase == .stopping)
             }
         }
-        .padding(26).background(Theme.accent.opacity(0.07), in: RoundedRectangle(cornerRadius: 24))
-        .overlay(RoundedRectangle(cornerRadius: 24).stroke(Theme.accent.opacity(0.18)))
+        .padding(26).background(Theme.accent.opacity(0.07), in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.accent.opacity(0.18)))
         .opacity(appeared ? 1 : 0).offset(y: appeared ? 0 : 12)
         .onAppear {
             withAnimation(reduceMotion ? nil : .easeOut(duration: 0.28)) { appeared = true }

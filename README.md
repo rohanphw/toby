@@ -2,7 +2,7 @@
 
 A voice-first personal workspace for macOS. Think out loud, capture meetings, keep useful notes, and ask an agent to do the follow-through.
 
-This is the fresh implementation in `gary-app`, version **0.5.0**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
+This is the fresh implementation in `gary-app`, version **0.6.0**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
 
 ## Build
 
@@ -35,7 +35,7 @@ Toby opens an in-app setup page until you finish, skip, or dismiss it. Quitting 
 
 ## Included
 
-- Native SwiftUI workspace, soft rounded headings, flat black surfaces and silver accents, library rows, menu bar and in-thread voice capture. Settings opens as an animated in-app side drawer (also Command–Comma); recording stays in the workspace.
+- Native SwiftUI workspace, consistent SF typography, flat black surfaces and silver accents, library rows, menu bar and in-thread voice capture. Settings opens as an animated in-app side drawer (also Command–Comma); recording stays in the workspace.
 - Local SwiftData library with notes, meetings, conversations, drafts, pinned items and explicit memory.
 - On-device speech recognition, silence-based voice submission and text-only replies.
 - Microphone and system-audio meeting capture, rolling recognition, timestamped channel transcripts, generated editable notes.

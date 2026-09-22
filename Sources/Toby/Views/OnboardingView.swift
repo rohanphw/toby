@@ -1,4 +1,5 @@
 import AVFoundation
+import EventKit
 import Speech
 import SwiftUI
 
@@ -49,7 +50,7 @@ struct OnboardingView: View {
                         }
                     }
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(headline).font(Theme.heading(38))
+                        Text(headline).font(Theme.heading(32))
                         Text(detail).font(.system(size: 15)).foregroundStyle(Theme.secondary).lineSpacing(4)
                     }
                     Group {
@@ -60,7 +61,7 @@ struct OnboardingView: View {
                         }
                     }.id(setup.step).transition(.opacity)
                     if let error = setup.error { ErrorNotice(message: error) { setup.error = nil } }
-                }.frame(maxWidth: 760, alignment: .leading).padding(32).frame(maxWidth: .infinity)
+                }.frame(maxWidth: 720, alignment: .leading).padding(32).frame(maxWidth: .infinity)
             }
             HStack(spacing: 14) {
                 Button("Skip setup") { setup.finish(.skipped) }.buttonStyle(.plain).foregroundStyle(
@@ -71,7 +72,7 @@ struct OnboardingView: View {
                 }
                 Button(setup.step == 2 ? "Finish setup" : "Continue") {
                     if setup.step == 2 { setup.finish(.completed) } else { setup.step += 1 }
-                }.buttonStyle(QuietButtonStyle())
+                }.buttonStyle(PrimaryButtonStyle())
                     .disabled(setup.step == 2 && !selectedAccount.isReady)
             }.padding(28).disabled(setup.busy || calendarBusy)
                 .overlay(alignment: .top) { Rectangle().fill(Theme.line).frame(height: 1) }
@@ -84,7 +85,7 @@ struct OnboardingView: View {
             }
     }
     private var headline: String {
-        ["Make a little room for Toby.", "Keep your work close.", "Choose who thinks with you."][setup.step]
+        ["Set up voice.", "Bring your files.", "Connect your intelligence."][setup.step]
     }
     private var detail: String {
         [
@@ -94,10 +95,12 @@ struct OnboardingView: View {
         ][setup.step]
     }
     private var permissions: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 0) {
             SetupRow(
                 symbol: "mic", title: "Microphone",
                 detail: "For talking to Toby and recording your side of a meeting.", status: micStatus,
+                tone: setup.microphone == .authorized
+                    ? .success : setup.microphone == .notDetermined ? .warning : .failure,
                 action: setup.microphone == .notDetermined ? "Allow microphone" : "System Settings",
                 enabled: setup.microphone != .authorized && !setup.busy
             ) {
@@ -107,6 +110,8 @@ struct OnboardingView: View {
                 symbol: "waveform", title: "Speech recognition",
                 detail: "Turns speech into text on this Mac. Toby always replies in writing.",
                 status: speechStatus,
+                tone: setup.speech == .authorized
+                    ? .success : setup.speech == .notDetermined ? .warning : .failure,
                 action: setup.speech == .notDetermined ? "Allow recognition" : "System Settings",
                 enabled: setup.speech != .authorized && !setup.busy
             ) {
@@ -117,6 +122,7 @@ struct OnboardingView: View {
                 detail:
                     "Optional. Captures audio from other apps during a recording. macOS calls this Screen & System Audio Recording; Toby saves no screen images. A restart may be needed after granting access.",
                 status: setup.systemAudio ? "Allowed" : "Not enabled",
+                tone: setup.systemAudio ? .success : .warning,
                 action: "Enable access", enabled: !setup.systemAudio && !setup.busy
             ) { setup.requestSystemAudio() }
             SetupRow(
@@ -124,6 +130,10 @@ struct OnboardingView: View {
                 detail:
                     "Optional. Find scheduled calls in your Mac calendars. Automatic recording stays a separate opt-in setting.",
                 status: model.schedule.hasAccess ? "Connected" : "Not connected",
+                tone: model.schedule.hasAccess
+                    ? .success
+                    : [.denied, .restricted].contains(EKEventStore.authorizationStatus(for: .event))
+                        ? .failure : .warning,
                 action: "Connect Calendar", enabled: !model.schedule.hasAccess && !calendarBusy
             ) {
                 Task {
@@ -143,7 +153,7 @@ struct OnboardingView: View {
                 symbol: "internaldrive", title: "Your Toby library",
                 detail:
                     "Notes, conversations and recordings are stored in Toby’s own Application Support folder. No extra permission is needed.",
-                status: "Ready", action: "Open folder", enabled: true
+                status: "Ready", tone: .success, action: "Open folder", enabled: true
             ) {
                 NSWorkspace.shared.open(AppPaths.root)
             }
@@ -152,6 +162,7 @@ struct OnboardingView: View {
                 detail:
                     "Optional. Choose where the file picker starts when you attach files. This doesn’t import, scan, or share the folder; you still choose each file.",
                 status: setup.folderName ?? "Choose when needed",
+                tone: setup.folderName == nil ? .warning : .success,
                 action: setup.folderName == nil ? "Choose folder" : "Change folder", enabled: !setup.busy
             ) {
                 Task { await setup.chooseFolder() }
@@ -173,12 +184,12 @@ struct OnboardingView: View {
                     account: selectedAccount,
                     selection: provider == CLIProvider.grok.rawValue ? $grokModel : $codexModel)
             }
-            Text(
-                selectedAccount.isReady
+            StatusLabel(
+                text:
+                    selectedAccount.isReady
                     ? "You’re ready. Any permissions you deferred will be requested when you use that feature."
-                    : "Connect the selected provider to finish, or skip setup to explore your local notes."
-            )
-            .font(.system(size: 13)).foregroundStyle(Theme.secondary)
+                    : "Connect the selected provider to finish, or skip setup to explore your local notes.",
+                tone: selectedAccount.isReady ? .success : .warning)
         }
     }
     private var micStatus: String {
@@ -208,21 +219,30 @@ private struct SetupRow: View {
     let title: String
     let detail: String
     let status: String
+    let tone: StatusTone
     let action: String
     let enabled: Bool
     let perform: () -> Void
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
-            Image(systemName: symbol).font(.system(size: 21, weight: .light)).frame(width: 30).padding(
-                .top, 3)
+            Image(systemName: symbol).font(.system(size: 19, weight: .regular))
+                .foregroundStyle(Theme.secondary).frame(width: 28).padding(.top, 2)
             VStack(alignment: .leading, spacing: 8) {
-                Text(title).font(Theme.heading(19))
-                Text(detail).font(.system(size: 13)).foregroundStyle(Theme.secondary).fixedSize(
-                    horizontal: false, vertical: true)
-                Text(status).font(.system(size: 12, weight: .medium)).textSelection(.enabled)
+                HStack(alignment: .firstTextBaseline) {
+                    Text(title).font(.system(size: 15, weight: .semibold))
+                    Spacer()
+                    StatusLabel(text: status, tone: tone)
+                }
+                Text(detail).font(Theme.caption).foregroundStyle(Theme.secondary)
+                    .lineSpacing(3).fixedSize(horizontal: false, vertical: true)
+                if enabled || tone != .success {
+                    Button(action, action: perform).buttonStyle(QuietButtonStyle()).disabled(!enabled)
+                        .padding(.top, 4)
+                }
             }.frame(maxWidth: .infinity, alignment: .leading)
-            Button(action, action: perform).buttonStyle(QuietButtonStyle()).disabled(!enabled)
-        }.surface()
+        }.padding(.vertical, 22)
+            .overlay(alignment: .bottom) { Rectangle().fill(Theme.line).frame(height: 1) }
+
     }
 }
 
@@ -241,11 +261,11 @@ private struct ProviderSetupCard: View {
                 )
                 .font(.system(size: 13)).foregroundStyle(Theme.secondary)
             }
-            Link(
-                "\(account.provider.title) installation & sign-in guide ↗",
-                destination: account.provider.setupURL
-            )
-            .font(.system(size: 13, weight: .medium)).foregroundStyle(Theme.accent)
-        }.surface()
+            if !account.isReady {
+                Link("Open \(account.provider.title) setup guide ↗", destination: account.provider.setupURL)
+                    .font(Theme.label).foregroundStyle(Theme.accent)
+            }
+        }.padding(.vertical, 18)
+            .overlay(alignment: .bottom) { Rectangle().fill(Theme.line).frame(height: 1) }
     }
 }

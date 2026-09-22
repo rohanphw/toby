@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 — 2026-09-22
+
+- Unify interface typography around native SF with a tighter heading scale, smaller content titles and explicit primary/secondary button hierarchy.
+- Introduce shared semantic state labels: green success, red failure/blocked access, yellow pending/unavailable decisions, neutral loading. Pair color with text and icons.
+- Replace oversized onboarding cards with compact permission/provider sections; remove disabled actions for completed permissions and collapse CLI repair details when connected.
+- Recompose Home around voice entry and a single writing/model composer. Remove conversation message boxes and reduce unused title space.
+- Preserve flat black surfaces, the original icon, custom controls and existing functionality. Build/package checks only; supplied screenshots informed the changes, without app launch or new visual QA.
+
 ## 0.5.0 — 2026-09-22
 
 - Add a persistent, three-step in-app onboarding flow for voice/meeting permissions, local files and CLI providers. Resume unfinished setup; persist Skip, Dismiss and Complete; reopen from Settings.

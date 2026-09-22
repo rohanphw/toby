@@ -10,12 +10,16 @@ struct WorkspaceView: View {
             Rectangle().fill(Theme.line).frame(height: 1)
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    if let notice = model.notice { ErrorNotice(message: notice) { model.notice = nil } }
+                    if let notice = model.notice {
+                        ErrorNotice(message: notice, tone: .warning) { model.notice = nil }
+                    }
                     if let error = model.library.error {
                         ErrorNotice(message: error) { model.library.error = nil }
                     }
                     if let error = model.agent.error {
-                        ErrorNotice(message: error) { model.agent.error = nil }
+                        ErrorNotice(message: error, tone: error == "Stopped" ? .warning : .failure) {
+                            model.agent.error = nil
+                        }
                     }
                     if let error = model.meetings.error {
                         ErrorNotice(message: error) { model.meetings.error = nil }
@@ -44,14 +48,17 @@ struct WorkspaceView: View {
                         case .memory: LibraryView(model: model, memoryOnly: true)
                         }
                     }
-                }.frame(maxWidth: 1040).padding(.horizontal, 48).padding(.top, 36).padding(.bottom, 60).frame(
+                }.frame(maxWidth: 920).padding(.horizontal, 48).padding(.top, 36).padding(.bottom, 60).frame(
                     maxWidth: .infinity)
             }
             .id(model.selected?.id)
             if model.agent.isRunning {
                 HStack(spacing: 10) {
                     ProgressView().controlSize(.small)
-                    Text(model.agent.phase).font(.system(size: 12))
+                    StatusLabel(
+                        text: model.agent.phase,
+                        tone: model.agent.approvals.isEmpty && model.agent.question == nil
+                            ? .neutral : .warning)
                     Spacer()
                     Button("Show work") {
                         model.selected = model.library.items.first { $0.id == model.agent.activeItemID }

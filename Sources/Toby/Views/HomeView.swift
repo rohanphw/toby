@@ -7,54 +7,47 @@ struct HomeView: View {
         Array(model.library.items.sorted { $0.updatedAt > $1.updatedAt }.prefix(6))
     }
     var body: some View {
-        VStack(alignment: .leading, spacing: 36) {
-            VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 32) {
+            VStack(alignment: .leading, spacing: 12) {
                 Eyebrow(text: Date().formatted(.dateTime.weekday(.wide).month(.wide).day()))
-                Text("What’s on\nyour mind?").font(Theme.heading(58)).tracking(-2).lineSpacing(-2)
-                Text("A passing thought. A big question. Something you don’t want to forget.")
-                    .font(.system(size: 15)).foregroundStyle(Theme.secondary)
-            }.padding(.top, 20)
-            HomeModelSelector(model: model)
-            HStack(alignment: .center, spacing: 32) {
-                Button(action: model.startVoice) {
-                    HStack(spacing: 24) {
-                        VoiceMark().frame(width: 120, height: 76)
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Talk to Toby").font(Theme.heading(27))
-                            Text("Think out loud. Get a written reply.").font(.system(size: 13))
-                                .foregroundStyle(Theme.secondary)
-                            Text("⌃ ⌥ Space").font(.system(size: 12)).foregroundStyle(Theme.accent)
-                        }
-                        Spacer(minLength: 8)
-                        Image(systemName: "arrow.up.right").font(.system(size: 20, weight: .light))
-                    }.padding(28).background(
-                        Theme.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 26)
-                    )
-                    .overlay(RoundedRectangle(cornerRadius: 26).stroke(Theme.accent.opacity(0.2)))
-                    .contentShape(RoundedRectangle(cornerRadius: 26))
-                }.buttonStyle(.plain)
-                VStack(alignment: .leading, spacing: 24) {
+                Text("What’s on your mind?").font(Theme.heading(36)).tracking(-0.8)
+                Text("Talk it through, write it down, or pick up a thought.")
+                    .font(Theme.body).foregroundStyle(Theme.secondary)
+            }.padding(.top, 10)
+            VStack(alignment: .leading, spacing: 20) {
+                HStack {
+                    Button(action: model.startVoice) {
+                        Label("Talk to Toby", systemImage: "waveform")
+                    }.buttonStyle(PrimaryButtonStyle())
+                    Text("⌃ ⌥ Space").font(Theme.caption).foregroundStyle(Theme.secondary)
+                    Spacer()
                     Button(action: model.newNote) { Label("Write a note", systemImage: "square.and.pencil") }
+                        .buttonStyle(QuietButtonStyle())
                     Button {
                         model.startMeeting()
                     } label: {
                         Label("Record a meeting", systemImage: "record.circle")
                     }
-                    .disabled(model.meetings.active || model.voice.active)
-                }.buttonStyle(.plain).font(.system(size: 14)).fixedSize()
+                    .buttonStyle(QuietButtonStyle()).disabled(model.meetings.active || model.voice.active)
+                }
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack(alignment: .bottom, spacing: 16) {
+                        TextField("Or write what you’re thinking…", text: $prompt, axis: .vertical)
+                            .textFieldStyle(.plain).font(.system(size: 16)).lineLimit(2...5).onSubmit(submit)
+                        Button(action: submit) {
+                            Image(systemName: "arrow.up").font(.system(size: 14, weight: .semibold))
+                        }
+                        .buttonStyle(PrimaryButtonStyle())
+                        .disabled(
+                            prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                || model.agent.isRunning || model.voice.active
+                        )
+                        .accessibilityLabel("Ask Toby")
+                    }
+                    Rectangle().fill(Theme.line).frame(height: 1)
+                    HomeModelSelector(model: model)
+                }.surface()
             }
-            HStack(alignment: .bottom, spacing: 16) {
-                TextField("Or start with a few words…", text: $prompt, axis: .vertical)
-                    .textFieldStyle(.plain).font(.system(size: 16)).lineLimit(1...5).onSubmit(submit)
-                Button(action: submit) { Image(systemName: "arrow.up.circle.fill").font(.system(size: 28)) }
-                    .buttonStyle(.plain).foregroundStyle(Theme.accent)
-                    .disabled(
-                        prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                            || model.agent.isRunning || model.voice.active
-                    )
-                    .accessibilityLabel("Ask Toby")
-            }.padding(.vertical, 20)
-                .overlay(alignment: .bottom) { Rectangle().fill(Theme.line).frame(height: 1) }
             if let upcoming = model.schedule.upcoming.first {
                 HStack(spacing: 14) {
                     Image(systemName: "calendar").foregroundStyle(Theme.accent)
@@ -67,7 +60,7 @@ struct HomeView: View {
             }
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text("Pick up where you left off").font(Theme.heading(22))
+                    Text("Pick up where you left off").font(Theme.heading(20))
                     Spacer()
                     Button("View all →") { model.page = .library }.buttonStyle(.plain)
                         .font(.system(size: 13)).foregroundStyle(Theme.secondary)
@@ -106,7 +99,7 @@ struct LibraryRow: View {
                     .frame(width: 48, height: 52).background(
                         Theme.surface, in: RoundedRectangle(cornerRadius: 14))
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(item.title).font(Theme.heading(18)).lineLimit(1)
+                    Text(item.title).font(.system(size: 15, weight: .medium)).lineLimit(1)
                     Text(preview).font(.system(size: 13)).foregroundStyle(Theme.secondary).lineLimit(1)
                 }.frame(maxWidth: .infinity, alignment: .leading)
                 if item.isPinned {
@@ -139,8 +132,8 @@ private struct HomeModelSelector: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
-                Text("Default model").foregroundStyle(Theme.secondary)
-                ProviderSelector(selection: $provider).frame(width: 150)
+                Text("Using").foregroundStyle(Theme.secondary)
+                ProviderSelector(selection: $provider).frame(width: 144)
                 DefaultModelPicker(
                     account: account,
                     selection: provider == CLIProvider.grok.rawValue ? $grokModel : $codexModel

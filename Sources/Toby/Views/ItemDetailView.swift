@@ -44,7 +44,7 @@ struct ItemDetailView: View {
                         Theme.accent)
                 }
             }
-            TextField("Untitled", text: $item.title, axis: .vertical).font(Theme.heading(38))
+            TextField("Untitled", text: $item.title, axis: .vertical).font(Theme.heading(28))
                 .textFieldStyle(.plain).lineLimit(1...3)
                 .onChange(of: item.title) { _, _ in model.library.changed(item) }
             if model.voice.active, model.voice.item?.id == item.id {
@@ -87,7 +87,6 @@ struct ItemDetailView: View {
                 }
             }
             if !item.messages.isEmpty {
-                Divider().overlay(Theme.line)
                 ConversationContent(messages: item.orderedMessages)
             }
             ItemComposer(model: model, item: item)

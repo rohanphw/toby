@@ -6,7 +6,7 @@ struct MeetingsView: View {
         VStack(alignment: .leading, spacing: 28) {
             Eyebrow(text: "Be present. Keep the details.")
             HStack {
-                Text("A place for every conversation.").font(Theme.heading(36))
+                Text("A place for every conversation.").font(Theme.heading(30))
                 Spacer()
                 Button {
                     model.startMeeting()
