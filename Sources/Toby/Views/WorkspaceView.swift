@@ -63,6 +63,8 @@ struct WorkspaceView: View {
                 }.buttonStyle(.borderless).padding(14).background(Theme.surface)
             }
         }
+        .disabled(model.onboarding.isPresented)
+        .accessibilityHidden(model.onboarding.isPresented)
         .font(.system(size: 14))
         .foregroundStyle(Theme.ink).background(WorkspaceBackground())
         .overlay(alignment: .trailing) {
@@ -74,6 +76,11 @@ struct WorkspaceView: View {
                     .shadow(color: .black.opacity(0.2), radius: 24, x: -12)
                     .transition(.move(edge: .trailing).combined(with: .opacity))
                     .zIndex(1)
+            }
+        }
+        .overlay {
+            if model.onboarding.isPresented {
+                OnboardingView(model: model, setup: model.onboarding)
             }
         }
         .animation(reduceMotion ? nil : .easeOut(duration: 0.25), value: model.showSettings)

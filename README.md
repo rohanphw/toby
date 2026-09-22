@@ -2,7 +2,7 @@
 
 A voice-first personal workspace for macOS. Think out loud, capture meetings, keep useful notes, and ask an agent to do the follow-through.
 
-This is the fresh implementation in `gary-app`, version **0.4.1**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
+This is the fresh implementation in `gary-app`, version **0.5.0**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
 
 ## Build
 
@@ -16,6 +16,14 @@ scripts/build-app.sh
 The second command produces `dist/Toby.app` with its icon, permission descriptions and local ad-hoc signature. It does **not** launch it. Open that bundle yourself for microphone, speech and calendar permissions; do not use `swift run` for permission-sensitive QA. Move the bundle to Applications if enabling launch at login.
 
 The package can also be opened in Xcode using `Package.swift`. No third-party Swift dependencies.
+
+## First-launch setup
+
+Toby opens an in-app setup page until you finish, skip, or dismiss it. Quitting midway preserves the current step. Reopen it from Settings → This Mac → Reopen setup.
+
+- Voice: request microphone and on-device speech-recognition permissions individually. Optional meeting-audio and Calendar access have their own controls. Denied permissions link to System Settings; no recording starts during setup.
+- Files: Toby’s own library needs no extra permission. An optional chosen folder becomes the starting location for attaching files; it is not scanned or imported. Full Disk Access is not requested.
+- Providers: automatic CLI checks show installation, authentication and model readiness. Official Codex/Grok guides, a copyable login command and a recheck button help connect either provider. Finish requires the selected provider and model to be ready; Skip/Dismiss still allow local notes without a connected provider.
 
 ## First use
 

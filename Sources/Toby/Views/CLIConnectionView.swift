@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CLIConnectionView: View {
     let account: AccountConnection
+    var showSetupLink = true
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -25,6 +26,10 @@ struct CLIConnectionView: View {
             }
             if let error = account.error {
                 Text(error).font(.caption).foregroundStyle(.orange).textSelection(.enabled)
+                if showSetupLink {
+                    Link("\(account.provider.title) setup guide ↗", destination: account.provider.setupURL)
+                        .font(.caption)
+                }
             }
         }
     }

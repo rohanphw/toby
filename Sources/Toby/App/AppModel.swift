@@ -8,6 +8,7 @@ import Observation
         case meetings = "Meetings"
         case memory = "Memory"
     }
+    let onboarding = OnboardingState()
     let library: Library
     let agent: AgentSession
     let voice: VoiceSession
@@ -49,7 +50,7 @@ import Observation
         }
         meetings.onFinished = { [weak self] item in self?.generateNotes(item) }
         schedule.onStart = { [weak self] event in
-            guard let self, !meetings.active, !voice.active else { return false }
+            guard let self, !onboarding.isPresented, !meetings.active, !voice.active else { return false }
             meetings.start(title: event.title)
             return true
         }
@@ -63,12 +64,28 @@ import Observation
         schedule.beginMonitoring()
         hotkey.register { [weak self] in self?.startVoice() }
     }
+    func reopenSetup() {
+        guard !voice.active, !meetings.active, !agent.isRunning else {
+            notice = "Finish the current recording or task before reopening setup."
+            return
+        }
+        showSettings = false
+        onboarding.reopen()
+        account.refresh()
+        grokAccount.refresh()
+        revealWorkspace?()
+    }
     func presentSettings() {
+        guard !onboarding.isPresented else {
+            revealWorkspace?()
+            return
+        }
         showSettings = true
         revealWorkspace?()
     }
     func startVoice() {
         revealWorkspace?()
+        guard !onboarding.isPresented else { return }
         showSettings = false
         if voice.active {
             selected = voice.item
@@ -91,6 +108,7 @@ import Observation
     }
     func startMeeting(_ event: ScheduledMeeting? = nil) {
         revealWorkspace?()
+        guard !onboarding.isPresented else { return }
         showSettings = false
         guard !voice.active else {
             notice = "End the voice conversation before recording a meeting."
@@ -105,8 +123,15 @@ import Observation
         schedule.manualFinish()
         meetings.finish()
     }
-    func newNote() { selected = library.create(.thought, title: "Untitled note") }
+    func newNote() {
+        guard !onboarding.isPresented else {
+            revealWorkspace?()
+            return
+        }
+        selected = library.create(.thought, title: "Untitled note")
+    }
     func ask(_ text: String) {
+        guard !onboarding.isPresented else { return }
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         guard !agent.isRunning else {
             notice = "Finish or stop the current task first."

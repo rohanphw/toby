@@ -27,3 +27,7 @@ Settings slide in from the right with no dimming scrim and no separate window. E
 ## Motion and interactions
 
 220–280ms ease-out transitions, no spring bounce. Voice opening animates once per capture start; wave activity follows microphone input. Reduced Motion removes movement and continuous waveform animation. Buttons have visible hover, press, focus and disabled states. Native controls handle keyboard focus.
+
+## First-launch setup
+
+A full in-app page uses the existing flat black surfaces, logo and rounded typography. Three numbered steps cover voice, files and providers; a fixed footer offers Back, Continue/Finish and Skip, with an explicit dismiss control in the header. Each permission has a plain-language purpose and current status. Provider setup links sit beside actionable login/recheck controls. No app-owned onboarding modal or new window is used.

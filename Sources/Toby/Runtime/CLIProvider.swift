@@ -4,6 +4,11 @@ enum CLIProvider: String, CaseIterable, Identifiable {
     case codex, grok
     var id: String { rawValue }
     var title: String { self == .codex ? "Codex" : "Grok" }
+    var setupURL: URL {
+        URL(
+            string: self == .codex
+                ? "https://developers.openai.com/codex/cli" : "https://docs.x.ai/build/overview")!
+    }
     var loginCommand: String { "\(rawValue) login" }
     var executable: URL? {
         let home = FileManager.default.homeDirectoryForCurrentUser

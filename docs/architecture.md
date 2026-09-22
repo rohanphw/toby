@@ -1,4 +1,4 @@
-# Architecture — 0.4.1
+# Architecture — 0.5.0
 
 ## Product
 
@@ -58,3 +58,13 @@ Protocol references: [xAI headless/ACP documentation](https://docs.x.ai/build/cl
 Home and Settings share persisted `agentProvider`, `codexModel` and `grokModel` defaults through the same picker component. Both provider catalogs load once on app launch in separate account connections. Settings can retry failed checks. Grok discovery calls `_x.ai/models/list` after cached-token authentication and reads the extension result envelope’s `availableModels` (`modelId`, `name`). Before prompting a new Grok session, a nonempty selected model is applied with `session/set_model`; rejection stops the task before the prompt, without a fallback to another model. Unset choices are resolved and saved as concrete IDs: Codex uses `config/read.config.model`, falling back to the catalog `isDefault` only when no model is configured; Grok uses `currentModelId`. Existing explicit choices are preserved. A task cannot run with an unresolved empty model. See [Grok model research](grok-models.md).
 
 The main header reads the existing `Toby.icns` image directly from the packaged app resources. It adds no asset dependency and preserves the Dock icon. The canvas, surface outlines, and hover fills contain no gradients. The header logo is 48 points. Custom model popovers provide search, arrow navigation, Return selection, Escape dismissal and selected-state accessibility. Search fields use plain text editing with custom solid fill, focus border and clear buttons.
+
+## Onboarding (0.5.0)
+
+`OnboardingState` persists the current step and an explicit outcome (`pending`, `completed`, `skipped`, `dismissed`) in UserDefaults. The default is pending; closing/quitting a window does not mark completion. The in-app setup surface covers the workspace until a terminal outcome. Settings can reopen it without resetting existing permissions or credentials. Workspace commands, global talk and meeting auto-start cannot bypass an open setup flow.
+
+Permission controls request AVFoundation microphone access, Speech authorization, CoreGraphics screen-capture authorization used by the existing ScreenCaptureKit audio path, and optional EventKit access. Requests are user-triggered, statuses refresh on activation, and setup does not instantiate a recorder. The system permission panel remains macOS-owned. System-audio changes may require a relaunch. Setup never enables automatic meeting recording.
+
+`LocalFolderAccess` stores a minimal bookmark to an optional default attachment folder. Library attachment panels start there, while the user still selects each file. It neither grants blanket filesystem access nor imports/indexes the chosen folder. Unreachable bookmarks resolve to no default, allowing the user to choose another folder.
+
+AccountConnection separately tracks authentication and full readiness. Completing setup requires authentication, completed discovery, no current error, and a catalog entry matching the selected provider’s saved model. Both providers are checked, but only one is required. Missing CLIs and signed-out sessions point to official setup guides; Toby does not install CLIs or initiate browser login itself.

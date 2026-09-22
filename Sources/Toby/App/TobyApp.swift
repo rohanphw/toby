@@ -52,6 +52,7 @@ import SwiftUI
             CommandGroup(replacing: .newItem) {
                 Button("New Note") { model?.newNote() }.keyboardShortcut("n")
                 Button("Search Your Library") { model?.showSearch = true }.keyboardShortcut("k")
+                    .disabled(model?.onboarding.isPresented == true)
             }
         }
         MenuBarExtra {

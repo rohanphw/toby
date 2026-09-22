@@ -1,4 +1,4 @@
-# Manual QA handoff — 0.4.1
+# Manual QA handoff — 0.5.0
 
 Per Rohan’s instruction, the agent did not launch the app, capture screenshots, perform visual QA, control the app/device, or run functionality tests. Build success does not establish any of the behaviors below on a real device.
 
@@ -45,3 +45,13 @@ Verify Home and Settings synchronize each provider’s separate saved choice, in
 ## Custom controls and automatic defaults
 
 Verify both catalogs load at launch without a button, failed discovery stays visible and retry works in Settings. With an unset Toby model, confirm Codex honors its configured model and Grok its current model ID; existing explicit choices must survive relaunch. Check model-search typing, Up/Down/Return/Escape, outside dismissal, VoiceOver selection, and long names. Check library/search clear buttons, keyboard focus, larger header logo, flat backgrounds and solid hover fills. Not run by the agent.
+
+## First-launch onboarding
+
+On a fresh app preference profile, verify setup opens at step one. Quit midway and confirm the same step returns. Check Skip, Dismiss, and Finish separately: each should prevent automatic reappearance; Settings → Reopen setup should restore it. Finish should require the selected provider’s authenticated model, but deferred permissions should not block it. Existing installations without an onboarding outcome also see setup once.
+
+Grant and deny microphone, Speech Recognition, meeting-audio and Calendar permissions independently. Confirm no microphone or recording starts during setup, status refreshes after returning from System Settings, and denied access can be deferred. Verify window close/global hotkey/menu actions cannot bypass pending setup or start a recording. If macOS requests relaunch after audio permission, resume the saved step afterward.
+
+Choose a folder, cancel a choice, relaunch, and attach a file: the picker should begin in the chosen location without importing any folder contents. Test a moved/deleted folder and reselect it.
+
+For both providers, check missing executable, signed-out session, authenticated session, failed model discovery, stale model choice and successful retry. Open the official guide, copy the login command, sign in in Terminal and recheck. Confirm one connected provider is sufficient and no API key is requested. These are manual QA instructions; no permissions were requested or app launched by the agent.

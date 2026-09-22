@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0 — 2026-09-22
+
+- Add a persistent, three-step in-app onboarding flow for voice/meeting permissions, local files and CLI providers. Resume unfinished setup; persist Skip, Dismiss and Complete; reopen from Settings.
+- Request permissions only on user action, link denied access to System Settings, and leave calendar/meeting capture optional without starting any recording.
+- Remember an optional attachment-picker folder without scanning/importing it or requesting Full Disk Access.
+- Show both CLI connection states, official setup guides and model selection. Require the selected provider to be ready for completion while retaining Skip/Dismiss.
+- Validation: compilation and package checks only; no app launch, permission requests or functionality/visual QA.
+
 ## 0.4.1 — 2026-09-22
 
 - Remove all background and surface-border gradients; use solid hover fills. Enlarge the header logo to 48 points.

@@ -10,6 +10,11 @@ struct ModelOption: Identifiable {
     var status = "CLI session not checked"
     var isBusy = false
     var models: [ModelOption] = []
+    private(set) var isAuthenticated = false
+    var isReady: Bool {
+        let selected = UserDefaults.standard.string(forKey: provider.rawValue + "Model") ?? ""
+        return isAuthenticated && !isBusy && error == nil && models.contains(where: { $0.id == selected })
+    }
     var error: String?
     private(set) var defaultModelID: String?
     private var operation: Task<Void, Never>?
@@ -27,6 +32,7 @@ struct ModelOption: Identifiable {
     func refresh() {
         guard !isBusy else { return }
         isBusy = true
+        isAuthenticated = false
         error = nil
         models = []
         let token = UUID()
@@ -52,6 +58,7 @@ struct ModelOption: Identifiable {
                             "Run codex login in Terminal, then check again. Toby uses that CLI session.")
                     }
                     guard generation == token else { return }
+                    isAuthenticated = true
                     status =
                         result["account"]["email"].string.map { "CLI session · \($0)" }
                         ?? "Using authenticated Codex CLI"
@@ -70,6 +77,7 @@ struct ModelOption: Identifiable {
                     }
                 } else {
                     guard generation == token else { return }
+                    isAuthenticated = true
                     status = "Using authenticated Grok CLI"
                     // ACP extensions carry their own result envelope inside JSON-RPC's result.
                     let response = try await client.request("_x.ai/models/list")

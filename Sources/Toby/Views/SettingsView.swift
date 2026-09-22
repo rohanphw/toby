@@ -100,6 +100,7 @@ struct SettingsView: View {
                         }
                     }
                     SettingsSection(title: "This Mac") {
+                        Button("Reopen setup") { model.reopenSetup() }.buttonStyle(QuietButtonStyle())
                         Toggle(
                             "Open Toby at login", isOn: Binding(get: { launchAtLogin }, set: setLaunchAtLogin)
                         )
@@ -107,7 +108,7 @@ struct SettingsView: View {
                         LabeledContent(
                             "Version",
                             value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-                                ?? "0.4.1")
+                                ?? "0.5.0")
                         Text(
                             "This fresh app has its own library. Existing Toby data is not imported or modified."
                         )

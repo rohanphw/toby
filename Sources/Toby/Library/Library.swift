@@ -66,6 +66,7 @@ import SwiftData
     }
     func attach(to item: LibraryItem) {
         let panel = NSOpenPanel()
+        panel.directoryURL = LocalFolderAccess.resolve()
         panel.allowsMultipleSelection = true
         panel.canChooseDirectories = false
         guard panel.runModal() == .OK else { return }
