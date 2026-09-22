@@ -8,6 +8,7 @@ struct CalendarEntry: Identifiable {
     let allDay: Bool
     let calendarName: String
     let account: String
+    let joinEmail: String?
     let conferenceURL: URL?
     let location: String?
     let details: String?
@@ -17,7 +18,7 @@ struct CalendarEntry: Identifiable {
 
     var meeting: ScheduledMeeting? {
         guard !allDay, let url = conferenceURL else { return nil }
-        return ScheduledMeeting(id: id, title: title, start: start, end: end, url: url)
+        return ScheduledMeeting(id: id, title: title, start: start, end: end, url: url, joinEmail: joinEmail)
     }
     var occurrenceKey: String {
         if let meeting { return meeting.occurrenceKey }

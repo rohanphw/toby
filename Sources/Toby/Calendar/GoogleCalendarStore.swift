@@ -198,7 +198,7 @@ struct GoogleCalendarAccount: Codable, Identifiable {
                                     "google-\(account.id)-\(calendar.id)-\(eventID)-\(Int(start.timeIntervalSince1970))",
                                 title: item["summary"] as? String ?? "Untitled event", start: start, end: end,
                                 allDay: startValue["date"] != nil, calendarName: calendar.name,
-                                account: account.email, conferenceURL: url,
+                                account: account.email, joinEmail: account.email, conferenceURL: url,
                                 location: item["location"] as? String,
                                 details: Self.descriptionText(item["description"] as? String),
                                 organizer: (item["organizer"] as? [String: Any]).flatMap(Self.personName),
@@ -237,7 +237,7 @@ struct GoogleCalendarAccount: Codable, Identifiable {
         UserDefaults.standard.set(try? JSONEncoder().encode(accounts), forKey: "googleCalendarAccounts")
     }
     private func publish() {
-        agenda = eventsByAccount.values.flatMap { $0 }
+        agenda = accounts.flatMap { eventsByAccount[$0.id] ?? [] }
         onChange?()
     }
     func accessToken(_ id: String, forDrive: Bool = false) async throws -> String {

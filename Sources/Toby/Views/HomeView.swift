@@ -52,9 +52,14 @@ struct HomeView: View {
                 HStack(spacing: 14) {
                     Image(systemName: "calendar").foregroundStyle(Theme.accent)
                     Text(upcoming.start, format: .dateTime.hour().minute()).foregroundStyle(Theme.secondary)
-                    Text(upcoming.title).lineLimit(1)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(upcoming.title).lineLimit(1)
+                        if let email = upcoming.joinEmail {
+                            Text(email).font(Theme.caption).foregroundStyle(Theme.secondary)
+                        }
+                    }
                     Spacer()
-                    Button("Join meeting") { NSWorkspace.shared.open(upcoming.url) }.buttonStyle(
+                    Button("Join meeting") { NSWorkspace.shared.open(upcoming.joinURL) }.buttonStyle(
                         QuietButtonStyle())
                 }.font(.system(size: 13))
             }

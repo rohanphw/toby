@@ -8,6 +8,17 @@ struct ScheduledMeeting: Identifiable {
     let start: Date
     let end: Date
     let url: URL
+    let joinEmail: String?
+    var joinURL: URL {
+        guard url.host?.lowercased() == "meet.google.com", let joinEmail, !joinEmail.isEmpty,
+            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        else { return url }
+        var query = components.queryItems ?? []
+        query.removeAll { $0.name.lowercased() == "authuser" }
+        query.append(URLQueryItem(name: "authuser", value: joinEmail))
+        components.queryItems = query
+        return components.url ?? url
+    }
     var occurrenceKey: String {
         let host = url.host?.lowercased() ?? ""
         // Ignore tracking queries; the conference path and occurrence identify a call.
@@ -106,7 +117,12 @@ struct ScheduledMeeting: Identifiable {
                     id: "mac-\(event.calendarItemIdentifier)-\(Int(event.startDate.timeIntervalSince1970))",
                     title: event.title ?? "Untitled event", start: event.startDate, end: event.endDate,
                     allDay: event.isAllDay, calendarName: event.calendar.title,
-                    account: event.calendar.source.title, conferenceURL: conferenceURL(event),
+                    account: event.calendar.source.title,
+                    joinEmail: event.attendees?.first(where: { $0.isCurrentUser }).flatMap { participant in
+                        guard participant.url.scheme?.lowercased() == "mailto" else { return nil }
+                        return String(participant.url.absoluteString.dropFirst(7)).removingPercentEncoding
+                    },
+                    conferenceURL: conferenceURL(event),
                     location: event.location, details: event.notes,
                     organizer: event.organizer?.name
                         ?? event.organizer?.url.absoluteString.replacingOccurrences(of: "mailto:", with: ""),
@@ -116,9 +132,15 @@ struct ScheduledMeeting: Identifiable {
                     externalID: event.calendarItemExternalIdentifier)
             }
         var seen = Set<String>()
-        agenda = (google.agenda + local).filter {
-            $0.end > range.start && $0.start < range.end && seen.insert($0.occurrenceKey).inserted
-        }.sorted { $0.start < $1.start }
+        let directOccurrences = Set(google.agenda.map(\.occurrenceKey))
+        let localOnly = local.filter { $0.joinEmail != nil || !directOccurrences.contains($0.occurrenceKey) }
+        agenda = (google.agenda + localOnly).filter {
+            let key = "\($0.occurrenceKey)|\($0.joinEmail?.lowercased() ?? "")"
+            return $0.end > range.start && $0.start < range.end && seen.insert(key).inserted
+        }.sorted {
+            if $0.start != $1.start { return $0.start < $1.start }
+            return $0.id < $1.id
+        }
         upcoming = agenda.compactMap(\.meeting).filter {
             $0.end > .now && $0.start < Date().addingTimeInterval(24 * 3600)
         }

@@ -91,10 +91,10 @@ struct CalendarPage: View {
                             }
                             HStack(spacing: 10) {
                                 if let meeting = entry.meeting {
-                                    Button("Join") { NSWorkspace.shared.open(meeting.url) }
+                                    Button("Join") { NSWorkspace.shared.open(meeting.joinURL) }
                                     Button("Join & take notes") {
                                         if model.startMeeting(meeting) {
-                                            NSWorkspace.shared.open(meeting.url)
+                                            NSWorkspace.shared.open(meeting.joinURL)
                                         }
                                     }.disabled(
                                         model.voice.active || model.meetings.active || entry.end <= .now)

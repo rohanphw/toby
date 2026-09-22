@@ -144,15 +144,16 @@ import Observation
             return meetingPrompt.show(
                 title: event.title,
                 detail:
-                    "\(event.start.formatted(date: .omitted, time: .shortened))–\(event.end.formatted(date: .omitted, time: .shortened))",
+                    "\(event.start.formatted(date: .omitted, time: .shortened))–\(event.end.formatted(date: .omitted, time: .shortened))"
+                    + (event.joinEmail.map { " · \($0)" } ?? ""),
                 join: true,
                 action: { [weak self] in
                     guard let self,
                         let current = schedule.upcoming.first(where: {
-                            $0.occurrenceKey == event.occurrenceKey
+                            $0.id == event.id
                         }), current.end > .now, startMeeting(current)
                     else { return }
-                    NSWorkspace.shared.open(current.url)
+                    NSWorkspace.shared.open(current.joinURL)
                 }, snooze: { [weak self] in self?.schedule.snooze(event) })
         }
         schedule.onHideReminder = { [weak self] in self?.meetingPrompt.hide() }

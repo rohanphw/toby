@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.2 — 2026-09-23
+
+- Carry connected-account email through scheduled calls and add an email-based authuser hint to Google Meet joins from Calendar, Meetings, Home and reminders. Preserve other link parameters and leave other providers unchanged.
+- Retain distinct account copies of shared meeting occurrences and display the account in meeting rows/reminders. Keep reminder/recording deduplication by occurrence.
+- Compile/package checks only; browser account selection remains user-run QA.
+
 ## 0.9.1 — 2026-09-22
 
 - Replace browser redirects for event details with an inline Calendar accordion. Show dates, location, organizer, guests and description for Google and Mac events; preserve separate Join actions.

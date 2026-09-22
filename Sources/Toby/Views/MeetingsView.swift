@@ -41,9 +41,14 @@ struct MeetingsView: View {
                         Text(meeting.start, format: .dateTime.hour().minute()).font(
                             .system(size: 13)
                         ).foregroundStyle(Theme.secondary).frame(width: 90, alignment: .leading)
-                        Text(meeting.title).font(.system(size: 14))
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(meeting.title).font(.system(size: 14))
+                            if let email = meeting.joinEmail {
+                                Text(email).font(Theme.caption).foregroundStyle(Theme.secondary)
+                            }
+                        }
                         Spacer()
-                        Button("Join") { NSWorkspace.shared.open(meeting.url) }.buttonStyle(
+                        Button("Join") { NSWorkspace.shared.open(meeting.joinURL) }.buttonStyle(
                             QuietButtonStyle())
                         Button("Record") { model.startMeeting(meeting) }.buttonStyle(QuietButtonStyle())
                             .disabled(model.meetings.active || model.voice.active)

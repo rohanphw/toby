@@ -87,3 +87,9 @@ Onboarding adds optional Google connections to its existing second step without 
 ### Inline event details (0.9.1)
 
 Calendar entries retain location, description, organizer and guest labels from the existing Google/EventKit reads. CalendarPage owns one expanded event ID; CalendarEventDetails renders selectable inline text. Google HTML descriptions are reduced to inert plain text without loading remote resources. Event details no longer use external event URLs; Join remains an explicit conference action.
+
+### Account-aware meeting joins (0.9.2)
+
+CalendarEntry carries a separate optional joinEmail: direct Google connections use the authenticated account email, while EventKit uses only an explicitly identified current-user mailto attendee. Calendar names and organizers are never assumed to identify the joining user. ScheduledMeeting.joinURL adds/replaces authuser only on the exact meet.google.com host, preserving unrelated query items and fragments. All Join entry points use it. The browser still needs that Google account signed in; this does not choose a browser profile or authenticate Zoom/Teams. Agenda rows deduplicate by occurrence plus account, while reminders and recording remain occurrence-based. Reminder callbacks resolve the exact displayed event ID.
+
+Implementation precedent: [MeetingBar account selection](https://github.com/leits/MeetingBar/releases/tag/v5.0.0-rc2).

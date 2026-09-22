@@ -89,3 +89,9 @@ No app launch, browser sign-in, visual QA or functionality tests were performed 
 
 - Open and collapse event details with mouse and keyboard; opening another event closes the previous one. Confirm no browser opens for details; Join still opens the call.
 - Check Google and Mac events with missing fields, long descriptions, HTML descriptions, guest lists, timed/multi-day all-day dates, and Reduce Motion. Details should refresh with the calendar and disappear when their event/account is removed.
+
+## 0.9.2 (user-run)
+
+- With two signed-in Google accounts and the browser default set to the wrong one, join from Calendar, Meetings, Home and a reminder; verify Meet uses the displayed email. Check behavior when that account is not signed into the default browser/profile.
+- Check an existing authuser parameter is replaced, unrelated query/fragment data is preserved, and Zoom/Teams links remain unchanged.
+- The same meeting on two connected accounts must retain two labeled choices, but produce only one reminder/automatic recording. Removing one account must not make an existing reminder silently join as another account. Mac calendars without a known current-user attendee should retain the original link.

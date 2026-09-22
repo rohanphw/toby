@@ -81,7 +81,7 @@ import Foundation
                     [
                         "clientInfo": .object([
                             "name": .string("toby_next"), "title": .string("Toby"),
-                            "version": .string("0.9.1"),
+                            "version": .string("0.9.2"),
                         ])
                     ])
                 try send(.object(["method": .string("initialized")]))
@@ -90,7 +90,7 @@ import Foundation
                     "initialize",
                     [
                         "protocolVersion": .number(1),
-                        "clientInfo": .object(["name": .string("toby"), "version": .string("0.9.1")]),
+                        "clientInfo": .object(["name": .string("toby"), "version": .string("0.9.2")]),
                         "clientCapabilities": .object([
                             "fs": .object(["readTextFile": .bool(false), "writeTextFile": .bool(false)]),
                             "terminal": .bool(false),
