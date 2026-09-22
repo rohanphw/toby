@@ -138,7 +138,7 @@ private struct HomeModelSelector: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
                 Text("Using").foregroundStyle(Theme.secondary)
-                ProviderSelector(selection: $provider).frame(width: 144)
+                ProviderSelector(selection: $provider).frame(width: 228)
                 DefaultModelPicker(
                     account: account,
                     selection: provider == CLIProvider.grok.rawValue ? $grokModel : $codexModel

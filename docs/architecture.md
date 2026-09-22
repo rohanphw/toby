@@ -93,3 +93,7 @@ Calendar entries retain location, description, organizer and guest labels from t
 CalendarEntry carries a separate optional joinEmail: direct Google connections use the authenticated account email, while EventKit uses only an explicitly identified current-user mailto attendee. Calendar names and organizers are never assumed to identify the joining user. ScheduledMeeting.joinURL adds/replaces authuser only on the exact meet.google.com host, preserving unrelated query items and fragments. All Join entry points use it. The browser still needs that Google account signed in; this does not choose a browser profile or authenticate Zoom/Teams. Agenda rows deduplicate by occurrence plus account, while reminders and recording remain occurrence-based. Reminder callbacks resolve the exact displayed event ID.
 
 Implementation precedent: [MeetingBar account selection](https://github.com/leits/MeetingBar/releases/tag/v5.0.0-rc2).
+
+### Provider control spacing (0.9.3)
+
+The shared ProviderSelector uses 14-point horizontal label padding, 104-point minimum segment widths, 34-point inner height and a 4-point outer inset. Home allocates 228 points rather than compressing both provider labels and logos into 144 points. Its 42-point total height matches the model picker.

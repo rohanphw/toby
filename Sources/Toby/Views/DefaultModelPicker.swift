@@ -125,10 +125,11 @@ struct ProviderSelector: View {
                     selection = provider.rawValue
                 } label: {
                     HStack(spacing: 8) {
-                        ProviderMark(provider: provider, size: 17)
-                        Text(provider.title).font(.system(size: 13, weight: .medium))
+                        ProviderMark(provider: provider, size: 16)
+                        Text(provider.title).font(.system(size: 13, weight: .medium)).fixedSize()
                     }
-                    .frame(maxWidth: .infinity).padding(.vertical, 10)
+                    .padding(.horizontal, 14)
+                    .frame(minWidth: 104, maxWidth: .infinity, minHeight: 34)
                     .background(
                         selection == provider.rawValue ? Color(white: 0.16) : .clear,
                         in: RoundedRectangle(cornerRadius: 9)

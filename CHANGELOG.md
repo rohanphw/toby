@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.3 — 2026-09-23
+
+- Correct provider selector spacing: inset each logo/label, give both segments a minimum width, and enlarge the undersized Home selector. Match the adjacent model control height.
+- Compile checks only; supplied screenshot used as the reference, without app launch or visual QA.
+
 ## 0.9.2 — 2026-09-23
 
 - Carry connected-account email through scheduled calls and add an email-based authuser hint to Google Meet joins from Calendar, Meetings, Home and reminders. Preserve other link parameters and leave other providers unchanged.
