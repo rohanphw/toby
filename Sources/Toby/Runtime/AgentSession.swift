@@ -63,6 +63,7 @@ struct RuntimeQuestion: Identifiable {
         library.changed(item, immediately: true)
         let provider =
             CLIProvider(rawValue: UserDefaults.standard.string(forKey: "agentProvider") ?? "codex") ?? .codex
+        let grokModel = UserDefaults.standard.string(forKey: "grokModel") ?? ""
         grokMessageID = UUID().uuidString
         let client = CLITransport(provider: provider)
         transport = client
@@ -95,6 +96,12 @@ struct RuntimeQuestion: Identifiable {
                         throw TobyError("Grok did not return a session identifier.")
                     }
                     guard token == runToken, !Task.isCancelled else { throw CancellationError() }
+                    if !grokModel.isEmpty {
+                        _ = try await client.request(
+                            "session/set_model",
+                            ["sessionId": .string(sessionID), "modelId": .string(grokModel)])
+                        guard token == runToken, !Task.isCancelled else { throw CancellationError() }
+                    }
                     phase = "Thinking with Grok"
                     let result = try await client.request(
                         "session/prompt",

@@ -1,4 +1,4 @@
-# Architecture — 0.3.1
+# Architecture — 0.4.0
 
 ## Product
 
@@ -10,7 +10,7 @@ Toby is a native, local-first personal workspace. Voice is an entry point, meeti
 - `Library`: one SwiftData model context, mutations, bounded checkpoints, import/export and recovery.
 - `AgentSession`: one active run with generation ownership, event projection, approvals and completion callbacks.
 - `CLITransport`: one Codex app-server or Grok ACP process, serialized stdout framing, request deadlines, cancellation and stale-process isolation.
-- `AccountConnection`: a separate, short-lived transport for CLI authentication checks and Codex model discovery. It cannot stop a task’s process.
+- `AccountConnection`: a separate, short-lived transport for CLI authentication checks and provider model discovery. It cannot stop a task’s process.
 - `VoiceSession`: talking lifecycle, silence boundary and microphone resumption after written replies.
 - `MeetingSession`: meeting lifecycle, transcript assembly and local recording ownership.
 - `AudioCapture`: permissions, AVAudioEngine and ScreenCaptureKit. No video output is registered or persisted.
@@ -55,4 +55,6 @@ Codex uses `account/read` on its authenticated app-server. Grok runs `agent --no
 
 Protocol references: [xAI headless/ACP documentation](https://docs.x.ai/build/cli/headless-scripting), [official agent-mode documentation](https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-pager/docs/user-guide/15-agent-mode.md). Installed CLI help was inspected; provider sessions were not exercised.
 
-Home and Settings share the persisted `agentProvider` and `codexModel` defaults. Home exposes explicit Codex model discovery through the existing isolated account connection; opening Home does not start a CLI process. Grok continues to use its CLI-managed default.
+Home and Settings share persisted `agentProvider`, `codexModel` and `grokModel` defaults through the same picker component. Explicit discovery uses each provider’s isolated account connection; opening Home does not start a CLI process. Grok discovery calls `_x.ai/models/list` after cached-token authentication and reads the extension result envelope’s `availableModels` (`modelId`, `name`). Before prompting a new Grok session, a nonempty selected model is applied with `session/set_model`; rejection stops the task before the prompt, without a fallback to another model. Empty selection leaves the CLI default intact. See [Grok model research](grok-models.md).
+
+The main header reads the existing `Toby.icns` image directly from the packaged app resources. It adds no asset dependency and preserves the Dock icon. Glossy black background highlights fall back to solid black with Reduce Transparency.

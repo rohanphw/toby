@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 — 2026-09-22
+
+- Discover Grok models through its authenticated ACP catalog and apply the saved choice before prompting each session. Home and Settings share model pickers for both providers; CLI default remains available.
+- Replace warm brown/apricot styling with glossy black surfaces, subtle highlights and silver accents.
+- Add the existing bundled Toby logo to the left of the header wordmark without changing the application icon.
+- Document xAI source research and protocol details. Validation: build, signature, plist and asset checks only; no app launch, live provider prompt or visual/functionality QA.
+
 ## 0.3.1 — 2026-09-22
 
 - Add a Home default-provider/model selector, synchronized with Settings. Load or refresh Codex models through the existing authenticated CLI check; Grok clearly shows its CLI-managed default.

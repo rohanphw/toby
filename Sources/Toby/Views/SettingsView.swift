@@ -5,6 +5,7 @@ struct SettingsView: View {
     let model: AppModel
     @AppStorage("agentProvider") private var provider = "codex"
     @AppStorage("codexModel") private var codexModel = ""
+    @AppStorage("grokModel") private var grokModel = ""
     @AppStorage("speechLocale") private var locale = "en-US"
     @State private var showAutomaticConfirmation = false
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
@@ -29,17 +30,12 @@ struct SettingsView: View {
                             ForEach(CLIProvider.allCases) { Text($0.title).tag($0.rawValue) }
                         }.disabled(model.agent.isRunning)
                         CLIConnectionView(account: model.account)
-                        Picker("Codex model", selection: $codexModel) {
-                            Text("CLI default").tag("")
-                            ForEach(model.account.models) { Text($0.name).tag($0.id) }
-                            if !codexModel.isEmpty,
-                                !model.account.models.contains(where: { $0.id == codexModel })
-                            {
-                                Text(codexModel).tag(codexModel)
-                            }
-                        }
+                        DefaultModelPicker(account: model.account, selection: $codexModel)
+                            .disabled(model.agent.isRunning)
                         Divider()
                         CLIConnectionView(account: model.grokAccount)
+                        DefaultModelPicker(account: model.grokAccount, selection: $grokModel)
+                            .disabled(model.agent.isRunning)
                         Text(
                             "Toby uses the authenticated CLI installations on this Mac. Sign in through the CLI once, then Check CLI session here. Credentials and refresh remain owned by the CLIs; Toby never imports tokens or requests an API key."
                         )
@@ -113,7 +109,7 @@ struct SettingsView: View {
                         LabeledContent(
                             "Version",
                             value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-                                ?? "0.3.1")
+                                ?? "0.4.0")
                         Text(
                             "This fresh app has its own library. Existing Toby data is not imported or modified."
                         )

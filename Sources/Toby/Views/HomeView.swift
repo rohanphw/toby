@@ -101,7 +101,7 @@ struct LibraryRow: View {
             HStack(spacing: 18) {
                 Image(systemName: item.kind.symbol).font(.system(size: 20, weight: .light))
                     .foregroundStyle(
-                        item.kind == .meeting ? Color(red: 0.72, green: 0.78, blue: 0.67) : Theme.accent
+                        Theme.accent
                     )
                     .frame(width: 48, height: 52).background(
                         Theme.surface, in: RoundedRectangle(cornerRadius: 14))
@@ -132,6 +132,10 @@ private struct HomeModelSelector: View {
     let model: AppModel
     @AppStorage("agentProvider") private var provider = "codex"
     @AppStorage("codexModel") private var codexModel = ""
+    @AppStorage("grokModel") private var grokModel = ""
+    private var account: AccountConnection {
+        provider == CLIProvider.grok.rawValue ? model.grokAccount : model.account
+    }
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
@@ -139,35 +143,26 @@ private struct HomeModelSelector: View {
                 Picker("Provider", selection: $provider) {
                     ForEach(CLIProvider.allCases) { Text($0.title).tag($0.rawValue) }
                 }.labelsHidden().frame(width: 110)
-                if provider == CLIProvider.codex.rawValue {
-                    Picker("Default Codex model", selection: $codexModel) {
-                        Text("CLI default").tag("")
-                        ForEach(model.account.models) { Text($0.name).tag($0.id) }
-                        if !codexModel.isEmpty,
-                            !model.account.models.contains(where: { $0.id == codexModel })
-                        {
-                            Text(codexModel).tag(codexModel)
-                        }
-                    }.labelsHidden().frame(maxWidth: 240)
-                    if model.account.isBusy {
-                        ProgressView().controlSize(.small).accessibilityLabel("Loading models")
-                    } else {
-                        Button {
-                            model.account.refresh()
-                        } label: {
-                            Label(
-                                model.account.models.isEmpty ? "Load models" : "Refresh",
-                                systemImage: "arrow.clockwise")
-                        }.buttonStyle(QuietButtonStyle())
-                    }
+                DefaultModelPicker(
+                    account: account,
+                    selection: provider == CLIProvider.grok.rawValue ? $grokModel : $codexModel
+                )
+                .labelsHidden().frame(maxWidth: 240)
+                if account.isBusy {
+                    ProgressView().controlSize(.small).accessibilityLabel("Loading models")
                 } else {
-                    Text("Grok CLI default").foregroundStyle(Theme.ink)
-                        .help("Grok uses the model configured in its authenticated CLI.")
+                    Button {
+                        account.refresh()
+                    } label: {
+                        Label(
+                            account.models.isEmpty ? "Load models" : "Refresh", systemImage: "arrow.clockwise"
+                        )
+                    }.buttonStyle(QuietButtonStyle())
                 }
                 Spacer(minLength: 0)
             }.font(.system(size: 13)).disabled(model.agent.isRunning)
-            if provider == CLIProvider.codex.rawValue, let error = model.account.error {
-                ErrorNotice(message: error) { model.account.error = nil }
+            if let error = account.error {
+                ErrorNotice(message: error) { account.error = nil }
             }
             if model.agent.isRunning {
                 Text("You can change the default when the current task finishes.")

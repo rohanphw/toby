@@ -109,7 +109,13 @@ private struct WorkspaceNavigation: View {
                 model.selected = nil
                 model.page = .home
             } label: {
-                Text("Toby").font(Theme.heading(25))
+                HStack(spacing: 8) {
+                    if let logo = Theme.logo {
+                        Image(nsImage: logo).resizable().interpolation(.high)
+                            .scaledToFit().frame(width: 32, height: 32).accessibilityHidden(true)
+                    }
+                    Text("Toby").font(Theme.heading(25))
+                }
             }.buttonStyle(.plain)
             Rectangle().fill(Theme.line).frame(width: 1, height: 20)
             ForEach(AppModel.Page.allCases, id: \.self) { page in

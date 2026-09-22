@@ -64,6 +64,25 @@ struct ModelOption: Identifiable {
                 } else {
                     guard generation == token else { return }
                     status = "Using authenticated Grok CLI"
+                    // ACP extensions carry their own result envelope inside JSON-RPC's result.
+                    let response = try await client.request("_x.ai/models/list")
+                    guard generation == token else { return }
+                    if let message = response["error"].string ?? response["error"]["message"].string {
+                        throw TobyError(message)
+                    }
+                    guard let available = response["result"]["availableModels"].array else {
+                        throw TobyError(
+                            "Grok did not return a model catalog. Update the Grok CLI, then check again.")
+                    }
+                    models = available.compactMap {
+                        guard let id = $0["modelId"].string else { return nil }
+                        return ModelOption(id: id, name: $0["name"].string ?? id)
+                    }
+                    if models.isEmpty {
+                        throw TobyError(
+                            "No Grok models are available for this CLI session. Check your Grok login, then refresh."
+                        )
+                    }
                 }
             } catch is CancellationError {} catch {
                 guard generation == token else { return }

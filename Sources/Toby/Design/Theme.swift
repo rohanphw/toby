@@ -1,22 +1,39 @@
 import SwiftUI
 
 enum Theme {
-    static let canvas = Color(red: 0.129, green: 0.122, blue: 0.110)
-    static let surface = Color(red: 0.169, green: 0.157, blue: 0.141)
-    static let drawer = Color(red: 0.188, green: 0.173, blue: 0.153)
-    static let line = Color.white.opacity(0.09)
-    static let ink = Color(red: 0.95, green: 0.914, blue: 0.859)
-    static let secondary = Color(red: 0.714, green: 0.671, blue: 0.612)
-    static let accent = Color(red: 0.914, green: 0.710, blue: 0.557)
+    static let canvas = Color.black
+    static let surface = Color(white: 0.055)
+    static let drawer = Color(white: 0.075)
+    static let line = Color.white.opacity(0.12)
+    static let ink = Color(white: 0.96)
+    static let secondary = Color(white: 0.64)
+    static let accent = Color(red: 0.83, green: 0.88, blue: 0.94)
+    static let logo = Bundle.main.url(forResource: "Toby", withExtension: "icns").flatMap {
+        NSImage(contentsOf: $0)
+    }
     static func heading(_ size: CGFloat) -> Font { .system(size: size, weight: .medium, design: .rounded) }
 }
 struct WorkspaceBackground: View {
-    var body: some View { Theme.canvas.ignoresSafeArea() }
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    var body: some View {
+        ZStack {
+            Theme.canvas
+            if !reduceTransparency {
+                LinearGradient(
+                    colors: [Color(white: 0.10), Color(white: 0.025), .black],
+                    startPoint: .topLeading, endPoint: .bottomTrailing)
+            }
+        }.ignoresSafeArea()
+    }
 }
 struct Surface: ViewModifier {
     func body(content: Content) -> some View {
         content.padding(22).background(Theme.surface.opacity(0.7), in: RoundedRectangle(cornerRadius: 18))
-            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.line, lineWidth: 1))
+            .overlay(
+                RoundedRectangle(cornerRadius: 18).stroke(
+                    LinearGradient(
+                        colors: [.white.opacity(0.19), Theme.line.opacity(0.3)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1))
     }
 }
 extension View { func surface() -> some View { modifier(Surface()) } }

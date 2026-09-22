@@ -2,11 +2,11 @@
 
 ## Scene and direction
 
-A personal Mac workspace for thinking between calls and returning to unfinished ideas in the evening. Warm charcoal and soft oat text retain Toby's dark identity without the cold graphite control-panel look. The app feels like a comfortable writing room, not a terminal or sales dashboard.
+A personal Mac workspace for thinking between calls and returning to unfinished ideas in the evening. Glossy black surfaces, restrained highlights and soft native typography give Toby a distinct personal Mac identity. The original Toby logo sits immediately left of the header wordmark.
 
 ## Palette
 
-Restrained warm neutrals with apricot for voice actions and sage for meeting context. Canvas #211F1C, surface #2B2824, drawer #302C27, text #F2E9DB, secondary #B6AB9C, accent #E9B58E, sage #B8C7AB. Neutral colors are deliberately tinted. Subtle surface contrast replaces decorative glass.
+Neutral black canvas #000000, surfaces around #0E0E0E, drawer #131313, text #F5F5F5, secondary #A3A3A3, silver-blue accent #D4E0F0. A subdued diagonal light falloff and fine highlighted surface edges create gloss without blur or tinted brown backgrounds. Reduce Transparency uses a solid black canvas.
 
 ## Type
 
