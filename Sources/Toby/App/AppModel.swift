@@ -5,6 +5,7 @@ import Observation
     enum Page: String, CaseIterable {
         case home = "Home"
         case library = "Library"
+        case calendar = "Calendar"
         case meetings = "Meetings"
         case memory = "Memory"
     }
@@ -14,6 +15,7 @@ import Observation
     let voice: VoiceSession
     let meetings: MeetingSession
     let schedule = MeetingSchedule()
+    let drive = GoogleDriveStore()
     let callDetection = CallDetection()
     private let meetingPrompt = MeetingPrompt()
     let account = AccountConnection()
@@ -122,11 +124,19 @@ import Observation
             voice.error = message == "Stopped" ? nil : message
             voice.stop()
         }
+        schedule.google.onDisconnect = { [weak self] id in
+            self?.drive.removeAccount(id)
+            self?.meetingPrompt.hide()
+        }
         meetings.onFinished = { [weak self] item in self?.generateNotes(item) }
         schedule.onStart = { [weak self] event in
             guard let self, !onboarding.isPresented, !meetings.active, !voice.active else { return false }
             meetingPrompt.hide()
             meetings.start(title: event.title)
+            if let item = meetings.item {
+                item.calendarOccurrenceKey = event.occurrenceKey
+                library.changed(item, immediately: true)
+            }
             return true
         }
         schedule.onReminder = { [weak self] event in
@@ -243,6 +253,10 @@ import Observation
         if let event { schedule.skip(event) }
         meetings.start(
             title: event?.title ?? "Meeting · \(Date().formatted(date: .abbreviated, time: .shortened))")
+        if let event, let item = meetings.item {
+            item.calendarOccurrenceKey = event.occurrenceKey
+            library.changed(item, immediately: true)
+        }
         openItem(meetings.item)
         return true
     }
@@ -284,6 +298,7 @@ import Observation
         }
     }
     func shutdown() async {
+        drive.cancel()
         schedule.stopMonitoring()
         callDetection.stop()
         meetingPrompt.hide()

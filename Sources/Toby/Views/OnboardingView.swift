@@ -10,7 +10,7 @@ struct OnboardingView: View {
     @AppStorage("codexModel") private var codexModel = ""
     @AppStorage("grokModel") private var grokModel = ""
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    private let steps = ["Your voice", "Your files", "Your intelligence"]
+    private let steps = ["Your voice", "Files & accounts", "Your intelligence"]
     private var selectedAccount: AccountConnection {
         provider == CLIProvider.grok.rawValue ? model.grokAccount : model.account
     }
@@ -24,6 +24,7 @@ struct OnboardingView: View {
                 Text("Toby").font(Theme.heading(26))
                 Spacer()
                 Button {
+                    model.schedule.google.cancelConnection()
                     setup.finish(.dismissed)
                 } label: {
                     Image(systemName: "xmark")
@@ -64,14 +65,22 @@ struct OnboardingView: View {
                 }.frame(maxWidth: 720, alignment: .leading).padding(32).frame(maxWidth: .infinity)
             }
             HStack(spacing: 14) {
-                Button("Skip setup") { setup.finish(.skipped) }.buttonStyle(.plain).foregroundStyle(
+                Button("Skip setup") {
+                    model.schedule.google.cancelConnection()
+                    setup.finish(.skipped)
+                }.buttonStyle(.plain).foregroundStyle(
                     Theme.secondary)
                 Spacer()
                 if setup.step > 0 {
                     Button("Back") { setup.step -= 1 }.buttonStyle(QuietButtonStyle())
                 }
                 Button(setup.step == 2 ? "Finish setup" : "Continue") {
-                    if setup.step == 2 { setup.finish(.completed) } else { setup.step += 1 }
+                    if setup.step == 2 {
+                        model.schedule.google.cancelConnection()
+                        setup.finish(.completed)
+                    } else {
+                        setup.step += 1
+                    }
                 }.buttonStyle(PrimaryButtonStyle())
                     .disabled(setup.step == 2 && !selectedAccount.isReady)
             }.padding(28).disabled(setup.busy || calendarBusy)
@@ -85,12 +94,12 @@ struct OnboardingView: View {
             }
     }
     private var headline: String {
-        ["Set up voice.", "Bring your files.", "Connect your intelligence."][setup.step]
+        ["Set up voice.", "Bring your world along.", "Connect your intelligence."][setup.step]
     }
     private var detail: String {
         [
             "Set up voice and meeting capture. Each permission is your choice; you can continue without it and enable it later.",
-            "Your library lives on this Mac. Bring files into a conversation when you want Toby to work with them.",
+            "Your library stays on this Mac. Optionally connect Google accounts for calendars and files you choose from Drive.",
             "Toby uses your existing Codex or Grok CLI login. Connect either provider to get started; you don’t need both.",
         ][setup.step]
     }
@@ -173,6 +182,8 @@ struct OnboardingView: View {
             ) {
                 Task { await setup.chooseFolder() }
             }
+            CalendarConnectionsView(schedule: model.schedule, showMacCalendars: false)
+                .padding(.vertical, 16)
             Text(
                 "Toby doesn’t need Full Disk Access. macOS may ask about a protected folder when you choose files there."
             )

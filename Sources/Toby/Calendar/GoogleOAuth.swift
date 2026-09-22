@@ -78,8 +78,9 @@ enum CalendarKeychain {
 }
 
 @MainActor final class GoogleOAuth {
+    static let driveScope = "https://www.googleapis.com/auth/drive.file"
     static let scopes =
-        "openid email https://www.googleapis.com/auth/calendar.calendarlist.readonly https://www.googleapis.com/auth/calendar.events.readonly"
+        "openid email https://www.googleapis.com/auth/calendar.calendarlist.readonly https://www.googleapis.com/auth/calendar.events.readonly https://www.googleapis.com/auth/drive.file"
     private var listener: NWListener?
     private var continuation: CheckedContinuation<String, Error>?
     private var timeout: Task<Void, Never>?
@@ -87,7 +88,12 @@ enum CalendarKeychain {
     private var verifier = ""
     private var redirect = ""
 
-    func authorize(client: GoogleClient) async throws -> GoogleTokens {
+    private(set) var pickedFileIDs: [String] = []
+
+    func authorize(client: GoogleClient, pickingFiles: Bool = false, email: String? = nil) async throws
+        -> GoogleTokens
+    {
+        pickedFileIDs = []
         verifier = try Self.random()
         state = try Self.random()
         let parameters = NWParameters.tcp
@@ -110,11 +116,19 @@ enum CalendarKeychain {
                         var url = URLComponents(string: "https://accounts.google.com/o/oauth2/v2/auth")!
                         url.queryItems = [
                             "client_id": client.clientID, "redirect_uri": self.redirect,
-                            "response_type": "code", "scope": Self.scopes, "state": self.state,
+                            "response_type": "code", "scope": pickingFiles ? Self.driveScope : Self.scopes,
+                            "state": self.state,
                             "code_challenge": Self.base64(Data(SHA256.hash(data: Data(self.verifier.utf8)))),
                             "code_challenge_method": "S256", "access_type": "offline",
                             "prompt": "consent select_account",
                         ].map { URLQueryItem(name: $0.key, value: $0.value) }
+                        if pickingFiles {
+                            url.queryItems?.append(URLQueryItem(name: "trigger_onepick", value: "true"))
+                            url.queryItems?.append(URLQueryItem(name: "allow_multiple", value: "true"))
+                        }
+                        if let email {
+                            url.queryItems?.append(URLQueryItem(name: "login_hint", value: email))
+                        }
                         if !NSWorkspace.shared.open(url.url!) {
                             self.finish(
                                 .failure(
@@ -180,12 +194,14 @@ enum CalendarKeychain {
                 let body =
                     code == nil
                     ? "Google sign-in was not completed. Return to Toby to try again."
-                    : "You can return to Toby. Finishing your Google Calendar connection…"
+                    : "You can return to Toby. Finishing your Google request…"
                 let response =
                     "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=utf-8\r\nCache-Control: no-store\r\nConnection: close\r\nContent-Length: \(body.utf8.count)\r\n\r\n\(body)"
                 connection.send(
                     content: Data(response.utf8), completion: .contentProcessed { _ in connection.cancel() })
                 if let code {
+                    self.pickedFileIDs = (url.queryItems?.first { $0.name == "picked_file_ids" }?.value ?? "")
+                        .split(separator: ",").map(String.init)
                     self.finish(.success(code))
                 } else {
                     self.finish(

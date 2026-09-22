@@ -12,20 +12,22 @@ struct GoogleCalendarAccount: Codable, Identifiable {
     var calendars: [GoogleCalendarChoice]
     var lastSynced: Date?
     var error: String?
+    var driveEnabled: Bool?
 }
 
 @MainActor @Observable final class GoogleCalendarStore {
     private(set) var accounts: [GoogleCalendarAccount] = []
-    private(set) var events: [ScheduledMeeting] = []
+    private(set) var agenda: [CalendarEntry] = []
     private(set) var hasClient = false
     private(set) var connecting = false
     private(set) var refreshing = false
     var error: String?
+    var onDisconnect: ((String) -> Void)?
     var onChange: (() -> Void)?
     private var oauth: GoogleOAuth?
     private var task: Task<Void, Never>?
     private var connectTask: Task<Void, Never>?
-    private var eventsByAccount: [String: [ScheduledMeeting]] = [:]
+    private var eventsByAccount: [String: [CalendarEntry]] = [:]
     private var revision = UUID()
 
     init() {
@@ -37,7 +39,7 @@ struct GoogleCalendarAccount: Codable, Identifiable {
             hasClient = client != nil
         } catch { self.error = error.localizedDescription }
     }
-    private static func appClient() throws -> GoogleClient? {
+    static func appClient() throws -> GoogleClient? {
         guard let url = Bundle.main.url(forResource: "GoogleOAuthClient", withExtension: "json") else {
             return nil
         }
@@ -48,7 +50,7 @@ struct GoogleCalendarAccount: Codable, Identifiable {
         }
         return client
     }
-    func connect() {
+    func connect(email: String? = nil) {
         guard !connecting else { return }
         connecting = true
         error = nil
@@ -64,7 +66,7 @@ struct GoogleCalendarAccount: Codable, Identifiable {
                 }
                 let auth = GoogleOAuth()
                 oauth = auth
-                let tokens = try await auth.authorize(client: client)
+                let tokens = try await auth.authorize(client: client, email: email)
                 try Task.checkCancellation()
                 let granted = Set((tokens.scope ?? "").split(separator: " ").map(String.init))
                 guard granted.contains("https://www.googleapis.com/auth/calendar.calendarlist.readonly"),
@@ -97,6 +99,9 @@ struct GoogleCalendarAccount: Codable, Identifiable {
                 if !accounts.contains(where: { $0.id == id }) {
                     accounts.append(.init(id: id, email: email, calendars: []))
                 }
+                if let index = accounts.firstIndex(where: { $0.id == id }) {
+                    accounts[index].driveEnabled = granted.contains(GoogleOAuth.driveScope)
+                }
                 persist()
                 refresh()
             } catch is CancellationError {} catch { self.error = error.localizedDescription }
@@ -110,6 +115,7 @@ struct GoogleCalendarAccount: Codable, Identifiable {
         do {
             try CalendarKeychain.remove(id)
             accounts.removeAll { $0.id == id }
+            onDisconnect?(id)
             eventsByAccount.removeValue(forKey: id)
             persist()
             publish()
@@ -149,15 +155,15 @@ struct GoogleCalendarAccount: Codable, Identifiable {
                             name: item["summaryOverride"] as? String ?? item["summary"] as? String ?? id,
                             selected: previous[id] ?? true)
                     }
-                    var meetings: [ScheduledMeeting] = []
+                    var meetings: [CalendarEntry] = []
                     let formatter = ISO8601DateFormatter()
                     let query = [
                         URLQueryItem(
                             name: "timeMin",
-                            value: formatter.string(from: Date().addingTimeInterval(-4 * 3600))),
+                            value: formatter.string(from: CalendarEntry.range.start)),
                         URLQueryItem(
                             name: "timeMax",
-                            value: formatter.string(from: Date().addingTimeInterval(24 * 3600))),
+                            value: formatter.string(from: CalendarEntry.range.end)),
                         URLQueryItem(name: "singleEvents", value: "true"),
                         URLQueryItem(name: "orderBy", value: "startTime"),
                     ]
@@ -172,9 +178,9 @@ struct GoogleCalendarAccount: Codable, Identifiable {
                                     $0["self"] as? Bool == true
                                         && $0["responseStatus"] as? String == "declined"
                                 }),
-                                let startText = (item["start"] as? [String: Any])?["dateTime"] as? String,
-                                let endText = (item["end"] as? [String: Any])?["dateTime"] as? String,
-                                let start = Self.date(startText), let end = Self.date(endText), end > .now,
+                                let startValue = item["start"] as? [String: Any],
+                                let endValue = item["end"] as? [String: Any],
+                                let start = Self.eventDate(startValue), let end = Self.eventDate(endValue),
                                 let eventID = item["id"] as? String
                             else { return nil }
                             let conference = item["conferenceData"] as? [String: Any]
@@ -186,12 +192,15 @@ struct GoogleCalendarAccount: Codable, Identifiable {
                                 item["hangoutLink"] as? String, video, item["location"] as? String,
                                 item["description"] as? String,
                             ].compactMap { $0 }.joined(separator: " ")
-                            guard let url = ScheduledMeeting.conferenceURL(in: text) else { return nil }
-                            return ScheduledMeeting(
+                            let url = ScheduledMeeting.conferenceURL(in: text)
+                            return CalendarEntry(
                                 id:
                                     "google-\(account.id)-\(calendar.id)-\(eventID)-\(Int(start.timeIntervalSince1970))",
-                                title: item["summary"] as? String ?? "Meeting", start: start, end: end,
-                                url: url)
+                                title: item["summary"] as? String ?? "Untitled event", start: start, end: end,
+                                allDay: startValue["date"] != nil, calendarName: calendar.name,
+                                account: account.email, conferenceURL: url,
+                                eventURL: (item["htmlLink"] as? String).flatMap(URL.init(string:)),
+                                externalID: item["iCalUID"] as? String)
                         }
                     }
                     try Task.checkCancellation()
@@ -224,12 +233,16 @@ struct GoogleCalendarAccount: Codable, Identifiable {
         UserDefaults.standard.set(try? JSONEncoder().encode(accounts), forKey: "googleCalendarAccounts")
     }
     private func publish() {
-        events = eventsByAccount.values.flatMap { $0 }
+        agenda = eventsByAccount.values.flatMap { $0 }
         onChange?()
     }
-    private func accessToken(_ id: String) async throws -> String {
+    func accessToken(_ id: String, forDrive: Bool = false) async throws -> String {
+        guard accounts.contains(where: { $0.id == id }) else { throw CancellationError() }
         guard var token: GoogleTokens = try CalendarKeychain.read(id) else {
             throw CalendarFailure(message: "Reconnect this Google account.")
+        }
+        if forDrive, !(token.scope ?? "").split(separator: " ").contains(Substring(GoogleOAuth.driveScope)) {
+            throw CalendarFailure(message: "Reconnect this account to allow Drive access.")
         }
         if (token.expiresAt ?? .distantPast).timeIntervalSinceNow > 120 { return token.accessToken }
         guard let refresh = token.refreshToken,
@@ -240,6 +253,11 @@ struct GoogleCalendarAccount: Codable, Identifiable {
             "refresh_token": refresh, "grant_type": "refresh_token",
         ])
         try Task.checkCancellation()
+        guard accounts.contains(where: { $0.id == id }) else { throw CancellationError() }
+        // A reconnect may have replaced a narrower grant while this refresh was in flight.
+        if let latest: GoogleTokens = try CalendarKeychain.read(id), latest.accessToken != token.accessToken {
+            return try await accessToken(id, forDrive: forDrive)
+        }
         token.accessToken = renewed.accessToken
         token.expiresAt = renewed.expiresAt
         token.refreshToken = renewed.refreshToken ?? refresh
@@ -291,6 +309,16 @@ struct GoogleCalendarAccount: Codable, Identifiable {
             throw CalendarFailure(message: "Google returned an unreadable calendar response.")
         }
         return object
+    }
+    private static func eventDate(_ value: [String: Any]) -> Date? {
+        if let text = value["dateTime"] as? String { return date(text) }
+        guard let text = value["date"] as? String else { return nil }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.date(from: text)
     }
     private static func date(_ text: String) -> Date? {
         let formatter = ISO8601DateFormatter()

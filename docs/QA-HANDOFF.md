@@ -74,3 +74,13 @@ The older `gary/dist/Toby.app` uses `com.toby.agent` but has the same display na
 - After bundling Toby’s OAuth client, Connect Google must go straight to the browser; no client-import or Cloud setup UI should appear. Validate multi-account consent/refresh/revocation yourself.
 
 Agent validation is limited to compilation, source review and packaging checks once configured. No app runtime, visual or live authentication/usage tests have been run.
+
+## 0.9.0 (user-run)
+
+- Reconnect an existing account via Enable Drive; verify declining only Drive keeps Calendar usable. Add a second account during onboarding; skip/dismiss mid-sign-in and check it cancels. Completed onboarding should not automatically reappear.
+- Calendar: today/tomorrow/seven-day ranges, midnight/DST, multi-day all-day events, recurring instances, non-call events, declined/cancelled entries, selected calendars and account removal during sync. Check newly recorded calls link to their notes; historical notes have no event link.
+- Drive: enable Picker API in the existing project; choose files in the browser, cancel, select the wrong Google account, import Docs/Sheets/Slides/regular files, test restricted files and size errors. Verify partial imports remain attached when a later file fails. No Calendar permission should disappear after using Picker.
+- Save note/meeting notes/transcript to the explicitly selected account, inspect actual content, follow document link. Test disconnect/network loss mid-write; check Drive before retrying an uncertain save. No audio should upload.
+- Remove one of two accounts: remaining account/calendar selection persists; removed tokens/events do not return; local notes/imports and Google files remain. Separately synced Mac calendar copies may still appear.
+
+No app launch, browser sign-in, visual QA or functionality tests were performed by the agent.

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.0 — 2026-09-22
+
+- Add Calendar to header navigation with Today, Tomorrow and a seven-day agenda, all-day events, account/calendar labels, join actions and links to captured notes.
+- Request optional Drive file access alongside Google Calendar sign-in. Existing accounts explicitly reconnect; Calendar remains usable if Drive is declined.
+- Add browser-based native Google Picker for selected Drive attachments and save notes or meeting text as a new Google Doc. Account choice is explicit; Picker grants never replace Calendar credentials. No background indexing or automatic uploads.
+- Surface Remove account with inline confirmation in Settings. Remove local credentials/events and cancel account work while preserving local notes and Google files.
+- Add optional multi-account Google connection to the Files & accounts onboarding step, preserving existing setup progress.
+- Compile/package/static checks only; runtime OAuth, calendar, Drive and UI acceptance remains user-run.
+
 ## 0.8.0 — 2026-09-22
 
 - Add workspace-scoped two-finger horizontal navigation, back/forward history, keyboard commands, and page switching; preserve normal vertical scrolling and editor interactions.

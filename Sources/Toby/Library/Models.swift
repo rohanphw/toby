@@ -31,6 +31,7 @@ enum ItemKind: String, CaseIterable, Identifiable {
     var updatedAt: Date
     var isPinned: Bool
     var isMemory: Bool
+    var calendarOccurrenceKey: String?
     var threadID: String?
     var recordingState: String
     var attachmentNames: [String]

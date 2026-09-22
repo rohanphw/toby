@@ -2,7 +2,7 @@
 
 A voice-first personal workspace for macOS. Think out loud, capture meetings, keep useful notes, and ask an agent to do the follow-through.
 
-This is the fresh implementation in `gary-app`, version **0.8.0**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
+This is the fresh implementation in `gary-app`, version **0.9.0**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
 
 ## Build
 
@@ -30,7 +30,7 @@ Toby opens an in-app setup page until you finish, skip, or dismiss it. Quitting 
 1. Open the app yourself. Settings → Intelligence → Check CLI session reuses the existing login for each provider. If needed, run `codex login` or `grok login` in Terminal once, then check again. Select Codex or Grok for subsequent tasks. Both provider catalogs load automatically at launch. An unset choice is initialized to the actual CLI-configured model; an explicit Toby choice is preserved. Home and Settings use custom searchable model controls. Choose executable is available when discovery fails.
 2. Choose Talk, or press **Control–Option–Space**. Opening talking mode starts the microphone permission flow. Speak, pause for 1.8 seconds, or choose Send now. Talk opens a fresh thread in the main workspace with an animated listening area. Toby replies only in text through the selected CLI, then resumes listening. Interrupt stops the current task and reopens the microphone. End voice stops the session. Closing the main window stops workspace-started voice; menu-bar-started sessions continue until End voice.
 3. Meetings → Record a meeting captures your microphone and Mac audio. Finish saves the transcript and asks the selected CLI to produce notes. The raw audio remains available in the item’s workspace even when transcription or note generation fails.
-4. Connect one or more Google accounts in Settings → Meetings, select calendars, and receive meeting reminders. Google sign-in uses Toby’s bundled OAuth configuration; no user Cloud setup is required. Mac calendars remain optional. To record scheduled calls automatically, explicitly enable that separate setting. The app needs to remain open. The menu bar shows recording state even when the workspace is closed.
+4. Connect one or more Google accounts in Settings → Calendars, select calendars, and receive meeting reminders. Google sign-in uses Toby’s bundled OAuth configuration; no user Cloud setup is required. Mac calendars remain optional. To record scheduled calls automatically, explicitly enable that separate setting. The app needs to remain open. The menu bar shows recording state even when the workspace is closed.
 5. Write notes, pin important items, and mark specific items Remember to include them in future tasks. Search with **Command–K**. Send typed follow-ups with **Command–Return**.
 
 ## Included
@@ -83,3 +83,5 @@ See [architecture](docs/architecture.md), [QA handoff](docs/QA-HANDOFF.md) and [
 Codex resumes its saved thread. Grok starts a fresh ACP session per task and receives up to 20 prior completed messages, bounded to 32,000 characters; it does not resume hidden Grok tool history. Visible recent history is also supplied to Codex for continuity after provider switching. Grok’s CLI configuration determines its native tool/sandbox behavior; Toby does not enable always-approve and rejects unsupported client-side requests.
 
 The application icon is the original Toby icon, copied byte-for-byte from the old app into `Packaging/Toby.icns`. Packaging copies this versioned asset directly; it does not generate a replacement icon.
+
+Calendar now has its own header tab with a seven-day agenda. Connect Google during onboarding or Settings; existing accounts choose Enable Drive for the new permission. In an item, expand Google Drive to attach selected files or save a note/meeting document as a new Google Doc. The maintainer must enable Google Picker API alongside Calendar and Drive APIs. See [Google setup](docs/google-calendar.md).

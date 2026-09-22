@@ -45,6 +45,7 @@ struct WorkspaceView: View {
                         case .home: HomeView(model: model)
                         case .library: LibraryView(model: model, memoryOnly: false)
                         case .meetings: MeetingsView(model: model)
+                        case .calendar: CalendarPage(model: model)
                         case .memory: LibraryView(model: model, memoryOnly: true)
                         }
                     }

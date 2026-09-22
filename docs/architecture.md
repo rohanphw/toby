@@ -75,3 +75,11 @@ Settings uses four compact tabs with repair/privacy details in disclosures. Prov
 Google app client configuration is now owned by the distribution, loaded only from the signed bundle, and required by build-app.sh. User token storage stays in Keychain. Source builds still compile with an unconfigured Google state; no final bundle should be shipped until the maintainer supplies the Desktop OAuth client. See docs/google-calendar.md.
 
 The 0.8.0 local release is now configured with the maintainer-provided Desktop OAuth client in ignored `.local/GoogleOAuthClient.json`. Packaging embeds it before signing. Google consent, account access and runtime navigation/voice remain untested by the agent.
+
+## Calendar and Drive (0.9.0)
+
+`CalendarEntry` represents a seven-day agenda across direct Google and optional EventKit calendars. All-day dates use local calendar days, timed events preserve API offsets, recurring instances are expanded and pages fetched. Agenda deduplication uses conference URL/start or external event ID/start; reminder scheduling projects timed calls only. Optional `LibraryItem.calendarOccurrenceKey` links newly captured meeting notes to agenda entries via SwiftData's additive migration.
+
+`GoogleDriveStore` is owned by `AppModel`, so navigating away does not lose operation state. It uses selected-file browser Picker grants separately from the persistent Calendar/Drive OAuth session. Temporary Picker tokens are not written to Keychain. Imported files are copied into the existing item Inputs directory with sanitized unique names. Saving sends only a user-selected note/meeting text snapshot through Drive multipart conversion; no write retries or background uploads. Disconnect cancels pending account work, deletes local credentials and drops in-memory calendar data. Refresh cannot overwrite a newer sign-in grant or resurrect a removed account.
+
+Onboarding adds optional Google connections to its existing second step without changing persisted step numbering or replaying completed setup. Settings exposes account removal with an inline confirmation.

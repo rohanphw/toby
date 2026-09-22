@@ -198,7 +198,7 @@ struct SettingsView: View {
             }
             Divider()
             LabeledContent(
-                "Toby", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.8.0"
+                "Toby", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.9.0"
             )
             .font(Theme.caption).foregroundStyle(Theme.secondary)
             DisclosureGroup("App details") {

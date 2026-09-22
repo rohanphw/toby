@@ -2,10 +2,12 @@ import SwiftUI
 
 struct CalendarConnectionsView: View {
     let schedule: MeetingSchedule
+    var showMacCalendars = true
+    @State private var removing: String?
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack {
-                Label("Google Calendar", systemImage: "calendar").font(Theme.label)
+                Label("Google accounts", systemImage: "calendar").font(Theme.label)
                 Spacer()
                 if schedule.google.refreshing { ProgressView().controlSize(.small) }
                 if !schedule.google.accounts.isEmpty {
@@ -17,7 +19,8 @@ struct CalendarConnectionsView: View {
                     .disabled(schedule.google.refreshing).help("Refresh calendars")
                 }
             }
-            Text("All your calendars, together.").font(Theme.caption).foregroundStyle(Theme.secondary)
+            Text("Connect your calendars. Bring in Drive files when you need them.").font(Theme.caption)
+                .foregroundStyle(Theme.secondary)
             ForEach(schedule.google.accounts) { account in
                 VStack(alignment: .leading, spacing: 12) {
                     StatusLabel(text: account.email, tone: account.error == nil ? .success : .warning)
@@ -34,12 +37,34 @@ struct CalendarConnectionsView: View {
                     }
                     if let error = account.error {
                         ErrorNotice(message: error)
-                        Button("Reconnect") { schedule.google.connect() }.disabled(schedule.google.connecting)
+                        Button("Reconnect") { schedule.google.connect(email: account.email) }.disabled(
+                            schedule.google.connecting)
                     }
-                    DisclosureGroup("Account options") {
-                        Button("Disconnect account") { schedule.google.disconnect(account.id) }
-                            .disabled(schedule.google.connecting).padding(.top, 8)
-                    }.font(Theme.caption).foregroundStyle(Theme.secondary)
+                    StatusLabel(
+                        text: account.driveEnabled == true ? "Drive connected" : "Drive needs permission",
+                        tone: account.driveEnabled == true ? .success : .warning)
+                    HStack {
+                        if account.driveEnabled != true && account.error == nil {
+                            Button("Enable Drive") { schedule.google.connect(email: account.email) }
+                        }
+                        Spacer()
+                        Button("Remove account") { removing = account.id }
+                            .foregroundStyle(Theme.failure)
+                    }.disabled(schedule.google.connecting)
+                    if removing == account.id {
+                        Text(
+                            "Remove this account from Toby? Your Google files and saved Toby notes stay intact."
+                        )
+                        .font(Theme.caption).foregroundStyle(Theme.secondary)
+                        HStack {
+                            Button("Cancel") { removing = nil }
+                            Button("Remove") {
+                                schedule.google.disconnect(account.id)
+                                removing = nil
+                            }
+                            .foregroundStyle(Theme.failure)
+                        }.disabled(schedule.google.connecting)
+                    }
                 }.padding(.vertical, 6)
             }
             if schedule.google.connecting {
@@ -61,18 +86,20 @@ struct CalendarConnectionsView: View {
             if let error = schedule.google.error {
                 ErrorNotice(message: error) { schedule.google.error = nil }
             }
-            Divider().padding(.vertical, 8)
-            Toggle(
-                "Include Mac calendars",
-                isOn: Binding(
-                    get: { schedule.includeMacCalendars }, set: { schedule.includeMacCalendars = $0 })
-            )
-            .font(Theme.label).toggleStyle(.switch).controlSize(.small)
-            if schedule.includeMacCalendars {
-                if schedule.hasAccess {
-                    StatusLabel(text: "Mac calendars connected", tone: .success)
-                } else {
-                    Button("Allow calendar access") { Task { await schedule.requestAccess() } }
+            if showMacCalendars {
+                Divider().padding(.vertical, 8)
+                Toggle(
+                    "Include Mac calendars",
+                    isOn: Binding(
+                        get: { schedule.includeMacCalendars }, set: { schedule.includeMacCalendars = $0 })
+                )
+                .font(Theme.label).toggleStyle(.switch).controlSize(.small)
+                if schedule.includeMacCalendars {
+                    if schedule.hasAccess {
+                        StatusLabel(text: "Mac calendars connected", tone: .success)
+                    } else {
+                        Button("Allow calendar access") { Task { await schedule.requestAccess() } }
+                    }
                 }
             }
         }.buttonStyle(QuietButtonStyle())

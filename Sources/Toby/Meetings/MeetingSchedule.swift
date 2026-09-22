@@ -32,6 +32,7 @@ struct ScheduledMeeting: Identifiable {
 }
 
 @MainActor @Observable final class MeetingSchedule {
+    private(set) var agenda: [CalendarEntry] = []
     private(set) var upcoming: [ScheduledMeeting] = []
     private(set) var hasAccess = false
     let google = GoogleCalendarStore()
@@ -95,26 +96,26 @@ struct ScheduledMeeting: Identifiable {
     func refresh() {
         hasAccess = EKEventStore.authorizationStatus(for: .event) == .fullAccess
 
-        let predicate = calendar.predicateForEvents(
-            withStart: Date().addingTimeInterval(-4 * 3600), end: Date().addingTimeInterval(24 * 3600),
-            calendars: nil)
-        let local: [ScheduledMeeting] =
+        let range = CalendarEntry.range
+        let predicate = calendar.predicateForEvents(withStart: range.start, end: range.end, calendars: nil)
+        let local: [CalendarEntry] =
             (hasAccess && includeMacCalendars ? calendar.events(matching: predicate) : []).filter {
-                !$0.isAllDay && $0.endDate > .now
-                    && !($0.attendees ?? []).contains {
-                        $0.isCurrentUser && $0.participantStatus == .declined
-                    }
-            }
-            .compactMap { event in
-                guard let url = conferenceURL(event) else { return nil }
-                return ScheduledMeeting(
-                    id:
-                        "\(event.eventIdentifier ?? event.calendarItemIdentifier)-\(Int(event.startDate.timeIntervalSince1970))",
-                    title: event.title ?? "Meeting", start: event.startDate, end: event.endDate, url: url)
+                !($0.attendees ?? []).contains { $0.isCurrentUser && $0.participantStatus == .declined }
+            }.map { event in
+                CalendarEntry(
+                    id: "mac-\(event.calendarItemIdentifier)-\(Int(event.startDate.timeIntervalSince1970))",
+                    title: event.title ?? "Untitled event", start: event.startDate, end: event.endDate,
+                    allDay: event.isAllDay, calendarName: event.calendar.title,
+                    account: event.calendar.source.title, conferenceURL: conferenceURL(event),
+                    eventURL: nil, externalID: event.calendarItemExternalIdentifier)
             }
         var seen = Set<String>()
-        upcoming = (google.events + local).filter { $0.end > .now && seen.insert($0.occurrenceKey).inserted }
-            .sorted { $0.start < $1.start }
+        agenda = (google.agenda + local).filter {
+            $0.end > range.start && $0.start < range.end && seen.insert($0.occurrenceKey).inserted
+        }.sorted { $0.start < $1.start }
+        upcoming = agenda.compactMap(\.meeting).filter {
+            $0.end > .now && $0.start < Date().addingTimeInterval(24 * 3600)
+        }
         let relevant = Set(upcoming.map(\.occurrenceKey))
         // Keep recently shown occurrences across startup and transient Google sync failures.
         prompted = Set(

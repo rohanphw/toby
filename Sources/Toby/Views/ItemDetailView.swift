@@ -89,6 +89,7 @@ struct ItemDetailView: View {
             if !item.messages.isEmpty {
                 ConversationContent(messages: item.orderedMessages)
             }
+            DriveToolsView(model: model, item: item)
             ItemComposer(model: model, item: item)
         }
         .confirmationDialog("Delete ‘\(item.title)’?", isPresented: $confirmDelete) {
@@ -106,7 +107,8 @@ struct ItemDetailView: View {
         .onDisappear { model.library.save() }
     }
     private var isBusy: Bool {
-        model.agent.activeItemID == item.id || model.meetings.item?.id == item.id
+        (model.drive.busy && model.drive.itemID == item.id) || model.agent.activeItemID == item.id
+            || model.meetings.item?.id == item.id
             || (model.voice.item?.id == item.id && model.voice.active)
     }
     private func revealWorkspace() {
@@ -228,7 +230,8 @@ private struct ItemComposer: View {
                 )
                 .disabled(
                     item.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                        || model.agent.isRunning || model.voice.active || model.meetings.item?.id == item.id)
+                        || model.agent.isRunning || (model.drive.busy && model.drive.itemID == item.id)
+                        || model.voice.active || model.meetings.item?.id == item.id)
             }
             HStack {
                 Text(

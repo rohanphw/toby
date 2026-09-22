@@ -83,6 +83,18 @@ import SwiftData
             changed(item, immediately: true)
         } catch { self.error = "Could not attach the file: \(error.localizedDescription)" }
     }
+    func attachDownloadedFile(_ source: URL, name: String, to item: LibraryItem) throws {
+        let directory = AppPaths.workspace(item.id).appendingPathComponent("Inputs", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let safeName = String(
+            name.components(separatedBy: CharacterSet(charactersIn: "/:\\").union(.controlCharacters)).joined(
+                separator: "-"
+            ).prefix(160))
+        let filename = "\(UUID().uuidString.prefix(8))-\(safeName.isEmpty ? "Drive file" : safeName)"
+        try FileManager.default.copyItem(at: source, to: directory.appendingPathComponent(filename))
+        item.attachmentNames.append(filename)
+        changed(item, immediately: true)
+    }
     func export(_ item: LibraryItem) {
         let panel = NSSavePanel()
         panel.nameFieldStringValue = item.title + ".md"
