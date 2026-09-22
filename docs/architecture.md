@@ -1,4 +1,4 @@
-# Architecture — 0.3.0
+# Architecture — 0.3.1
 
 ## Product
 
@@ -54,3 +54,5 @@ No credentials are imported into Toby. Each subprocess inherits the current user
 Codex uses `account/read` on its authenticated app-server. Grok runs `agent --no-leader stdio`, initializes ACP version 1, requires the advertised `cached_token` method, and calls `authenticate` with headless metadata. Missing/expired credentials fail visibly; Toby does not select API-key authentication. Grok task sessions are fresh with bounded visible-history bridging; no SwiftData schema change was required. Native Grok tool-permission requests map only to advertised allow-once/reject-once options; unsupported client methods are rejected. Check/stop are scoped to Toby's child process, never the user's shared CLI leader.
 
 Protocol references: [xAI headless/ACP documentation](https://docs.x.ai/build/cli/headless-scripting), [official agent-mode documentation](https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-pager/docs/user-guide/15-agent-mode.md). Installed CLI help was inspected; provider sessions were not exercised.
+
+Home and Settings share the persisted `agentProvider` and `codexModel` defaults. Home exposes explicit Codex model discovery through the existing isolated account connection; opening Home does not start a CLI process. Grok continues to use its CLI-managed default.

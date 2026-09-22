@@ -14,6 +14,7 @@ struct HomeView: View {
                 Text("A passing thought. A big question. Something you don’t want to forget.")
                     .font(.system(size: 15)).foregroundStyle(Theme.secondary)
             }.padding(.top, 20)
+            HomeModelSelector(model: model)
             HStack(alignment: .center, spacing: 32) {
                 Button(action: model.startVoice) {
                     HStack(spacing: 24) {
@@ -124,5 +125,54 @@ struct LibraryRow: View {
         if !item.notes.isEmpty { return item.notes }
         if !item.body.isEmpty { return item.body }
         return item.orderedMessages.last?.text ?? "A new beginning."
+    }
+}
+
+private struct HomeModelSelector: View {
+    let model: AppModel
+    @AppStorage("agentProvider") private var provider = "codex"
+    @AppStorage("codexModel") private var codexModel = ""
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) {
+                Text("Default model").foregroundStyle(Theme.secondary)
+                Picker("Provider", selection: $provider) {
+                    ForEach(CLIProvider.allCases) { Text($0.title).tag($0.rawValue) }
+                }.labelsHidden().frame(width: 110)
+                if provider == CLIProvider.codex.rawValue {
+                    Picker("Default Codex model", selection: $codexModel) {
+                        Text("CLI default").tag("")
+                        ForEach(model.account.models) { Text($0.name).tag($0.id) }
+                        if !codexModel.isEmpty,
+                            !model.account.models.contains(where: { $0.id == codexModel })
+                        {
+                            Text(codexModel).tag(codexModel)
+                        }
+                    }.labelsHidden().frame(maxWidth: 240)
+                    if model.account.isBusy {
+                        ProgressView().controlSize(.small).accessibilityLabel("Loading models")
+                    } else {
+                        Button {
+                            model.account.refresh()
+                        } label: {
+                            Label(
+                                model.account.models.isEmpty ? "Load models" : "Refresh",
+                                systemImage: "arrow.clockwise")
+                        }.buttonStyle(QuietButtonStyle())
+                    }
+                } else {
+                    Text("Grok CLI default").foregroundStyle(Theme.ink)
+                        .help("Grok uses the model configured in its authenticated CLI.")
+                }
+                Spacer(minLength: 0)
+            }.font(.system(size: 13)).disabled(model.agent.isRunning)
+            if provider == CLIProvider.codex.rawValue, let error = model.account.error {
+                ErrorNotice(message: error) { model.account.error = nil }
+            }
+            if model.agent.isRunning {
+                Text("You can change the default when the current task finishes.")
+                    .font(.system(size: 12)).foregroundStyle(Theme.secondary)
+            }
+        }
     }
 }

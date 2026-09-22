@@ -1,4 +1,4 @@
-# Manual QA handoff — 0.3.0
+# Manual QA handoff — 0.3.1
 
 Per Rohan’s instruction, the agent did not launch the app, capture screenshots, perform visual QA, control the app/device, or run functionality tests. Build success does not establish any of the behaviors below on a real device.
 
@@ -33,3 +33,7 @@ These checks have not been run by the agent.
 ## 0.3.0 design pass
 
 Rohan reported voice working before this iteration. This redesign has compile/package validation only. Check the 880-point minimum window width, the Settings drawer, long titles/transcripts, Reduce Motion, repeated Talk invocation, navigation during listening, and written replies from both CLIs. The original app icon is unchanged.
+
+## Home model selector
+
+Load Codex models from Home, choose a default, confirm Settings reflects it, and verify the next typed/voice task uses it. Relaunch and confirm the choice persists. Switch to Grok and confirm the CLI-default label. Verify loading failures appear inline and Home selection is disabled during an active task. These checks are for Rohan; the agent has not exercised provider sessions.

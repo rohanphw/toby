@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 — 2026-09-22
+
+- Add a Home default-provider/model selector, synchronized with Settings. Load or refresh Codex models through the existing authenticated CLI check; Grok clearly shows its CLI-managed default.
+- Keep the selected model visible before discovery and disable Home selection during an active task.
+- Validation: release compilation and bundle checks only; no app launch or visual/functionality QA.
+
 ## 0.3.0 — 2026-09-22
 
 - Removed voice playback entirely: all replies are written; the microphone resumes after each reply.

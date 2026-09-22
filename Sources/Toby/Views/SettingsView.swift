@@ -113,7 +113,7 @@ struct SettingsView: View {
                         LabeledContent(
                             "Version",
                             value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-                                ?? "0.3.0")
+                                ?? "0.3.1")
                         Text(
                             "This fresh app has its own library. Existing Toby data is not imported or modified."
                         )
