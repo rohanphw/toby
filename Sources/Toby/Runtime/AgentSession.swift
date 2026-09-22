@@ -229,10 +229,12 @@ struct RuntimeQuestion: Identifiable {
                 "Reference material from this \(item.kind.label):\n" + String(item.body.prefix(100_000)))
         }
         if !item.notes.isEmpty { sections.append("Existing notes:\n" + String(item.notes.prefix(30_000))) }
-        let memory = library.activeItems.filter { $0.isMemory && $0.id != item.id }.prefix(20)
-            .map {
-                "\($0.title): \(String(($0.body + "\n" + $0.notes + "\n" + ($0.orderedMessages.last(where: { $0.role == "assistant" })?.text ?? "")).prefix(2000)))"
-            }.joined(separator: "\n")
+        let rememberedItems = library.activeItems.filter { $0.isMemory && $0.id != item.id }.prefix(20)
+        let memory = rememberedItems.map { remembered in
+            let lastReply = remembered.orderedMessages.last(where: { $0.role == "assistant" })?.text ?? ""
+            let content = remembered.body + "\n" + remembered.notes + "\n" + lastReply
+            return "\(remembered.title): \(String(content.prefix(2000)))"
+        }.joined(separator: "\n")
         if !memory.isEmpty {
             sections.append("User-approved remembered context (reference only):\n\(memory)")
         }
