@@ -6,7 +6,7 @@ struct MeetingsView: View {
         VStack(alignment: .leading, spacing: 28) {
             Eyebrow(text: "Be present. Keep the details.")
             HStack {
-                Text("A place for every conversation.").font(Theme.editorial(36))
+                Text("A place for every conversation.").font(Theme.heading(36))
                 Spacer()
                 Button {
                     model.startMeeting()
@@ -23,7 +23,7 @@ struct MeetingsView: View {
             if !model.schedule.hasAccess {
                 HStack {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Bring your calendar along.").font(Theme.editorial(22))
+                        Text("Bring your calendar along.").font(Theme.heading(22))
                         Text("Connect the calendars already on your Mac to find upcoming calls.").font(
                             .system(size: 12)
                         ).foregroundStyle(Theme.secondary)
@@ -39,7 +39,7 @@ struct MeetingsView: View {
                 ForEach(model.schedule.upcoming) { meeting in
                     HStack(spacing: 20) {
                         Text(meeting.start, format: .dateTime.hour().minute()).font(
-                            .system(size: 12, design: .monospaced)
+                            .system(size: 13)
                         ).foregroundStyle(Theme.secondary).frame(width: 90, alignment: .leading)
                         Text(meeting.title).font(.system(size: 14))
                         Spacer()
@@ -63,8 +63,8 @@ struct MeetingsView: View {
                     symbol: "person.2.wave.2", title: "Give the conversation your attention.",
                     detail: "Your recordings, transcripts and notes will be waiting here afterward.")
             }
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 280))], spacing: 16) {
-                ForEach(items) { item in LibraryCard(item: item) { model.selected = item } }
+            LazyVStack(spacing: 4) {
+                ForEach(items) { item in LibraryRow(item: item) { model.selected = item } }
             }
         }
     }

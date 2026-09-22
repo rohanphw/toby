@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 — 2026-09-22
+
+- Removed voice playback entirely: all replies are written; the microphone resumes after each reply.
+- Talk and the global shortcut open a fresh thread in the main workspace with an animated, audio-reactive listening area. Repeated invocation returns to an active session.
+- Replaced the separate Settings window with a trailing in-app drawer and inline automatic-recording consent. Recordings remain in the main workspace.
+- Redesigned Home, library rows, thread presentation and shared typography with warm charcoal, cream and apricot; rounded native headings replace serif headings and uppercase labels.
+- Preserved the original Toby icon, CLI authentication, capture services and persistence schema.
+- Validation: compile and package checks only; no app launch, functionality tests or visual QA.
+
 ## 0.2.1 — 2026-09-22
 
 - Restore the original Toby application icon, bundled unchanged from the old app.

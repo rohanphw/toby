@@ -3,7 +3,7 @@ import SwiftUI
 struct WorkspaceView: View {
     @Bindable var model: AppModel
     @Environment(\.openWindow) private var openWindow
-    @Environment(\.openSettings) private var openSettings
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var body: some View {
         VStack(spacing: 0) {
             WorkspaceNavigation(model: model)
@@ -20,9 +20,22 @@ struct WorkspaceView: View {
                     if let error = model.meetings.error {
                         ErrorNotice(message: error) { model.meetings.error = nil }
                     }
+                    if let error = model.voice.error {
+                        ErrorNotice(message: error) { model.voice.error = nil }
+                    }
+                    if model.voice.active, model.selected?.id != model.voice.item?.id {
+                        HStack {
+                            Label("Voice session active", systemImage: "waveform").foregroundStyle(
+                                Theme.accent)
+                            Spacer()
+                            Button("Return to conversation") { model.selected = model.voice.item }
+                            Button("End voice") { model.endVoice() }
+                        }.buttonStyle(QuietButtonStyle()).surface()
+                    }
                     if model.meetings.active { RecordingBanner(model: model) }
                     if let selected = model.selected {
                         ItemDetailView(model: model, item: selected).id(selected.id)
+                            .frame(maxWidth: 760).frame(maxWidth: .infinity)
                     } else {
                         switch model.page {
                         case .home: HomeView(model: model)
@@ -34,6 +47,7 @@ struct WorkspaceView: View {
                 }.frame(maxWidth: 1040).padding(.horizontal, 48).padding(.top, 36).padding(.bottom, 60).frame(
                     maxWidth: .infinity)
             }
+            .id(model.selected?.id)
             if model.agent.isRunning {
                 HStack(spacing: 10) {
                     ProgressView().controlSize(.small)
@@ -49,7 +63,20 @@ struct WorkspaceView: View {
                 }.buttonStyle(.borderless).padding(14).background(Theme.surface)
             }
         }
+        .font(.system(size: 14))
         .foregroundStyle(Theme.ink).background(WorkspaceBackground())
+        .overlay(alignment: .trailing) {
+            if model.showSettings {
+                SettingsView(model: model)
+                    .frame(width: 430)
+                    .background(Theme.drawer)
+                    .overlay(alignment: .leading) { Rectangle().fill(Theme.line).frame(width: 1) }
+                    .shadow(color: .black.opacity(0.2), radius: 24, x: -12)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                    .zIndex(1)
+            }
+        }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.25), value: model.showSettings)
         .frame(minWidth: 880, minHeight: 620)
         .sheet(isPresented: $model.showSearch) { SearchView(model: model) }
         .sheet(item: Binding(get: { model.agent.approvals.first }, set: { _ in })) { approval in
@@ -59,11 +86,12 @@ struct WorkspaceView: View {
             QuestionView(agent: model.agent, question: question)
         }
         .onAppear {
-            model.openVoiceWindow = {
-                openWindow(id: "voice")
+            model.revealWorkspace = {
+                openWindow(id: "main")
                 NSApp.activate(ignoringOtherApps: true)
             }
         }
+        .onDisappear { if model.voice.active { model.endVoice() } }
         .onChange(of: model.agent.error) { _, error in
             if let error, model.voice.active {
                 model.voice.error = error
@@ -75,15 +103,13 @@ struct WorkspaceView: View {
 
 private struct WorkspaceNavigation: View {
     @Bindable var model: AppModel
-    @Environment(\.openWindow) private var openWindow
-    @Environment(\.openSettings) private var openSettings
     var body: some View {
-        HStack(spacing: 26) {
+        HStack(spacing: 22) {
             Button {
                 model.selected = nil
                 model.page = .home
             } label: {
-                Text("Toby").font(Theme.editorial(25))
+                Text("Toby").font(Theme.heading(25))
             }.buttonStyle(.plain)
             Rectangle().fill(Theme.line).frame(width: 1, height: 20)
             ForEach(AppModel.Page.allCases, id: \.self) { page in
@@ -91,7 +117,7 @@ private struct WorkspaceNavigation: View {
                     model.selected = nil
                     model.page = page
                 } label: {
-                    Text(page.rawValue).font(.system(size: 12, weight: .medium))
+                    Text(page.rawValue).font(.system(size: 13, weight: .medium))
                         .foregroundStyle(
                             model.page == page && model.selected == nil ? Theme.ink : Theme.secondary)
                 }.buttonStyle(.plain)
@@ -103,12 +129,12 @@ private struct WorkspaceNavigation: View {
                 Image(systemName: "magnifyingglass")
             }.help("Search · ⌘K").accessibilityLabel("Search library")
             Button {
-                openWindow(id: "voice")
+                model.startVoice()
             } label: {
                 Label("Talk", systemImage: "waveform")
-            }.keyboardShortcut(" ", modifiers: [.control, .option])
+            }
             Button {
-                openSettings()
+                model.showSettings.toggle()
             } label: {
                 Image(systemName: "slider.horizontal.3")
             }.accessibilityLabel("Settings")
@@ -125,13 +151,17 @@ private struct RecordingBanner: View {
                 Text(
                     model.meetings.isStarting
                         ? "Preparing recording…" : "Recording · \(model.meetings.item?.title ?? "Meeting")"
-                ).font(.system(size: 12, weight: .medium))
+                ).font(.system(size: 13, weight: .medium))
                 Text("Microphone and Mac audio • saved on this Mac").font(.system(size: 11)).foregroundStyle(
                     Theme.secondary)
             }
             Spacer()
             if let started = model.meetings.startedAt {
                 Text(started, style: .timer).monospacedDigit().font(.system(size: 12))
+            }
+            if model.selected?.id != model.meetings.item?.id {
+                Button("Open recording") { model.selected = model.meetings.item }.buttonStyle(
+                    QuietButtonStyle())
             }
             Button("Finish & take notes") { model.finishMeeting() }.buttonStyle(QuietButtonStyle()).disabled(
                 model.meetings.isFinishing)

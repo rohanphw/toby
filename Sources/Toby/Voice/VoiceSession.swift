@@ -1,14 +1,13 @@
-import AVFoundation
+import Foundation
 import Observation
 
-@MainActor @Observable final class VoiceSession: NSObject, AVSpeechSynthesizerDelegate {
+@MainActor @Observable final class VoiceSession {
     enum Phase: String {
         case idle = "Ready to listen"
         case starting = "Opening microphone"
         case listening = "Listening"
         case submitting = "Sending"
         case thinking = "Thinking"
-        case speaking = "Speaking"
         case stopping = "Finishing"
     }
     private(set) var phase: Phase = .idle
@@ -18,7 +17,6 @@ import Observation
     var error: String?
     var onUtterance: ((LibraryItem, String) -> Void)?
     private let capture = AudioCapture()
-    private let speech = AVSpeechSynthesizer()
     private let library: Library
     private var silence: Task<Void, Never>?
     private var operation: Task<Void, Never>?
@@ -28,8 +26,6 @@ import Observation
     private var token = UUID()
     init(library: Library) {
         self.library = library
-        super.init()
-        speech.delegate = self
         capture.onText = { [weak self] _, text, final in self?.receive(text, final: final) }
         capture.onLevel = { [weak self] in self?.level = $0 }
         capture.onError = { [weak self] message in
@@ -38,6 +34,9 @@ import Observation
         }
     }
     var active: Bool { phase != .idle }
+    var transcript: String {
+        (committed + " " + partial).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
     func start(item: LibraryItem? = nil) {
         guard phase == .idle else { return }
         self.item = item ?? library.create(.conversation, title: "A conversation")
@@ -92,27 +91,13 @@ import Observation
             onUtterance?(item, text)
         }
     }
-    func respond(_ text: String) {
+    func responseCompleted() {
         guard continuous, phase == .thinking else { return }
-        guard UserDefaults.standard.object(forKey: "spokenReplies") as? Bool ?? true else {
-            listen()
-            return
-        }
-        let clean = text.replacingOccurrences(of: "#", with: "").replacingOccurrences(of: "**", with: "")
-        guard !clean.isEmpty else {
-            listen()
-            return
-        }
-        phase = .speaking
-        let utterance = AVSpeechUtterance(string: String(clean.prefix(6000)))
-        utterance.voice = AVSpeechSynthesisVoice(
-            language: UserDefaults.standard.string(forKey: "speechLocale") ?? "en-US")
-        speech.speak(utterance)
+        listen()
     }
     func interrupt() {
-        guard phase == .speaking || phase == .thinking else { return }
+        guard phase == .thinking else { return }
         phase = .idle
-        speech.stopSpeaking(at: .immediate)
         listen()
     }
     func stop() {
@@ -123,7 +108,6 @@ import Observation
         silence?.cancel()
         operation?.cancel()
         phase = .stopping
-        speech.stopSpeaking(at: .immediate)
         operation = Task {
             await capture.stop()
             await Task.yield()
@@ -153,10 +137,5 @@ import Observation
             guard !Task.isCancelled else { return }
             sendNow()
         }
-    }
-    nonisolated func speechSynthesizer(
-        _ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance
-    ) {
-        Task { @MainActor [weak self] in if self?.phase == .speaking { self?.listen() } }
     }
 }

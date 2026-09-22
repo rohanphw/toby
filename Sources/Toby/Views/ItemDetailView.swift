@@ -44,9 +44,12 @@ struct ItemDetailView: View {
                         Theme.accent)
                 }
             }
-            TextField("Untitled", text: $item.title, axis: .vertical).font(Theme.editorial(38))
+            TextField("Untitled", text: $item.title, axis: .vertical).font(Theme.heading(38))
                 .textFieldStyle(.plain).lineLimit(1...3)
                 .onChange(of: item.title) { _, _ in model.library.changed(item) }
+            if model.voice.active, model.voice.item?.id == item.id {
+                VoiceCaptureView(model: model)
+            }
             if item.kind == .thought {
                 TextEditor(text: $item.body).font(.system(size: 16)).lineSpacing(7).scrollContentBackground(
                     .hidden
@@ -100,6 +103,7 @@ struct ItemDetailView: View {
             )
         }
         .task(id: model.agent.isRunning) { await loadFiles() }
+        .onAppear { showTranscript = model.meetings.active && model.meetings.item?.id == item.id }
         .onDisappear { model.library.save() }
     }
     private var isBusy: Bool {
@@ -225,10 +229,13 @@ private struct ItemComposer: View {
                 )
                 .disabled(
                     item.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                        || model.agent.isRunning || model.meetings.item?.id == item.id)
+                        || model.agent.isRunning || model.voice.active || model.meetings.item?.id == item.id)
             }
             HStack {
-                Text("This item, attached files & remembered notes").font(.system(size: 10)).foregroundStyle(
+                Text(
+                    model.voice.active
+                        ? "End voice to send a typed message" : "This item, attached files & remembered notes"
+                ).font(.system(size: 10)).foregroundStyle(
                     Theme.secondary)
                 Spacer()
                 Text("⌘ Return").font(.system(size: 10)).foregroundStyle(Theme.secondary)

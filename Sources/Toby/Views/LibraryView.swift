@@ -21,7 +21,7 @@ struct LibraryView: View {
             Eyebrow(text: memoryOnly ? "What Toby remembers" : "Your personal collection")
             HStack {
                 Text(memoryOnly ? "Things worth remembering." : "All the pieces, together.").font(
-                    Theme.editorial(37))
+                    Theme.heading(37))
                 Spacer()
                 Button("New note", action: model.newNote).buttonStyle(QuietButtonStyle())
             }
@@ -48,8 +48,8 @@ struct LibraryView: View {
                         ? "Start with a note or a conversation. Your work will find its place here."
                         : "Try another word or a different filter.")
             } else {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 270), alignment: .top)], spacing: 16) {
-                    ForEach(items) { item in LibraryCard(item: item) { model.selected = item } }
+                LazyVStack(spacing: 4) {
+                    ForEach(items) { item in LibraryRow(item: item) { model.selected = item } }
                 }
             }
         }

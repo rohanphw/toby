@@ -1,4 +1,4 @@
-# Architecture — 0.2.0
+# Architecture — 0.3.0
 
 ## Product
 
@@ -11,7 +11,7 @@ Toby is a native, local-first personal workspace. Voice is an entry point, meeti
 - `AgentSession`: one active run with generation ownership, event projection, approvals and completion callbacks.
 - `CLITransport`: one Codex app-server or Grok ACP process, serialized stdout framing, request deadlines, cancellation and stale-process isolation.
 - `AccountConnection`: a separate, short-lived transport for CLI authentication checks and Codex model discovery. It cannot stop a task’s process.
-- `VoiceSession`: talking lifecycle, silence boundary, interrupted replies and speech synthesis.
+- `VoiceSession`: talking lifecycle, silence boundary and microphone resumption after written replies.
 - `MeetingSession`: meeting lifecycle, transcript assembly and local recording ownership.
 - `AudioCapture`: permissions, AVAudioEngine and ScreenCaptureKit. No video output is registered or persisted.
 - `AudioSink`: off-render-thread serialized audio file writes and recognition. Recognition rolls every 45 seconds to keep meeting sessions bounded.
@@ -37,7 +37,9 @@ A three-minute event-silence watchdog stops unresponsive work, except while the 
 
 ## Capture policy
 
-Talking mode starts only from its dedicated user-invoked surface. A short pause submits the utterance. Mic capture pauses during execution and speech playback. Explicit interruption stops execution/playback and resumes listening. Closing the voice window ends capture.
+Talk and the global shortcut create a new conversation and select it in the main workspace. Reinvoking Talk during capture returns to that active thread. A short pause submits the utterance. Microphone capture pauses during execution; replies render only as text, then listening resumes. Explicit interruption stops execution and resumes listening. End voice or closing the main workspace ends the voice session. Navigating to another page retains a visible return/end control.
+
+Settings is a trailing in-app drawer, with Command–Comma routing to the same state. Automatic recording consent appears inline in the drawer. There is no Settings scene or voice window. Voice entry and drawer transitions respect Reduce Motion. Meetings retain inline recording controls and transcripts. Provider approvals and questions retain their existing sheets.
 
 Meeting capture records microphone and all system audio except this app. Both sources are transcribed on-device. Calendar automation is opt-in and checks every 20 seconds while the app is open. Supported conferencing events begin recording near their scheduled start and finish at the scheduled end. A persisted event-occurrence key prevents immediate re-recording after relaunch. Skipping an event persists the same exclusion. No browser/app surveillance or inferred call detection is performed.
 

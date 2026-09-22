@@ -25,7 +25,11 @@ struct ConversationContent: View {
                             "Copy response")
                     }
                     MarkdownDocument(text: message.text)
-                }.frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(message.role == "user" ? 20 : 4)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    message.role == "user" ? Theme.surface : .clear, in: RoundedRectangle(cornerRadius: 20))
             }
         }
     }
@@ -37,7 +41,7 @@ struct ApprovalView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
             Image(systemName: "hand.raised").font(.system(size: 26)).foregroundStyle(Theme.accent)
-            Text(approval.title).font(Theme.editorial(29))
+            Text(approval.title).font(Theme.heading(29))
             Text("Toby needs your permission to continue this action.").foregroundStyle(Theme.secondary)
             ScrollView {
                 Text(
@@ -65,7 +69,7 @@ struct QuestionView: View {
     @State private var answers: [String: String] = [:]
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("A quick question.").font(Theme.editorial(30))
+            Text("A quick question.").font(Theme.heading(30))
             ForEach(question.questions) { q in
                 VStack(alignment: .leading, spacing: 10) {
                     Text(q.prompt)

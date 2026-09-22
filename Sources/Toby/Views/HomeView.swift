@@ -2,135 +2,127 @@ import SwiftUI
 
 struct HomeView: View {
     let model: AppModel
-    @Environment(\.openWindow) private var openWindow
     @State private var prompt = ""
     private var recent: [LibraryItem] {
         Array(model.library.items.sorted { $0.updatedAt > $1.updatedAt }.prefix(6))
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 36) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 16) {
-                    Eyebrow(text: Date().formatted(.dateTime.weekday(.wide).month(.wide).day()))
-                    Text("A little space\nfor everything on your mind.").font(Theme.editorial(43)).tracking(
-                        -1
-                    ).lineSpacing(3)
-                    Text("Think out loud. Keep the good parts. Pick up where you left off.")
-                        .font(.system(size: 13)).foregroundStyle(Theme.secondary)
-                }
-                Spacer()
-                Image(systemName: "sparkle").font(.system(size: 60, weight: .ultraLight)).foregroundStyle(
-                    Theme.accent.opacity(0.45)
-                ).padding(.top, 40)
-            }.padding(.top, 14)
-            HStack(spacing: 18) {
-                Button {
-                    openWindow(id: "voice")
-                } label: {
-                    HStack(spacing: 14) {
-                        Image(systemName: "waveform").font(.system(size: 22, weight: .light)).foregroundStyle(
-                            Theme.accent)
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text("Talk to Toby").font(Theme.editorial(22))
-                            Text("A thought, a question, a place to begin.").font(.system(size: 12))
+            VStack(alignment: .leading, spacing: 16) {
+                Eyebrow(text: Date().formatted(.dateTime.weekday(.wide).month(.wide).day()))
+                Text("What’s on\nyour mind?").font(Theme.heading(58)).tracking(-2).lineSpacing(-2)
+                Text("A passing thought. A big question. Something you don’t want to forget.")
+                    .font(.system(size: 15)).foregroundStyle(Theme.secondary)
+            }.padding(.top, 20)
+            HStack(alignment: .center, spacing: 32) {
+                Button(action: model.startVoice) {
+                    HStack(spacing: 24) {
+                        VoiceMark().frame(width: 120, height: 76)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Talk to Toby").font(Theme.heading(27))
+                            Text("Think out loud. Get a written reply.").font(.system(size: 13))
                                 .foregroundStyle(Theme.secondary)
+                            Text("⌃ ⌥ Space").font(.system(size: 12)).foregroundStyle(Theme.accent)
                         }
-                        Spacer()
-                        Text("⌃ ⌥ Space").font(.system(size: 10, design: .monospaced)).foregroundStyle(
-                            Theme.secondary)
-                    }.surface()
+                        Spacer(minLength: 8)
+                        Image(systemName: "arrow.up.right").font(.system(size: 20, weight: .light))
+                    }.padding(28).background(
+                        Theme.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 26)
+                    )
+                    .overlay(RoundedRectangle(cornerRadius: 26).stroke(Theme.accent.opacity(0.2)))
+                    .contentShape(RoundedRectangle(cornerRadius: 26))
                 }.buttonStyle(.plain)
-                Button {
-                    model.newNote()
-                } label: {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Image(systemName: "square.and.pencil").foregroundStyle(Theme.secondary)
-                        Text("Leave a note").font(Theme.editorial(19))
-                    }.frame(width: 132, alignment: .leading).surface()
-                }.buttonStyle(.plain)
+                VStack(alignment: .leading, spacing: 24) {
+                    Button(action: model.newNote) { Label("Write a note", systemImage: "square.and.pencil") }
+                    Button {
+                        model.startMeeting()
+                    } label: {
+                        Label("Record a meeting", systemImage: "record.circle")
+                    }
+                    .disabled(model.meetings.active || model.voice.active)
+                }.buttonStyle(.plain).font(.system(size: 14)).fixedSize()
             }
-            HStack(spacing: 12) {
-                TextField("Or write what’s on your mind…", text: $prompt, axis: .vertical).textFieldStyle(
-                    .plain
-                ).lineLimit(1...5).onSubmit(submit)
-                Button(action: submit) { Image(systemName: "arrow.up.circle.fill").font(.system(size: 26)) }
-                    .buttonStyle(.plain)
+            HStack(alignment: .bottom, spacing: 16) {
+                TextField("Or start with a few words…", text: $prompt, axis: .vertical)
+                    .textFieldStyle(.plain).font(.system(size: 16)).lineLimit(1...5).onSubmit(submit)
+                Button(action: submit) { Image(systemName: "arrow.up.circle.fill").font(.system(size: 28)) }
+                    .buttonStyle(.plain).foregroundStyle(Theme.accent)
                     .disabled(
                         prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                            || model.agent.isRunning
-                    ).accessibilityLabel("Ask Toby")
-            }.padding(18).background(Theme.surface.opacity(0.45), in: RoundedRectangle(cornerRadius: 9))
-                .overlay(RoundedRectangle(cornerRadius: 9).stroke(Theme.line))
+                            || model.agent.isRunning || model.voice.active
+                    )
+                    .accessibilityLabel("Ask Toby")
+            }.padding(.vertical, 20)
+                .overlay(alignment: .bottom) { Rectangle().fill(Theme.line).frame(height: 1) }
             if let upcoming = model.schedule.upcoming.first {
                 HStack(spacing: 14) {
-                    Image(systemName: "calendar").foregroundStyle(Theme.secondary)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(upcoming.title).font(.system(size: 13, weight: .medium))
-                        Text(upcoming.start, format: .dateTime.hour().minute()).font(.system(size: 11))
-                            .foregroundStyle(Theme.secondary)
-                    }
+                    Image(systemName: "calendar").foregroundStyle(Theme.accent)
+                    Text(upcoming.start, format: .dateTime.hour().minute()).foregroundStyle(Theme.secondary)
+                    Text(upcoming.title).lineLimit(1)
                     Spacer()
-                    Button("Open meeting") { NSWorkspace.shared.open(upcoming.url) }.buttonStyle(
+                    Button("Join meeting") { NSWorkspace.shared.open(upcoming.url) }.buttonStyle(
                         QuietButtonStyle())
-                }
+                }.font(.system(size: 13))
             }
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Eyebrow(text: "Pick up a thread")
+                    Text("Pick up where you left off").font(Theme.heading(22))
                     Spacer()
-                    Button("Your library →") { model.page = .library }.buttonStyle(.plain).font(
-                        .system(size: 12)
-                    ).foregroundStyle(Theme.secondary)
+                    Button("View all →") { model.page = .library }.buttonStyle(.plain)
+                        .font(.system(size: 13)).foregroundStyle(Theme.secondary)
                 }
                 if recent.isEmpty {
-                    EmptyWorkspace(
-                        symbol: "text.book.closed", title: "Your second brain starts here.",
-                        detail:
-                            "Conversations, notes and meetings will collect here as you use Toby. There’s nothing to organize first."
-                    )
+                    Text("Your notes, conversations, and meetings will find a home here.")
+                        .foregroundStyle(Theme.secondary).padding(.vertical, 20)
                 } else {
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                        ForEach(recent) { item in LibraryCard(item: item) { model.selected = item } }
+                    LazyVStack(spacing: 4) {
+                        ForEach(recent) { item in LibraryRow(item: item) { model.selected = item } }
                     }
                 }
             }
         }
     }
     private func submit() {
-        guard !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !model.agent.isRunning else {
-            return
-        }
+        guard !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+            !model.agent.isRunning, !model.voice.active
+        else { return }
         model.ask(prompt)
         prompt = ""
     }
 }
 
-struct LibraryCard: View {
+struct LibraryRow: View {
     let item: LibraryItem
     let action: () -> Void
+    @State private var hovered = false
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack {
-                    Label(item.kind.label, systemImage: item.kind.symbol).font(
-                        .system(size: 10, weight: .medium)
-                    ).foregroundStyle(Theme.secondary)
-                    Spacer()
-                    if item.isPinned {
-                        Image(systemName: "pin.fill").font(.system(size: 10)).foregroundStyle(Theme.accent)
-                    }
-                    Text(item.updatedAt, format: .dateTime.month(.abbreviated).day()).font(.system(size: 10))
-                        .foregroundStyle(Theme.secondary)
+            HStack(spacing: 18) {
+                Image(systemName: item.kind.symbol).font(.system(size: 20, weight: .light))
+                    .foregroundStyle(
+                        item.kind == .meeting ? Color(red: 0.72, green: 0.78, blue: 0.67) : Theme.accent
+                    )
+                    .frame(width: 48, height: 52).background(
+                        Theme.surface, in: RoundedRectangle(cornerRadius: 14))
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(item.title).font(Theme.heading(18)).lineLimit(1)
+                    Text(preview).font(.system(size: 13)).foregroundStyle(Theme.secondary).lineLimit(1)
+                }.frame(maxWidth: .infinity, alignment: .leading)
+                if item.isPinned {
+                    Image(systemName: "pin.fill").font(.system(size: 11)).foregroundStyle(Theme.accent)
                 }
-                Text(item.title).font(Theme.editorial(23)).lineLimit(2).multilineTextAlignment(.leading)
-                Text(preview).font(.system(size: 12)).foregroundStyle(Theme.secondary).lineLimit(2)
-                    .multilineTextAlignment(.leading)
-            }.frame(maxWidth: .infinity, minHeight: 112, alignment: .topLeading).surface()
-        }.buttonStyle(.plain)
+                VStack(alignment: .trailing, spacing: 6) {
+                    Text(item.updatedAt, format: .dateTime.month(.abbreviated).day())
+                    Text(item.kind.label)
+                }.font(.system(size: 11)).foregroundStyle(Theme.secondary)
+                Image(systemName: "chevron.right").font(.system(size: 10)).foregroundStyle(Theme.secondary)
+            }.padding(14).background(hovered ? Theme.surface : .clear, in: RoundedRectangle(cornerRadius: 18))
+                .contentShape(RoundedRectangle(cornerRadius: 18))
+        }.buttonStyle(.plain).onHover { hovered = $0 }
     }
     private var preview: String {
         if !item.notes.isEmpty { return item.notes }
         if !item.body.isEmpty { return item.body }
-        return item.orderedMessages.last?.text ?? "A little space to begin."
+        return item.orderedMessages.last?.text ?? "A new beginning."
     }
 }

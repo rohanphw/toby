@@ -20,7 +20,8 @@ import Observation
     var search = ""
     var showSearch = false
     var notice: String?
-    var openVoiceWindow: (() -> Void)?
+    var showSettings = false
+    var revealWorkspace: (() -> Void)?
     private let hotkey = GlobalShortcut()
     init() throws {
         library = try Library()
@@ -36,9 +37,9 @@ import Observation
             }
             agent.send(text, to: item)
         }
-        agent.onCompletion = { [weak self] item, text in
+        agent.onCompletion = { [weak self] item, _ in
             guard let self else { return }
-            if voice.item?.id == item.id { voice.respond(text) }
+            if voice.item?.id == item.id { voice.responseCompleted() }
         }
         agent.onFailure = { [weak self] id, message in
             guard let self, voice.item?.id == id, voice.active else { return }
@@ -55,9 +56,19 @@ import Observation
     }
     func startServices() {
         schedule.beginMonitoring()
-        hotkey.register { [weak self] in self?.openVoiceWindow?() }
+        hotkey.register { [weak self] in self?.startVoice() }
+    }
+    func presentSettings() {
+        showSettings = true
+        revealWorkspace?()
     }
     func startVoice() {
+        revealWorkspace?()
+        showSettings = false
+        if voice.active {
+            selected = voice.item
+            return
+        }
         guard !meetings.active else {
             notice = "Finish the meeting recording before starting a voice conversation."
             return
@@ -66,9 +77,16 @@ import Observation
             notice = "Finish or stop the current task before starting a voice conversation."
             return
         }
-        voice.start(item: selected?.kind == .conversation ? selected : nil)
+        voice.start()
+        selected = voice.item
+    }
+    func endVoice() {
+        voice.stop()
+        if agent.activeItemID == voice.item?.id { agent.stop() }
     }
     func startMeeting(_ event: ScheduledMeeting? = nil) {
+        revealWorkspace?()
+        showSettings = false
         guard !voice.active else {
             notice = "End the voice conversation before recording a meeting."
             return

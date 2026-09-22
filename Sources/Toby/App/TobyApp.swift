@@ -41,21 +41,18 @@ import SwiftUI
                         "Your library couldn’t open", systemImage: "externaldrive.badge.exclamationmark",
                         description: Text(startupError ?? "Unknown storage error"))
                 }
-            }.preferredColorScheme(.dark).tint(Theme.ink)
+            }.preferredColorScheme(.dark).tint(Theme.accent)
         }
         .defaultSize(width: 1120, height: 780)
         .windowStyle(.hiddenTitleBar)
         .commands {
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings…") { model?.presentSettings() }.keyboardShortcut(",")
+            }
             CommandGroup(replacing: .newItem) {
                 Button("New Note") { model?.newNote() }.keyboardShortcut("n")
                 Button("Search Your Library") { model?.showSearch = true }.keyboardShortcut("k")
             }
-        }
-        Window("Talk to Toby", id: "voice") {
-            if let model { VoicePanel(model: model).preferredColorScheme(.dark).tint(Theme.ink) }
-        }.defaultSize(width: 440, height: 360).windowResizability(.contentSize).windowStyle(.hiddenTitleBar)
-        Settings {
-            if let model { SettingsView(model: model).preferredColorScheme(.dark).tint(Theme.ink) }
         }
         MenuBarExtra {
             if let model { MenuBarView(model: model).preferredColorScheme(.dark) }

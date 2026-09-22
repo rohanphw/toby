@@ -7,7 +7,7 @@ struct MarkdownDocument: View {
             ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
                 switch block {
                 case .heading(let text, let level):
-                    Text(inline(text)).font(Theme.editorial(level == 1 ? 27 : level == 2 ? 23 : 19)).padding(
+                    Text(inline(text)).font(Theme.heading(level == 1 ? 27 : level == 2 ? 23 : 19)).padding(
                         .top, 6)
                 case .paragraph(let text):
                     Text(inline(text)).font(.system(size: 15)).lineSpacing(6)
