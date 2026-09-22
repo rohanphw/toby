@@ -13,7 +13,11 @@ import Foundation
     private var deadlines: [Int: Task<Void, Never>] = [:]
 
     let provider: CLIProvider
-    init(provider: CLIProvider = .codex) { self.provider = provider }
+    private let workspace: URL?
+    init(provider: CLIProvider = .codex, workspace: URL? = nil) {
+        self.provider = provider
+        self.workspace = workspace
+    }
     static func executable(for provider: CLIProvider = .codex) -> URL? {
         provider.executable
     }
@@ -33,10 +37,53 @@ import Foundation
             binary.deletingLastPathComponent().path + ":/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:"
             + (environment["PATH"] ?? "")
         child.environment = environment
-        child.currentDirectoryURL = AppPaths.root
-        child.executableURL = binary
-        child.arguments =
+        child.currentDirectoryURL = workspace ?? AppPaths.root
+        let arguments =
             provider == .codex ? ["app-server", "--listen", "stdio://"] : ["agent", "--no-leader", "stdio"]
+        if let workspace {
+            // Inherited by CLI tools: prompts alone cannot protect archived data on disk.
+            let sandbox = URL(fileURLWithPath: "/usr/bin/sandbox-exec")
+            guard FileManager.default.isExecutableFile(atPath: sandbox.path) else {
+                throw TobyError(
+                    "This Mac cannot enforce Toby’s library isolation. Agent work was not started.")
+            }
+            let codexWrites =
+                provider == .codex
+                ? """
+                (deny file-write*
+                    (require-not
+                        (require-any
+                            (subpath (param "TOBY_WORKSPACE"))
+                            (subpath (param "TOBY_CODEX_HOME"))
+                            (subpath (param "TOBY_TEMP"))
+                            (subpath "/private/tmp")
+                            (literal "/dev/null")
+                            (literal "/dev/tty"))))
+                """ : ""
+            let profile = """
+                (version 1)
+                (allow default)
+                \(codexWrites)
+                (deny file-read-data file-write*
+                    (require-all
+                        (subpath (param "TOBY_LIBRARY"))
+                        (require-not (subpath (param "TOBY_WORKSPACE")))))
+                """
+            child.executableURL = sandbox
+            child.arguments =
+                [
+                    "-D", "TOBY_LIBRARY=\(AppPaths.root.resolvingSymlinksInPath().path)",
+                    "-D", "TOBY_WORKSPACE=\(workspace.resolvingSymlinksInPath().path)",
+                    "-D",
+                    "TOBY_CODEX_HOME=\(URL(fileURLWithPath: environment["CODEX_HOME"] ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".codex").path).resolvingSymlinksInPath().path)",
+                    "-D",
+                    "TOBY_TEMP=\(FileManager.default.temporaryDirectory.resolvingSymlinksInPath().path)",
+                    "-p", profile, binary.path,
+                ] + arguments
+        } else {
+            child.executableURL = binary
+            child.arguments = arguments
+        }
         child.standardInput = stdin
         child.standardOutput = stdout
         child.standardError = stderr
@@ -81,7 +128,7 @@ import Foundation
                     [
                         "clientInfo": .object([
                             "name": .string("toby_next"), "title": .string("Toby"),
-                            "version": .string("0.9.3"),
+                            "version": .string("0.10.0"),
                         ])
                     ])
                 try send(.object(["method": .string("initialized")]))
@@ -90,7 +137,7 @@ import Foundation
                     "initialize",
                     [
                         "protocolVersion": .number(1),
-                        "clientInfo": .object(["name": .string("toby"), "version": .string("0.9.3")]),
+                        "clientInfo": .object(["name": .string("toby"), "version": .string("0.10.0")]),
                         "clientCapabilities": .object([
                             "fs": .object(["readTextFile": .bool(false), "writeTextFile": .bool(false)]),
                             "terminal": .bool(false),

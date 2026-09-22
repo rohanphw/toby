@@ -4,10 +4,12 @@ struct LibraryView: View {
     let model: AppModel
     let memoryOnly: Bool
     @State private var query = ""
+    @State private var showingArchive = false
     @State private var kind: ItemKind?
     private var items: [LibraryItem] {
         model.library.items.filter {
-            (!memoryOnly || $0.isMemory) && (kind == nil || $0.kind == kind)
+            ($0.isArchived == (!memoryOnly && showingArchive)) && (!memoryOnly || $0.isMemory)
+                && (kind == nil || $0.kind == kind)
                 && (query.isEmpty
                     || ($0.title + $0.body + $0.notes + $0.messages.map(\.text).joined())
                         .localizedCaseInsensitiveContains(query))
@@ -20,10 +22,31 @@ struct LibraryView: View {
         VStack(alignment: .leading, spacing: 28) {
             Eyebrow(text: memoryOnly ? "What Toby remembers" : "Your personal collection")
             HStack {
-                Text(memoryOnly ? "Things worth remembering." : "All the pieces, together.").font(
+                Text(
+                    memoryOnly
+                        ? "Things worth remembering."
+                        : showingArchive ? "Your archive." : "All the pieces, together."
+                ).font(
                     Theme.heading(30))
                 Spacer()
                 Button("New note", action: model.newNote).buttonStyle(QuietButtonStyle())
+            }
+            if !memoryOnly {
+                HStack(spacing: 16) {
+                    Button("Library") { showingArchive = false }
+                        .foregroundStyle(showingArchive ? Theme.secondary : Theme.ink)
+                    Button {
+                        showingArchive = true
+                    } label: {
+                        Label("Archive", systemImage: "archivebox")
+                    }.foregroundStyle(showingArchive ? Theme.ink : Theme.secondary)
+                }.buttonStyle(.plain).font(Theme.label)
+                if showingArchive {
+                    Text(
+                        "Kept here for you. Excluded from Toby’s memory and future chat context until restored."
+                    )
+                    .font(Theme.caption).foregroundStyle(Theme.secondary)
+                }
             }
             if memoryOnly {
                 Text(
@@ -43,13 +66,17 @@ struct LibraryView: View {
             if items.isEmpty {
                 EmptyWorkspace(
                     symbol: memoryOnly ? "sparkles" : "books.vertical",
-                    title: query.isEmpty ? "Make room for an idea." : "Nothing found.",
+                    title: query.isEmpty
+                        ? (showingArchive ? "Nothing archived yet." : "Make room for an idea.")
+                        : "Nothing found.",
                     detail: query.isEmpty
-                        ? "Start with a note or a conversation. Your work will find its place here."
+                        ? (showingArchive
+                            ? "Right-click a chat and choose Archive to keep it here."
+                            : "Start with a note or a conversation. Your work will find its place here.")
                         : "Try another word or a different filter.")
             } else {
                 LazyVStack(spacing: 4) {
-                    ForEach(items) { item in LibraryRow(item: item) { model.openItem(item) } }
+                    ForEach(items) { item in LibraryRow(model: model, item: item) { model.openItem(item) } }
                 }
             }
         }
@@ -74,8 +101,8 @@ struct SearchView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var query = ""
     private var results: [LibraryItem] {
-        guard !query.isEmpty else { return Array(model.library.items.prefix(10)) }
-        return model.library.items.filter {
+        guard !query.isEmpty else { return Array(model.library.activeItems.prefix(10)) }
+        return model.library.activeItems.filter {
             ($0.title + $0.body + $0.notes + $0.messages.map(\.text).joined())
                 .localizedCaseInsensitiveContains(query)
         }
@@ -105,6 +132,17 @@ struct SearchView: View {
                                 Image(systemName: "arrow.up.left").foregroundStyle(Theme.secondary)
                             }.padding(12).contentShape(Rectangle())
                         }.buttonStyle(.plain)
+                            .contextMenu {
+                                Button("Archive") {
+                                    model.archive(item)
+                                    dismiss()
+                                }.disabled(!model.canOrganizeLibrary)
+                                Button("Delete", role: .destructive) {
+                                    model.requestDeletion(item)
+                                    dismiss()
+                                }
+                                .disabled(!model.canOrganizeLibrary)
+                            }
                     }
                 }
             }

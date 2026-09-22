@@ -95,3 +95,11 @@ No app launch, browser sign-in, visual QA or functionality tests were performed 
 - With two signed-in Google accounts and the browser default set to the wrong one, join from Calendar, Meetings, Home and a reminder; verify Meet uses the displayed email. Check behavior when that account is not signed into the default browser/profile.
 - Check an existing authuser parameter is replaced, unrelated query/fragment data is preserved, and Zoom/Teams links remain unchanged.
 - The same meeting on two connected accounts must retain two labeled choices, but produce only one reminder/automatic recording. Removing one account must not make an existing reminder silently join as another account. Mac calendars without a known current-user attendee should retain the original link.
+
+## 0.10.0 (user-run; required before relying on archive isolation)
+
+- Right-click Home, Library, Memory, Meetings and search rows: Archive/Delete only; archive rows offer Restore/Delete. Verify deletion confirmation and cancellation, including from search and the currently open chat. Organizing must disable during agent/voice/recording/Drive work.
+- Archive a remembered/pinned chat with attachments/recordings; restart; check Archive, read-only details, physical workspace move, absence from normal search/Home/Memory, and restore with Remember still off.
+- Run Codex and Grok separately. They must operate in their own workspace while attempts to read another workspace, archived files, or Toby's SQLite store fail. Confirm Codex tools avoid nested sandbox failures with externalSandbox; verify auth, ordinary commands and output creation still work. This was not exercised by the agent.
+- After archiving remembered text, send a fresh task and inspect its supplied context; archived text must be absent. Old provider sessions must not resume. Previously copied text in other chats/provider caches is outside retrospective forgetting.
+- Permanently delete archived/active items; verify messages and files disappear without Trash. Simulate database/filesystem failures and interrupted staging to verify rollback/recovery and truthful cleanup errors. No live user data was deleted during development.

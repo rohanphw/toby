@@ -3,7 +3,6 @@ import SwiftUI
 struct ItemDetailView: View {
     let model: AppModel
     @Bindable var item: LibraryItem
-    @State private var confirmDelete = false
     @State private var showTranscript = false
     @State private var files: [URL] = []
     var body: some View {
@@ -29,7 +28,9 @@ struct ItemDetailView: View {
                     Button("Export as Markdown") { model.library.export(item) }
                     Button("Show workspace in Finder") { revealWorkspace() }
                     Divider()
-                    Button("Delete", role: .destructive) { confirmDelete = true }.disabled(isBusy)
+                    Button("Archive") { model.archive(item) }.disabled(!model.canOrganizeLibrary)
+                    Button("Delete", role: .destructive) { model.requestDeletion(item) }.disabled(
+                        !model.canOrganizeLibrary)
                 } label: {
                     Image(systemName: "ellipsis")
                 }.menuStyle(.borderlessButton).fixedSize().accessibilityLabel("Item actions")
@@ -92,24 +93,9 @@ struct ItemDetailView: View {
             DriveToolsView(model: model, item: item)
             ItemComposer(model: model, item: item)
         }
-        .confirmationDialog("Delete ‘\(item.title)’?", isPresented: $confirmDelete) {
-            Button("Delete item and move its files to Trash", role: .destructive) {
-                model.goBack()
-                model.library.delete(item)
-            }
-        } message: {
-            Text(
-                "This removes its notes and conversation from your library. Files and recordings go to the Mac’s Trash."
-            )
-        }
         .task(id: model.agent.isRunning) { await loadFiles() }
         .onAppear { showTranscript = model.meetings.active && model.meetings.item?.id == item.id }
         .onDisappear { model.library.save() }
-    }
-    private var isBusy: Bool {
-        (model.drive.busy && model.drive.itemID == item.id) || model.agent.activeItemID == item.id
-            || model.meetings.item?.id == item.id
-            || (model.voice.item?.id == item.id && model.voice.active)
     }
     private func revealWorkspace() {
         let url = AppPaths.workspace(item.id)

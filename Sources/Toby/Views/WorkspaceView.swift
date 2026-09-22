@@ -38,8 +38,13 @@ struct WorkspaceView: View {
                     }
                     if model.meetings.active { RecordingBanner(model: model) }
                     if let selected = model.selected {
-                        ItemDetailView(model: model, item: selected).id(selected.id)
-                            .frame(maxWidth: 760).frame(maxWidth: .infinity)
+                        Group {
+                            if selected.isArchived {
+                                ArchivedItemView(model: model, item: selected)
+                            } else {
+                                ItemDetailView(model: model, item: selected)
+                            }
+                        }.id(selected.id).frame(maxWidth: 760).frame(maxWidth: .infinity)
                     } else {
                         switch model.page {
                         case .home: HomeView(model: model)
@@ -70,6 +75,21 @@ struct WorkspaceView: View {
                     }
                 }.buttonStyle(.borderless).padding(14).background(Theme.surface)
             }
+        }
+        .confirmationDialog(
+            "Delete this chat permanently?",
+            isPresented: Binding(
+                get: { model.pendingDeletion != nil }, set: { if !$0 { model.pendingDeletion = nil } }
+            ), titleVisibility: .visible
+        ) {
+            if let item = model.pendingDeletion {
+                Button("Delete permanently", role: .destructive) { model.confirmDeletion(item) }
+                    .disabled(!model.canOrganizeLibrary)
+            }
+        } message: {
+            Text(
+                "‘\(model.pendingDeletion?.title ?? "Chat")’ and its local messages, attachments and recordings will be permanently deleted. This cannot be undone."
+            )
         }
         .disabled(model.onboarding.isPresented)
         .accessibilityHidden(model.onboarding.isPresented)

@@ -94,6 +94,36 @@ import Observation
         guard Page.allCases.indices.contains(next) else { return }
         navigate(to: Page.allCases[next])
     }
+    var pendingDeletion: LibraryItem?
+    var canOrganizeLibrary: Bool { !agent.isRunning && !voice.active && !meetings.active && !drive.busy }
+    func archive(_ item: LibraryItem) {
+        guard canOrganizeLibrary else {
+            notice = "Finish the current work before organizing chats."
+            return
+        }
+        guard library.setArchived(!item.isArchived, item: item) else { return }
+        forgetNavigation(item.id)
+    }
+    func requestDeletion(_ item: LibraryItem) {
+        guard canOrganizeLibrary else {
+            notice = "Finish the current work before deleting chats."
+            return
+        }
+        pendingDeletion = item
+    }
+    func confirmDeletion(_ item: LibraryItem) {
+        guard canOrganizeLibrary, library.items.contains(where: { $0 === item }) else { return }
+        let id = item.id
+        pendingDeletion = nil
+        let wasSelected = selected === item
+        if wasSelected { selected = nil }
+        if library.delete(item) { forgetNavigation(id) } else if wasSelected { selected = item }
+    }
+    private func forgetNavigation(_ id: UUID) {
+        backHistory.removeAll { $0.itemID == id }
+        forwardHistory.removeAll { $0.itemID == id }
+        if selected?.id == id { selected = nil }
+    }
     var search = ""
     var showSearch = false
     var notice: String?

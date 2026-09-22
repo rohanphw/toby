@@ -6,6 +6,7 @@ import SwiftData
     let container: ModelContainer
     private let context: ModelContext
     private(set) var items: [LibraryItem] = []
+    var activeItems: [LibraryItem] { items.filter { !$0.isArchived } }
     var error: String?
     private var checkpoint: Task<Void, Never>?
 
@@ -24,6 +25,7 @@ import SwiftData
             for message in item.messages where message.state == "streaming" { message.state = "interrupted" }
         }
         try context.save()
+        try recoverFileMoves()
     }
     @discardableResult func create(_ kind: ItemKind, title: String) -> LibraryItem {
         let item = LibraryItem(title: title, kind: kind)
@@ -53,18 +55,104 @@ import SwiftData
             self?.save()
         }
     }
-    func delete(_ item: LibraryItem) {
-        context.delete(item)
+    @discardableResult func setArchived(_ archived: Bool, item: LibraryItem) -> Bool {
+        guard item.isArchived != archived else { return true }
+        let source = item.isArchived ? AppPaths.archive(item.id) : AppPaths.workspace(item.id)
+        let destination = archived ? AppPaths.archive(item.id) : AppPaths.workspace(item.id)
+        var moved = false
         do {
             try context.save()
-            items.removeAll { $0.id == item.id }
-            let url = AppPaths.workspace(item.id)
-            if FileManager.default.fileExists(atPath: url.path) {
-                try FileManager.default.trashItem(at: url, resultingItemURL: nil)
+            if FileManager.default.fileExists(atPath: source.path) {
+                try FileManager.default.createDirectory(
+                    at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
+                try FileManager.default.moveItem(at: source, to: destination)
+                moved = true
             }
-        } catch { self.error = "Could not finish deleting this item: \(error.localizedDescription)" }
+            item.archivedAt = archived ? .now : nil
+            item.isMemory = false
+            item.isPinned = false
+            // A resumed provider session may retain remembered context that has just been withdrawn.
+            for existing in items { existing.threadID = nil }
+            try context.save()
+            return true
+        } catch {
+            context.rollback()
+            if moved {
+                do { try FileManager.default.moveItem(at: destination, to: source) } catch {
+                    self.error =
+                        "Could not restore the workspace after a failed archive change. Reopen Toby to recover it."
+                    return false
+                }
+            }
+            self.error = "Could not change the archive: \(error.localizedDescription)"
+            return false
+        }
+    }
+    @discardableResult func delete(_ item: LibraryItem) -> Bool {
+        let id = item.id
+        let source = item.isArchived ? AppPaths.archive(id) : AppPaths.workspace(id)
+        let pending = AppPaths.root.appendingPathComponent(
+            "DeletionPending/\(id.uuidString)", isDirectory: true)
+        var moved = false
+        do {
+            try context.save()
+            if FileManager.default.fileExists(atPath: source.path) {
+                try FileManager.default.createDirectory(
+                    at: pending.deletingLastPathComponent(), withIntermediateDirectories: true)
+                try FileManager.default.moveItem(at: source, to: pending)
+                moved = true
+            }
+            context.delete(item)
+            for existing in items where existing.id != id { existing.threadID = nil }
+            try context.save()
+        } catch {
+            context.rollback()
+            if moved {
+                do { try FileManager.default.moveItem(at: pending, to: source) } catch {
+                    self.error = "Deletion failed and the workspace needs recovery. Reopen Toby."
+                    return false
+                }
+            }
+            self.error = "Could not delete this item: \(error.localizedDescription)"
+            return false
+        }
+        items.removeAll { $0 === item }
+        if moved {
+            do { try FileManager.default.removeItem(at: pending) } catch {
+                self.error =
+                    "Chat removed, but its files could not be deleted. Toby will retry cleanup on launch."
+            }
+        }
+        return true
+    }
+    private func recoverFileMoves() throws {
+        let manager = FileManager.default
+        let pending = AppPaths.root.appendingPathComponent("DeletionPending", isDirectory: true)
+        if manager.fileExists(atPath: pending.path) {
+            for directory in try manager.contentsOfDirectory(at: pending, includingPropertiesForKeys: nil) {
+                guard let id = UUID(uuidString: directory.lastPathComponent) else { continue }
+                if let item = items.first(where: { $0.id == id }) {
+                    let destination = item.isArchived ? AppPaths.archive(id) : AppPaths.workspace(id)
+                    try manager.createDirectory(
+                        at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
+                    try manager.moveItem(at: directory, to: destination)
+                } else {
+                    try manager.removeItem(at: directory)
+                }
+            }
+        }
+        for item in items {
+            let expected = item.isArchived ? AppPaths.archive(item.id) : AppPaths.workspace(item.id)
+            let other = item.isArchived ? AppPaths.workspace(item.id) : AppPaths.archive(item.id)
+            if !manager.fileExists(atPath: expected.path), manager.fileExists(atPath: other.path) {
+                try manager.createDirectory(
+                    at: expected.deletingLastPathComponent(), withIntermediateDirectories: true)
+                try manager.moveItem(at: other, to: expected)
+            }
+        }
     }
     func attach(to item: LibraryItem) {
+        guard !item.isArchived else { return }
         let panel = NSOpenPanel()
         panel.directoryURL = LocalFolderAccess.resolve()
         panel.allowsMultipleSelection = true
@@ -84,6 +172,7 @@ import SwiftData
         } catch { self.error = "Could not attach the file: \(error.localizedDescription)" }
     }
     func attachDownloadedFile(_ source: URL, name: String, to item: LibraryItem) throws {
+        guard !item.isArchived else { throw TobyError("Restore this item before attaching files.") }
         let directory = AppPaths.workspace(item.id).appendingPathComponent("Inputs", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let safeName = String(

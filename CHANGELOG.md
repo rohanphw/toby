@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.10.0 — 2026-09-23
+
+- Add Archive/Delete context menus to library, recent, meeting and search rows; add Library → Archive with read-only chat viewing and restore.
+- Exclude archived items from normal lists, search and memory context. Clear their Remember/Pin flags, move workspace files into Archive, block new agent requests and reset saved CLI thread references after archive/delete.
+- Launch agent processes with an inherited macOS Seatbelt rule denying access to Toby’s database, archive and other item workspaces. Codex uses externalSandbox to avoid nested Seatbelt profiles; keep its write scope limited to the current workspace, CLI state and temporary directories.
+- Delete permanently removes the local model/messages and workspace files after confirmation. Recover interrupted file moves on launch; report cleanup failures rather than claiming complete deletion.
+- Compile/package/static review only. Filesystem isolation, CLI compatibility, persistence and context-menu behavior require user runtime QA.
+
 ## 0.9.3 — 2026-09-23
 
 - Correct provider selector spacing: inset each logo/label, give both segments a minimum width, and enlarge the undersized Home selector. Match the adjacent model control height.

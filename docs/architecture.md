@@ -97,3 +97,15 @@ Implementation precedent: [MeetingBar account selection](https://github.com/leit
 ### Provider control spacing (0.9.3)
 
 The shared ProviderSelector uses 14-point horizontal label padding, 104-point minimum segment widths, 34-point inner height and a 4-point outer inset. Home allocates 228 points rather than compressing both provider labels and logos into 144 points. Its 42-point total height matches the model picker.
+
+## Archive and deletion (0.10.0)
+
+`LibraryItem.archivedAt` is an optional additive SwiftData field. `Library.activeItems` is the shared normal-list/search/context boundary. Archive clears Remember/Pin, moves existing Workspaces/<id> into Archive/<id>, and invalidates all saved Codex thread IDs to avoid resuming earlier injected memory. Restore returns the workspace and leaves Remember disabled. ArchivedItemView is read-only and contains no composer, Drive controls or memory toggle. AgentSession rejects archived items even if called outside the UI. Organizing is disabled during agent, voice, recording or Drive activity.
+
+Deletion stages workspace files in DeletionPending/<id>, commits the cascading SwiftData deletion, then permanently removes those files. Failed database commits roll back the file move; interrupted operations recover against surviving item IDs on launch. Cleanup failures report partial completion and retry on launch. This is application deletion, not forensic disk erasure, backup deletion, Google document deletion or deletion of provider-held chat logs.
+
+Agent CLITransport receives only its active workspace and wraps the CLI in `/usr/bin/sandbox-exec`. The inherited profile denies file-read-data and file-write operations anywhere under TobyNext outside that workspace, including the raw SQLite database, Archive, pending deletion and other chats. Account/model/usage probes do not receive agent work and retain their existing transport. For Codex, the wrapper additionally denies writes outside the workspace, CODEX_HOME, temporary directories and required device files. TurnStart uses the installed CLI schema's externalSandbox policy to avoid macOS nested-sandbox failures. API/network access remains enabled; the external policy is a filesystem isolation boundary, not an outbound-domain filter. No unsandboxed fallback is provided for agent work.
+
+This boundary applies to CLI processes launched by Toby and their descendants. It does not revoke text already copied into another conversation, provider/CLI caches, user-created exports or access by independent apps/agents outside Toby. Already-sent context cannot be retracted. These limitations must not be represented as guaranteed retrospective forgetting.
+
+Source contract: local CLI-generated TurnStartParams/SandboxPolicy schema; [Codex permissions source](https://github.com/openai/codex/blob/main/codex-rs/app-server-protocol/src/protocol/v2/permissions.rs). Runtime Seatbelt/CLI compatibility remains untested under the user's compile-only constraint.

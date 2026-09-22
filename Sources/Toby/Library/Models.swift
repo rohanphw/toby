@@ -31,6 +31,8 @@ enum ItemKind: String, CaseIterable, Identifiable {
     var updatedAt: Date
     var isPinned: Bool
     var isMemory: Bool
+    var archivedAt: Date?
+    var isArchived: Bool { archivedAt != nil }
     var calendarOccurrenceKey: String?
     var threadID: String?
     var recordingState: String
@@ -75,6 +77,9 @@ enum ItemKind: String, CaseIterable, Identifiable {
 enum AppPaths {
     static let root = FileManager.default.homeDirectoryForCurrentUser
         .appendingPathComponent("Library/Application Support/TobyNext", isDirectory: true)
+    static func archive(_ id: UUID) -> URL {
+        root.appendingPathComponent("Archive/\(id.uuidString)", isDirectory: true)
+    }
     static func workspace(_ id: UUID) -> URL {
         root.appendingPathComponent("Workspaces/\(id.uuidString)", isDirectory: true)
     }

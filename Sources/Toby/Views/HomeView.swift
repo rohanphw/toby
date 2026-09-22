@@ -4,7 +4,7 @@ struct HomeView: View {
     let model: AppModel
     @State private var prompt = ""
     private var recent: [LibraryItem] {
-        Array(model.library.items.sorted { $0.updatedAt > $1.updatedAt }.prefix(6))
+        Array(model.library.activeItems.sorted { $0.updatedAt > $1.updatedAt }.prefix(6))
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {
@@ -75,7 +75,9 @@ struct HomeView: View {
                         .foregroundStyle(Theme.secondary).padding(.vertical, 20)
                 } else {
                     LazyVStack(spacing: 4) {
-                        ForEach(recent) { item in LibraryRow(item: item) { model.openItem(item) } }
+                        ForEach(recent) { item in
+                            LibraryRow(model: model, item: item) { model.openItem(item) }
+                        }
                     }
                 }
             }
@@ -91,6 +93,7 @@ struct HomeView: View {
 }
 
 struct LibraryRow: View {
+    let model: AppModel
     let item: LibraryItem
     let action: () -> Void
     @State private var hovered = false
@@ -118,6 +121,7 @@ struct LibraryRow: View {
             }.padding(14).background(hovered ? Theme.surface : .clear, in: RoundedRectangle(cornerRadius: 18))
                 .contentShape(RoundedRectangle(cornerRadius: 18))
         }.buttonStyle(.plain).onHover { hovered = $0 }
+            .contextMenu { LibraryItemActions(model: model, item: item) }
     }
     private var preview: String {
         if !item.notes.isEmpty { return item.notes }

@@ -60,7 +60,7 @@ struct MeetingsView: View {
                 }
             }
             Eyebrow(text: "Meeting library")
-            let items = model.library.items.filter { $0.kind == .meeting }.sorted {
+            let items = model.library.activeItems.filter { $0.kind == .meeting }.sorted {
                 $0.createdAt > $1.createdAt
             }
             if items.isEmpty {
@@ -69,7 +69,7 @@ struct MeetingsView: View {
                     detail: "Your recordings, transcripts and notes will be waiting here afterward.")
             }
             LazyVStack(spacing: 4) {
-                ForEach(items) { item in LibraryRow(item: item) { model.openItem(item) } }
+                ForEach(items) { item in LibraryRow(model: model, item: item) { model.openItem(item) } }
             }
         }
     }

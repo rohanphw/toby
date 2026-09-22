@@ -2,7 +2,7 @@
 
 A voice-first personal workspace for macOS. Think out loud, capture meetings, keep useful notes, and ask an agent to do the follow-through.
 
-This is the fresh implementation in `gary-app`, version **0.9.3**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
+This is the fresh implementation in `gary-app`, version **0.10.0**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
 
 ## Build
 
@@ -85,3 +85,5 @@ Codex resumes its saved thread. Grok starts a fresh ACP session per task and rec
 The application icon is the original Toby icon, copied byte-for-byte from the old app into `Packaging/Toby.icns`. Packaging copies this versioned asset directly; it does not generate a replacement icon.
 
 Calendar now has its own header tab with a seven-day agenda. Connect Google during onboarding or Settings; existing accounts choose Enable Drive for the new permission. In an item, expand Google Drive to attach selected files or save a note/meeting document as a new Google Doc. The maintainer must enable Google Picker API alongside Calendar and Drive APIs. See [Google setup](docs/google-calendar.md).
+
+Right-click any library/recent/meeting/search item to Archive or Delete. Archived chats live in **Library → Archive**, are read-only until restored, and are excluded from future memory/context. Delete permanently removes the local chat and workspace files after confirmation. Archive cannot retract content already shared with another chat or retained by a CLI/provider. Toby-launched agents are additionally restricted from reading the archive, database and other chats' workspaces; independent external apps are outside this boundary.

@@ -99,7 +99,7 @@ struct CalendarPage: View {
                                     }.disabled(
                                         model.voice.active || model.meetings.active || entry.end <= .now)
                                 }
-                                if let note = model.library.items.first(where: {
+                                if let note = model.library.activeItems.first(where: {
                                     $0.calendarOccurrenceKey == entry.occurrenceKey
                                 }) {
                                     Button("Open notes") { model.openItem(note) }
