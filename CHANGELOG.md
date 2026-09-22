@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Prepare public source distribution with MIT licensing, contributor and security guidance, updated setup instructions, and credential-file exclusions.
+
 ## 0.10.0 — 2026-09-23
 
 - Add Archive/Delete context menus to library, recent, meeting and search rows; add Library → Archive with read-only chat viewing and restore.

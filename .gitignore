@@ -13,3 +13,11 @@ client_secret*.json
 # Local application OAuth build configuration
 .local/
 GoogleOAuthClient.json
+
+# Credentials and signing material
+.env.*
+*.p12
+*.p8
+*.key
+*.mobileprovision
+*.provisionprofile
