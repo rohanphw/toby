@@ -1,4 +1,4 @@
-# Architecture — 0.1.0
+# Architecture — 0.2.0
 
 ## Product
 
@@ -9,8 +9,8 @@ Toby is a native, local-first personal workspace. Voice is an entry point, meeti
 - `AppModel`: dependency composition, navigation and cross-feature handoffs.
 - `Library`: one SwiftData model context, mutations, bounded checkpoints, import/export and recovery.
 - `AgentSession`: one active run with generation ownership, event projection, approvals and completion callbacks.
-- `CodexTransport`: one app-server process, serialized stdout framing, request deadlines, cancellation and stale-process isolation.
-- `AccountConnection`: a separate, short-lived transport for sign-in, status and model discovery. It cannot stop a task’s process.
+- `CLITransport`: one Codex app-server or Grok ACP process, serialized stdout framing, request deadlines, cancellation and stale-process isolation.
+- `AccountConnection`: a separate, short-lived transport for CLI authentication checks and Codex model discovery. It cannot stop a task’s process.
 - `VoiceSession`: talking lifecycle, silence boundary, interrupted replies and speech synthesis.
 - `MeetingSession`: meeting lifecycle, transcript assembly and local recording ownership.
 - `AudioCapture`: permissions, AVAudioEngine and ScreenCaptureKit. No video output is registered or persisted.
@@ -44,3 +44,11 @@ Meeting capture records microphone and all system audio except this app. Both so
 ## Build/distribution
 
 SwiftPM builds the executable. `scripts/build-app.sh` creates an app bundle with its icon, Info.plist usage descriptions and ad-hoc signature. It does not launch or install the app. Developer ID signing/notarization and a fully packaged Codex runtime remain distribution work.
+
+## CLI authentication and Grok (0.2.0)
+
+No credentials are imported into Toby. Each subprocess inherits the current user's environment and home directory. Executable discovery honors explicit selections, then PATH and standard per-user/system installs. Account checks use separate processes and never send a model prompt. Sign-in belongs to Terminal (`codex login` / `grok login`); the app can copy the command but does not run it automatically.
+
+Codex uses `account/read` on its authenticated app-server. Grok runs `agent --no-leader stdio`, initializes ACP version 1, requires the advertised `cached_token` method, and calls `authenticate` with headless metadata. Missing/expired credentials fail visibly; Toby does not select API-key authentication. Grok task sessions are fresh with bounded visible-history bridging; no SwiftData schema change was required. Native Grok tool-permission requests map only to advertised allow-once/reject-once options; unsupported client methods are rejected. Check/stop are scoped to Toby's child process, never the user's shared CLI leader.
+
+Protocol references: [xAI headless/ACP documentation](https://docs.x.ai/build/cli/headless-scripting), [official agent-mode documentation](https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-pager/docs/user-guide/15-agent-mode.md). Installed CLI help was inspected; provider sessions were not exercised.

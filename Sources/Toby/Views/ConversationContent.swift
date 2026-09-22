@@ -51,6 +51,8 @@ struct ApprovalView: View {
                 Spacer()
                 Button("Deny") { agent.resolve(approval, allow: false) }
                 Button("Allow once") { agent.resolve(approval, allow: true) }.buttonStyle(.borderedProminent)
+                    .disabled(
+                        approval.method == "session/request_permission" && approval.allowOptionID == nil)
             }
         }.padding(30).frame(width: 560).background(Theme.canvas).foregroundStyle(Theme.ink)
             .interactiveDismissDisabled()

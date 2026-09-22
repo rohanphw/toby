@@ -1,7 +1,7 @@
 import Foundation
 
 /// One process per owner. Account checks never share a process with running work.
-@MainActor final class CodexTransport {
+@MainActor final class CLITransport {
     var onEvent: ((String, JSONValue, JSONValue?) -> Void)?
     var onExit: ((String) -> Void)?
     private var process: Process?
@@ -12,30 +12,15 @@ import Foundation
     private var pending: [Int: CheckedContinuation<JSONValue, Error>] = [:]
     private var deadlines: [Int: Task<Void, Never>] = [:]
 
-    static func executable() -> URL? {
-        let configured = UserDefaults.standard.string(forKey: "codexBinary")
-        let bundled = Bundle.main.url(forResource: "codex", withExtension: nil, subdirectory: "bin")?.path
-        let home = FileManager.default.homeDirectoryForCurrentUser.path
-        var candidates = [
-            configured, bundled, "/opt/homebrew/bin/codex", "/usr/local/bin/codex",
-            "\(home)/.local/bin/codex",
-        ].compactMap { $0 }
-        candidates += (ProcessInfo.processInfo.environment["PATH"] ?? "").split(separator: ":").map {
-            "\($0)/codex"
-        }
-        let nvm = URL(fileURLWithPath: home).appendingPathComponent(".nvm/versions/node")
-        candidates +=
-            ((try? FileManager.default.contentsOfDirectory(at: nvm, includingPropertiesForKeys: nil)) ?? [])
-            .sorted { $0.lastPathComponent > $1.lastPathComponent }.map {
-                $0.appendingPathComponent("bin/codex").path
-            }
-        return candidates.first(where: { FileManager.default.isExecutableFile(atPath: $0) }).map(
-            URL.init(fileURLWithPath:))
+    let provider: CLIProvider
+    init(provider: CLIProvider = .codex) { self.provider = provider }
+    static func executable(for provider: CLIProvider = .codex) -> URL? {
+        provider.executable
     }
     func start() async throws {
         guard process == nil else { return }
-        guard let binary = Self.executable() else {
-            throw TobyError("Choose a Codex executable in Settings to connect Toby.")
+        guard let binary = Self.executable(for: provider) else {
+            throw TobyError("Choose the \(provider.title) executable in Settings to connect Toby.")
         }
         let child = Process()
         let stdin = Pipe()
@@ -48,8 +33,10 @@ import Foundation
             binary.deletingLastPathComponent().path + ":/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:"
             + (environment["PATH"] ?? "")
         child.environment = environment
+        child.currentDirectoryURL = AppPaths.root
         child.executableURL = binary
-        child.arguments = ["app-server", "--listen", "stdio://"]
+        child.arguments =
+            provider == .codex ? ["app-server", "--listen", "stdio://"] : ["agent", "--no-leader", "stdio"]
         child.standardInput = stdin
         child.standardOutput = stdout
         child.standardError = stderr
@@ -88,14 +75,38 @@ import Foundation
             }
         }
         do {
-            _ = try await request(
-                "initialize",
-                [
-                    "clientInfo": .object([
-                        "name": .string("toby_next"), "title": .string("Toby"), "version": .string("0.1.0"),
+            if provider == .codex {
+                _ = try await request(
+                    "initialize",
+                    [
+                        "clientInfo": .object([
+                            "name": .string("toby_next"), "title": .string("Toby"),
+                            "version": .string("0.2.0"),
+                        ])
                     ])
-                ])
-            try send(.object(["method": .string("initialized")]))
+                try send(.object(["method": .string("initialized")]))
+            } else {
+                let result = try await request(
+                    "initialize",
+                    [
+                        "protocolVersion": .number(1),
+                        "clientInfo": .object(["name": .string("toby"), "version": .string("0.2.0")]),
+                        "clientCapabilities": .object([
+                            "fs": .object(["readTextFile": .bool(false), "writeTextFile": .bool(false)]),
+                            "terminal": .bool(false),
+                        ]),
+                    ])
+                guard
+                    (result["authMethods"].array ?? []).contains(where: { $0["id"].string == "cached_token" })
+                else {
+                    throw TobyError(
+                        "Grok has no cached CLI login available. Run grok login in Terminal, then check again."
+                    )
+                }
+                _ = try await request(
+                    "authenticate",
+                    ["methodId": .string("cached_token"), "_meta": .object(["headless": .bool(true)])])
+            }
         } catch {
             stop()
             throw error
@@ -107,13 +118,15 @@ import Foundation
         try Task.checkCancellation()
         sequence += 1
         let id = sequence
+        let providerName = provider.title
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
                 pending[id] = continuation
                 deadlines[id] = Task { [weak self] in
                     try? await Task.sleep(for: .seconds(timeout))
                     guard !Task.isCancelled else { return }
-                    self?.fail(id, TobyError("Codex did not respond to \(method). You can retry."))
+                    self?.fail(
+                        id, TobyError("\(providerName) did not respond to \(method). You can retry."))
                 }
                 do {
                     try send(
@@ -153,8 +166,12 @@ import Foundation
         }
     }
     private func send(_ value: JSONValue) throws {
-        guard let input, process?.isRunning == true else { throw TobyError("Codex is not running.") }
-        var data = try JSONEncoder().encode(value)
+        guard let input, process?.isRunning == true else {
+            throw TobyError("\(provider.title) is not running.")
+        }
+        var message = value.object ?? [:]
+        if provider == .grok { message["jsonrpc"] = .string("2.0") }
+        var data = try JSONEncoder().encode(JSONValue.object(message))
         data.append(10)
         try input.write(contentsOf: data)
     }
@@ -178,9 +195,9 @@ import Foundation
     }
     private func exited(_ token: UUID, status: Int32) {
         guard generation == token else { return }
-        for id in Array(pending.keys) { fail(id, TobyError("Codex exited (\(status)).")) }
+        for id in Array(pending.keys) { fail(id, TobyError("\(provider.title) exited (\(status)).")) }
         process = nil
         input = nil
-        onExit?("Codex exited (\(status)).")
+        onExit?("\(provider.title) exited (\(status)).")
     }
 }

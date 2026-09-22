@@ -1,4 +1,4 @@
-# Manual QA handoff — 0.1.0
+# Manual QA handoff — 0.2.0
 
 Per Rohan’s instruction, the agent did not launch the app, capture screenshots, perform visual QA, control the app/device, or run functionality tests. Build success does not establish any of the behaviors below on a real device.
 
@@ -20,3 +20,12 @@ Use the packaged `dist/Toby.app`, not the bare SwiftPM executable, for your pass
 ## Known first-release limits
 
 See README’s Current boundaries. In particular: calendar-triggered recording is not live call detection; voice uses explicit turn boundaries; speech is dependent on installed on-device language support; there is no speaker diarization; very long meeting summaries are bounded; cloud/sync/Google helpers/playbooks are not implemented.
+
+## CLI authentication follow-up
+
+- With both CLIs already authenticated in Terminal, use Check CLI session for each in Settings. Neither should ask for an API key or a second account registration.
+- Select each provider in turn. Verify typed tasks, voice replies and meeting notes run through the chosen CLI; verify continuation when switching providers.
+- Verify a missing executable and a signed-out/expired CLI session report an actionable error. Check a connection during a task; it must not terminate active work.
+- For Grok, verify streaming, one-time allow/deny, stop during startup/prompt/approval, and subsequent reuse. Grok session history is bridged from visible messages, not resumed natively.
+
+These checks have not been run by the agent.

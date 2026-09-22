@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0 — 2026-09-22
+
+- Use installed, authenticated Codex and Grok CLIs; remove the app-owned sign-in flow.
+- Add Grok ACP cached-token authentication, streamed tasks and native one-time permission handling.
+- Add provider selection, independent CLI session checks, explicit executable selection and copyable login commands.
+- Preserve visible conversation context across providers without copying credential files or tokens.
+- Keep the persistence schema unchanged. Grok uses new runtime sessions with bounded visible-history context.
+
+Validation: compilation and bundle metadata/signature checks only; no app launch, provider/auth requests or functionality testing.
+
 ## 0.1.0 — 2026-09-22
 
 Initial native implementation of the fresh, voice-first Toby app.

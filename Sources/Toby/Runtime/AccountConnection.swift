@@ -6,81 +6,88 @@ struct ModelOption: Identifiable {
     let name: String
 }
 @MainActor @Observable final class AccountConnection {
-    var status = "Not checked"
+    let provider: CLIProvider
+    var status = "CLI session not checked"
     var isBusy = false
     var models: [ModelOption] = []
     var error: String?
     private var operation: Task<Void, Never>?
-    private var transport: CodexTransport?
-    func refresh() { run(login: false) }
-    func signIn() { run(login: true) }
+    private var transport: CLITransport?
+    private var generation = UUID()
+    init(provider: CLIProvider = .codex) { self.provider = provider }
     func cancel() {
+        generation = UUID()
         operation?.cancel()
         transport?.stop()
+        transport = nil
         isBusy = false
         status = "Connection check cancelled"
     }
-    private func run(login: Bool) {
+    func refresh() {
         guard !isBusy else { return }
         isBusy = true
         error = nil
+        models = []
+        let token = UUID()
+        generation = token
         operation = Task {
-            let client = CodexTransport()
+            let client = CLITransport(provider: provider)
             transport = client
+            // Never accept tools or execute a prompt while checking authentication.
+            client.onEvent = { [weak client] _, _, id in if let id { client?.reject(id) } }
             defer {
                 client.stop()
-                transport = nil
-                isBusy = false
+                if generation == token {
+                    transport = nil
+                    isBusy = false
+                }
             }
             do {
                 try await client.start()
-                if login {
-                    let challenge = try await client.request(
-                        "account/login/start", ["type": .string("chatgpt")])
-                    guard let raw = challenge["authUrl"].string, let url = URL(string: raw),
-                        NSWorkspace.shared.open(url)
-                    else {
-                        throw TobyError("Could not open the sign-in page.")
-                    }
-                    status = "Finish signing in in your browser"
-                }
-                let deadline = Date().addingTimeInterval(login ? 180 : 0)
-                repeat {
-                    try Task.checkCancellation()
+                if provider == .codex {
                     let result = try await client.request("account/read", ["refreshToken": .bool(false)])
-                    if result["account"].object != nil {
-                        status = result["account"]["email"].string ?? "Connected to Codex"
-                        let response = try await client.request(
-                            "model/list", ["includeHidden": .bool(false), "limit": .number(100)])
-                        models = (response["data"].array ?? []).compactMap {
-                            guard let model = $0["model"].string else { return nil }
-                            return ModelOption(id: model, name: $0["displayName"].string ?? model)
-                        }
-                        return
+                    guard result["account"].object != nil else {
+                        throw TobyError(
+                            "Run codex login in Terminal, then check again. Toby uses that CLI session.")
                     }
-                    if !login {
-                        status = "Sign in to connect"
-                        return
+                    guard generation == token else { return }
+                    status =
+                        result["account"]["email"].string.map { "CLI session · \($0)" }
+                        ?? "Using authenticated Codex CLI"
+                    let response = try await client.request(
+                        "model/list", ["includeHidden": .bool(false), "limit": .number(100)])
+                    guard generation == token else { return }
+                    models = (response["data"].array ?? []).compactMap {
+                        guard let model = $0["model"].string else { return nil }
+                        return ModelOption(id: model, name: $0["displayName"].string ?? model)
                     }
-                    try await Task.sleep(for: .seconds(2))
-                } while Date() < deadline
-                throw TobyError("Sign-in timed out. You can try again.")
+                } else {
+                    guard generation == token else { return }
+                    status = "Using authenticated Grok CLI"
+                }
             } catch is CancellationError {} catch {
+                guard generation == token else { return }
                 self.error = error.localizedDescription
-                status = "Connection needs attention"
+                status = "CLI session needs attention"
             }
         }
     }
+    func copyLoginCommand() {
+        let path = provider.executable?.path ?? provider.rawValue
+        let quoted = "'" + path.replacingOccurrences(of: "'", with: "'\\''") + "'"
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString("\(quoted) login", forType: .string)
+    }
     func chooseExecutable() {
         let panel = NSOpenPanel()
-        panel.title = "Choose the Codex executable"
+        panel.title = "Choose the \(provider.title) executable"
         panel.canChooseDirectories = false
         guard panel.runModal() == .OK, let url = panel.url else { return }
         guard FileManager.default.isExecutableFile(atPath: url.path) else {
             error = "Choose an executable file."
             return
         }
-        UserDefaults.standard.set(url.path, forKey: "codexBinary")
+        UserDefaults.standard.set(url.path, forKey: provider.rawValue + "Binary")
         refresh()
     }
 }

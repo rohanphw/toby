@@ -14,6 +14,7 @@ import Observation
     let meetings: MeetingSession
     let schedule = MeetingSchedule()
     let account = AccountConnection()
+    let grokAccount = AccountConnection(provider: .grok)
     var page: Page = .home
     var selected: LibraryItem?
     var search = ""
@@ -111,6 +112,7 @@ import Observation
         schedule.stopMonitoring()
         hotkey.unregister()
         account.cancel()
+        grokAccount.cancel()
         agent.stop()
         voice.stop()
         if meetings.active { meetings.finish(generateNotes: false) }

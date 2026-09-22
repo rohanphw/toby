@@ -16,7 +16,7 @@ struct MeetingsView: View {
                 .buttonStyle(QuietButtonStyle()).disabled(model.meetings.active || model.voice.active)
             }
             Text(
-                "Capture your microphone and Mac audio, then turn the conversation into useful notes. Recordings and transcripts stay in your local library; generating notes sends transcript text to Codex."
+                "Capture your microphone and Mac audio, then turn the conversation into useful notes. Recordings and transcripts stay in your local library; generating notes sends transcript text to your selected provider."
             )
             .font(.system(size: 13)).lineSpacing(4).foregroundStyle(Theme.secondary).frame(
                 maxWidth: 700, alignment: .leading)

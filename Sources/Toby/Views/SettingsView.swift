@@ -3,6 +3,7 @@ import SwiftUI
 
 struct SettingsView: View {
     let model: AppModel
+    @AppStorage("agentProvider") private var provider = "codex"
     @AppStorage("codexModel") private var codexModel = ""
     @AppStorage("speechLocale") private var locale = "en-US"
     @AppStorage("spokenReplies") private var spokenReplies = true
@@ -11,45 +12,24 @@ struct SettingsView: View {
     @State private var error: String?
     var body: some View {
         Form {
-            Section {
-                HStack {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("Codex").font(.headline)
-                        Text(model.account.status).font(.caption).foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    if model.account.isBusy {
-                        ProgressView().controlSize(.small)
-                        Button("Cancel") { model.account.cancel() }
-                    } else {
-                        Button("Check") { model.account.refresh() }
-                        Button("Sign in") { model.account.signIn() }
-                    }
-                }
-                HStack {
-                    Text(CodexTransport.executable()?.lastPathComponent ?? "Codex executable not found").font(
-                        .caption
-                    ).foregroundStyle(.secondary)
-                    Spacer()
-                    Button("Choose executable…") { model.account.chooseExecutable() }.disabled(
-                        model.account.isBusy)
-                }
-                Picker("Model", selection: $codexModel) {
-                    Text("Codex default").tag("")
+            Section("Intelligence") {
+                Picker("Provider for new tasks", selection: $provider) {
+                    ForEach(CLIProvider.allCases) { Text($0.title).tag($0.rawValue) }
+                }.disabled(model.agent.isRunning)
+                CLIConnectionView(account: model.account)
+                Picker("Codex model", selection: $codexModel) {
+                    Text("CLI default").tag("")
                     ForEach(model.account.models) { Text($0.name).tag($0.id) }
                     if !codexModel.isEmpty, !model.account.models.contains(where: { $0.id == codexModel }) {
                         Text(codexModel).tag(codexModel)
                     }
                 }
-                if let error = model.account.error {
-                    Text(error).foregroundStyle(.orange).font(.caption).textSelection(.enabled)
-                }
-            } header: {
-                Text("Intelligence")
-            } footer: {
+                Divider()
+                CLIConnectionView(account: model.grokAccount)
                 Text(
-                    "Toby runs Codex locally using your Codex sign-in. Submitted text, attachments the agent reads, and remembered context are processed by the provider. Changing the model takes effect on the next task."
+                    "Toby uses the authenticated CLI installations on this Mac. Sign in through the CLI once, then Check CLI session here. Credentials and refresh remain owned by the CLIs; Toby never imports tokens or requests an API key."
                 )
+                .font(.caption).foregroundStyle(.secondary)
             }
             Section("Voice") {
                 Toggle("Speak Toby’s replies", isOn: $spokenReplies)
@@ -97,7 +77,7 @@ struct SettingsView: View {
             Section("This Mac") {
                 Toggle("Open Toby at login", isOn: Binding(get: { launchAtLogin }, set: setLaunchAtLogin))
                 Button("Open local library folder") { NSWorkspace.shared.open(AppPaths.root) }
-                LabeledContent("Version", value: "0.1.0")
+                LabeledContent("Version", value: "0.2.0")
                 Text("This fresh app has its own library. Existing Toby data is not imported or modified.")
                     .font(.caption).foregroundStyle(.secondary)
                 if let error { Text(error).font(.caption).foregroundStyle(.orange) }
