@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1 — 2026-09-22
+
+- Restore the original Toby application icon, bundled unchanged from the old app.
+- Version the icon asset directly and remove the replacement icon generator.
+
+Validation: release build, bundle signature and exact icon-file comparison. No app launch or visual/functionality QA.
+
 ## 0.2.0 — 2026-09-22
 
 - Use installed, authenticated Codex and Grok CLIs; remove the app-owned sign-in flow.

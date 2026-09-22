@@ -77,7 +77,7 @@ struct SettingsView: View {
             Section("This Mac") {
                 Toggle("Open Toby at login", isOn: Binding(get: { launchAtLogin }, set: setLaunchAtLogin))
                 Button("Open local library folder") { NSWorkspace.shared.open(AppPaths.root) }
-                LabeledContent("Version", value: "0.2.0")
+                LabeledContent("Version", value: "0.2.1")
                 Text("This fresh app has its own library. Existing Toby data is not imported or modified.")
                     .font(.caption).foregroundStyle(.secondary)
                 if let error { Text(error).font(.caption).foregroundStyle(.orange) }

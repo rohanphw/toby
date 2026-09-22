@@ -2,7 +2,7 @@
 
 A voice-first personal workspace for macOS. Think out loud, capture meetings, keep useful notes, and ask an agent to do the follow-through.
 
-This is the fresh implementation in `gary-app`, version **0.2.0**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
+This is the fresh implementation in `gary-app`, version **0.2.1**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
 
 ## Build
 
@@ -68,3 +68,5 @@ See [architecture](docs/architecture.md), [QA handoff](docs/QA-HANDOFF.md) and [
 ### CLI session continuity
 
 Codex resumes its saved thread. Grok starts a fresh ACP session per task and receives up to 20 prior completed messages, bounded to 32,000 characters; it does not resume hidden Grok tool history. Visible recent history is also supplied to Codex for continuity after provider switching. Grok’s CLI configuration determines its native tool/sandbox behavior; Toby does not enable always-approve and rejects unsupported client-side requests.
+
+The application icon is the original Toby icon, copied byte-for-byte from the old app into `Packaging/Toby.icns`. Packaging copies this versioned asset directly; it does not generate a replacement icon.
