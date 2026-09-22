@@ -83,3 +83,7 @@ The 0.8.0 local release is now configured with the maintainer-provided Desktop O
 `GoogleDriveStore` is owned by `AppModel`, so navigating away does not lose operation state. It uses selected-file browser Picker grants separately from the persistent Calendar/Drive OAuth session. Temporary Picker tokens are not written to Keychain. Imported files are copied into the existing item Inputs directory with sanitized unique names. Saving sends only a user-selected note/meeting text snapshot through Drive multipart conversion; no write retries or background uploads. Disconnect cancels pending account work, deletes local credentials and drops in-memory calendar data. Refresh cannot overwrite a newer sign-in grant or resurrect a removed account.
 
 Onboarding adds optional Google connections to its existing second step without changing persisted step numbering or replaying completed setup. Settings exposes account removal with an inline confirmation.
+
+### Inline event details (0.9.1)
+
+Calendar entries retain location, description, organizer and guest labels from the existing Google/EventKit reads. CalendarPage owns one expanded event ID; CalendarEventDetails renders selectable inline text. Google HTML descriptions are reduced to inert plain text without loading remote resources. Event details no longer use external event URLs; Join remains an explicit conference action.

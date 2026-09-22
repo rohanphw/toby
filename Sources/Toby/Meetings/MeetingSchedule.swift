@@ -107,7 +107,13 @@ struct ScheduledMeeting: Identifiable {
                     title: event.title ?? "Untitled event", start: event.startDate, end: event.endDate,
                     allDay: event.isAllDay, calendarName: event.calendar.title,
                     account: event.calendar.source.title, conferenceURL: conferenceURL(event),
-                    eventURL: nil, externalID: event.calendarItemExternalIdentifier)
+                    location: event.location, details: event.notes,
+                    organizer: event.organizer?.name
+                        ?? event.organizer?.url.absoluteString.replacingOccurrences(of: "mailto:", with: ""),
+                    guests: (event.attendees ?? []).map {
+                        $0.name ?? $0.url.absoluteString.replacingOccurrences(of: "mailto:", with: "")
+                    },
+                    externalID: event.calendarItemExternalIdentifier)
             }
         var seen = Set<String>()
         agenda = (google.agenda + local).filter {

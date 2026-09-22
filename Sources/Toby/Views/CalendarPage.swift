@@ -4,6 +4,8 @@ struct CalendarPage: View {
     let model: AppModel
     @State private var period = 0
     @State private var showAccounts = false
+    @State private var expandedEventID: String?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private let periods = ["Today", "Tomorrow", "Upcoming"]
     private var entries: [CalendarEntry] {
         let calendar = Calendar.current
@@ -102,10 +104,24 @@ struct CalendarPage: View {
                                 }) {
                                     Button("Open notes") { model.openItem(note) }
                                 }
-                                if let url = entry.eventURL, url.scheme == "https" {
-                                    Button("Event details ↗") { NSWorkspace.shared.open(url) }
+                                Button {
+                                    withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
+                                        expandedEventID = expandedEventID == entry.id ? nil : entry.id
+                                    }
+                                } label: {
+                                    Label(
+                                        expandedEventID == entry.id ? "Hide details" : "Event details",
+                                        systemImage: expandedEventID == entry.id
+                                            ? "chevron.up" : "chevron.down")
                                 }
+                                .accessibilityLabel("Event details for \(entry.title)")
+                                .accessibilityValue(expandedEventID == entry.id ? "Expanded" : "Collapsed")
                             }.buttonStyle(QuietButtonStyle())
+                            if expandedEventID == entry.id {
+                                CalendarEventDetails(entry: entry)
+                                    .padding(.top, 12)
+                                    .transition(.opacity)
+                            }
                         }
                         Spacer(minLength: 0)
                     }.padding(.vertical, 22)

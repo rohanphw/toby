@@ -199,7 +199,11 @@ struct GoogleCalendarAccount: Codable, Identifiable {
                                 title: item["summary"] as? String ?? "Untitled event", start: start, end: end,
                                 allDay: startValue["date"] != nil, calendarName: calendar.name,
                                 account: account.email, conferenceURL: url,
-                                eventURL: (item["htmlLink"] as? String).flatMap(URL.init(string:)),
+                                location: item["location"] as? String,
+                                details: Self.descriptionText(item["description"] as? String),
+                                organizer: (item["organizer"] as? [String: Any]).flatMap(Self.personName),
+                                guests: (item["attendees"] as? [[String: Any]] ?? []).compactMap(
+                                    Self.personName),
                                 externalID: item["iCalUID"] as? String)
                         }
                     }
@@ -309,6 +313,31 @@ struct GoogleCalendarAccount: Codable, Identifiable {
             throw CalendarFailure(message: "Google returned an unreadable calendar response.")
         }
         return object
+    }
+    private static func personName(_ person: [String: Any]) -> String? {
+        let name = person["displayName"] as? String
+        let email = person["email"] as? String
+        if let name, !name.isEmpty, let email, name != email { return "\(name) · \(email)" }
+        return email ?? name
+    }
+    private static func descriptionText(_ html: String?) -> String? {
+        guard let html else { return nil }
+        // Render calendar HTML as inert text; never load remote resources or execute markup.
+        var text =
+            html
+            .replacingOccurrences(
+                of: "(?is)<(script|style)\\b[^>]*>.*?</\\1>", with: "", options: .regularExpression
+            )
+            .replacingOccurrences(
+                of: "(?i)<br\\s*/?>|</(?:p|div|li|h[1-6])>", with: "\n", options: .regularExpression
+            )
+            .replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+        for (entity, value) in [
+            ("&nbsp;", " "), ("&lt;", "<"), ("&gt;", ">"), ("&quot;", "\""), ("&#39;", "'"), ("&amp;", "&"),
+        ] {
+            text = text.replacingOccurrences(of: entity, with: value)
+        }
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     private static func eventDate(_ value: [String: Any]) -> Date? {
         if let text = value["dateTime"] as? String { return date(text) }

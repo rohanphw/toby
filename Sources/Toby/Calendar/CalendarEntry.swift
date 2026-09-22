@@ -9,7 +9,10 @@ struct CalendarEntry: Identifiable {
     let calendarName: String
     let account: String
     let conferenceURL: URL?
-    let eventURL: URL?
+    let location: String?
+    let details: String?
+    let organizer: String?
+    let guests: [String]
     let externalID: String?
 
     var meeting: ScheduledMeeting? {

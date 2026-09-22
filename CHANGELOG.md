@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.1 — 2026-09-22
+
+- Replace browser redirects for event details with an inline Calendar accordion. Show dates, location, organizer, guests and description for Google and Mac events; preserve separate Join actions.
+- Keep one event expanded at a time, support keyboard activation and announced expansion state, and respect Reduce Motion. Calendar descriptions render as inert text without loading web content.
+- Compile/package checks only; no app launch or visual/runtime QA.
+
 ## 0.9.0 — 2026-09-22
 
 - Add Calendar to header navigation with Today, Tomorrow and a seven-day agenda, all-day events, account/calendar labels, join actions and links to captured notes.

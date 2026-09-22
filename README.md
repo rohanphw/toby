@@ -2,7 +2,7 @@
 
 A voice-first personal workspace for macOS. Think out loud, capture meetings, keep useful notes, and ask an agent to do the follow-through.
 
-This is the fresh implementation in `gary-app`, version **0.9.0**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
+This is the fresh implementation in `gary-app`, version **0.9.1**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
 
 ## Build
 

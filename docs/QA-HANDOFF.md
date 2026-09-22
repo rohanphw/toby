@@ -84,3 +84,8 @@ Agent validation is limited to compilation, source review and packaging checks o
 - Remove one of two accounts: remaining account/calendar selection persists; removed tokens/events do not return; local notes/imports and Google files remain. Separately synced Mac calendar copies may still appear.
 
 No app launch, browser sign-in, visual QA or functionality tests were performed by the agent.
+
+## 0.9.1 (user-run)
+
+- Open and collapse event details with mouse and keyboard; opening another event closes the previous one. Confirm no browser opens for details; Join still opens the call.
+- Check Google and Mac events with missing fields, long descriptions, HTML descriptions, guest lists, timed/multi-day all-day dates, and Reduce Motion. Details should refresh with the calendar and disappear when their event/account is removed.
