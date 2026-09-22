@@ -3,3 +3,6 @@ dist/
 .DS_Store
 *.xcuserstate
 .env
+
+# Downloaded Google OAuth client configuration
+client_secret*.json

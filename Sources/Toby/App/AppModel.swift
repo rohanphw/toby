@@ -14,6 +14,8 @@ import Observation
     let voice: VoiceSession
     let meetings: MeetingSession
     let schedule = MeetingSchedule()
+    let callDetection = CallDetection()
+    private let meetingPrompt = MeetingPrompt()
     let account = AccountConnection()
     let grokAccount = AccountConnection(provider: .grok)
     var page: Page = .home
@@ -51,8 +53,35 @@ import Observation
         meetings.onFinished = { [weak self] item in self?.generateNotes(item) }
         schedule.onStart = { [weak self] event in
             guard let self, !onboarding.isPresented, !meetings.active, !voice.active else { return false }
+            meetingPrompt.hide()
             meetings.start(title: event.title)
             return true
+        }
+        schedule.onReminder = { [weak self] event in
+            guard let self, !onboarding.isPresented, !meetings.active, !voice.active else { return false }
+            return meetingPrompt.show(
+                title: event.title,
+                detail:
+                    "\(event.start.formatted(date: .omitted, time: .shortened))–\(event.end.formatted(date: .omitted, time: .shortened))",
+                join: true,
+                action: { [weak self] in
+                    guard let self,
+                        let current = schedule.upcoming.first(where: {
+                            $0.occurrenceKey == event.occurrenceKey
+                        }), current.end > .now, startMeeting(current)
+                    else { return }
+                    NSWorkspace.shared.open(current.url)
+                }, snooze: { [weak self] in self?.schedule.snooze(event) })
+        }
+        schedule.onHideReminder = { [weak self] in self?.meetingPrompt.hide() }
+        callDetection.onDisabled = { [weak self] in self?.meetingPrompt.hide() }
+        callDetection.onPossibleCall = { [weak self] app in
+            guard let self, !onboarding.isPresented else { return false }
+            if meetings.active || voice.active || schedule.recentlyPromptedCall() { return true }
+            return meetingPrompt.show(
+                title: "A conversation in \(app)?",
+                detail: "Microphone in use · Start recording with Toby", join: false,
+                action: { [weak self] in self?.startMeeting() })
         }
         schedule.onEnd = { [weak self] in self?.meetings.finish() }
     }
@@ -62,6 +91,7 @@ import Observation
         account.refresh()
         grokAccount.refresh()
         schedule.beginMonitoring()
+        callDetection.start()
         hotkey.register { [weak self] in self?.startVoice() }
     }
     func reopenSetup() {
@@ -70,6 +100,7 @@ import Observation
             return
         }
         showSettings = false
+        meetingPrompt.hide()
         onboarding.reopen()
         account.refresh()
         grokAccount.refresh()
@@ -99,6 +130,7 @@ import Observation
             notice = "Finish or stop the current task before starting a voice conversation."
             return
         }
+        meetingPrompt.hide()
         voice.start()
         selected = voice.item
     }
@@ -106,18 +138,24 @@ import Observation
         voice.stop()
         if agent.activeItemID == voice.item?.id { agent.stop() }
     }
-    func startMeeting(_ event: ScheduledMeeting? = nil) {
+    @discardableResult func startMeeting(_ event: ScheduledMeeting? = nil) -> Bool {
         revealWorkspace?()
-        guard !onboarding.isPresented else { return }
+        guard !onboarding.isPresented else { return false }
         showSettings = false
         guard !voice.active else {
             notice = "End the voice conversation before recording a meeting."
-            return
+            return false
         }
+        guard !meetings.active else {
+            selected = meetings.item
+            return false
+        }
+        meetingPrompt.hide()
         if let event { schedule.skip(event) }
         meetings.start(
             title: event?.title ?? "Meeting · \(Date().formatted(date: .abbreviated, time: .shortened))")
         selected = meetings.item
+        return true
     }
     func finishMeeting() {
         schedule.manualFinish()
@@ -158,6 +196,8 @@ import Observation
     }
     func shutdown() async {
         schedule.stopMonitoring()
+        callDetection.stop()
+        meetingPrompt.hide()
         hotkey.unregister()
         account.cancel()
         grokAccount.cancel()

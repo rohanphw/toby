@@ -2,7 +2,7 @@
 
 A voice-first personal workspace for macOS. Think out loud, capture meetings, keep useful notes, and ask an agent to do the follow-through.
 
-This is the fresh implementation in `gary-app`, version **0.6.1**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
+This is the fresh implementation in `gary-app`, version **0.7.0**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
 
 ## Build
 
@@ -30,7 +30,7 @@ Toby opens an in-app setup page until you finish, skip, or dismiss it. Quitting 
 1. Open the app yourself. Settings → Intelligence → Check CLI session reuses the existing login for each provider. If needed, run `codex login` or `grok login` in Terminal once, then check again. Select Codex or Grok for subsequent tasks. Both provider catalogs load automatically at launch. An unset choice is initialized to the actual CLI-configured model; an explicit Toby choice is preserved. Home and Settings use custom searchable model controls. Choose executable is available when discovery fails.
 2. Choose Talk, or press **Control–Option–Space**. Opening talking mode starts the microphone permission flow. Speak, pause for 1.8 seconds, or choose Send now. Talk opens a fresh thread in the main workspace with an animated listening area. Toby replies only in text through the selected CLI, then resumes listening. Interrupt stops the current task and reopens the microphone. End voice or close the main window to stop the voice session.
 3. Meetings → Record a meeting captures your microphone and Mac audio. Finish saves the transcript and asks the selected CLI to produce notes. The raw audio remains available in the item’s workspace even when transcription or note generation fails.
-4. To record scheduled calls automatically, connect Mac calendars and explicitly enable the setting. The app needs to remain open. The menu bar shows recording state even when the workspace is closed.
+4. Connect one or more Google accounts in Settings → Meetings, select calendars, and receive meeting reminders. The included setup guide covers the required Desktop OAuth client. Mac calendars remain optional. To record scheduled calls automatically, explicitly enable that separate setting. The app needs to remain open. The menu bar shows recording state even when the workspace is closed.
 5. Write notes, pin important items, and mark specific items Remember to include them in future tasks. Search with **Command–K**. Send typed follow-ups with **Command–Return**.
 
 ## Included
@@ -39,6 +39,7 @@ Toby opens an in-app setup page until you finish, skip, or dismiss it. Quitting 
 - Local SwiftData library with notes, meetings, conversations, drafts, pinned items and explicit memory.
 - On-device speech recognition, silence-based voice submission and text-only replies.
 - Microphone and system-audio meeting capture, rolling recognition, timestamped channel transcripts, generated editable notes.
+- Direct multi-account Google Calendar connections, per-calendar selection, optional Mac calendars, desktop Join & take notes reminders and opt-in possible-call detection.
 - Calendar-based automatic recording with per-event skip and manual start/finish.
 - Codex app-server and Grok ACP execution using CLI-owned authentication, Codex model discovery, per-item workspaces, approvals and user-input requests.
 - Ordered message streaming with item boundaries, bounded startup requests, explicit stop, incremental persistence and interrupted-run recovery.
@@ -49,7 +50,9 @@ Toby opens an in-app setup page until you finish, skip, or dismiss it. Quitting 
 
 This is a first implementation for Rohan’s manual QA, not a runtime-verified release.
 
-- Automatic recording follows supported conferencing links in calendar events (Zoom, Meet, Teams, Webex). It does not detect whether a call was actually joined, record arbitrary unscheduled calls automatically, join meetings, or wake a sleeping Mac. Start occurs within 90 seconds of the scheduled time; stop uses the scheduled end time. Turning the setting off prevents new recordings; Finish stops an existing recording.
+- Automatic recording follows supported conferencing links in calendar events (Zoom, Meet, Teams, Webex). It does not detect whether a call was actually joined, record arbitrary unscheduled calls automatically, join meetings automatically, or wake a sleeping Mac. Start occurs within 90 seconds of the scheduled time; stop uses the scheduled end time. Turning the setting off prevents new recordings; Finish stops an existing recording.
+- Possible-call detection watches microphone-use metadata for recognized conferencing apps/browsers on macOS 14.2+. It may mistake other microphone activity for a call or miss muted/unsupported calls. Desktop reminders require Toby to be running; they are custom panels, not Notification Center alerts, and do not inherit Focus filtering. Google calendars sync about every two minutes; reminders are checked every 20 seconds.
+- Google setup: [instructions](docs/google-calendar.md). Tokens are stored in Keychain; calendar selections/account labels live in app preferences. Disconnect removes local credentials; Google-side revocation is available separately.
 - Meeting audio includes other Mac audio. Use headphones to avoid capturing remote voices again through the microphone. “You” and “Meeting audio” are source channels, not speaker diarization.
 - Recognition depends on on-device language support. Microphone, Speech Recognition, Calendar and Screen & System Audio Recording permissions are managed by macOS. Calendar is optional; audio permissions are requested at capture time.
 - Voice is turn-based: the microphone pauses while the agent works and resumes after the written reply. Interrupt is explicit. No speech playback is used.

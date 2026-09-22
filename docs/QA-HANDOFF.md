@@ -47,3 +47,15 @@ Meeting-audio permission checks now run ScreenCaptureKit enumeration only after 
 ## Meeting-audio status regression
 
 With Toby enabled in Screen & System Audio Recording, click Check / enable access. Successful source enumeration should show green Access confirmed and stay confirmed after switching away and back. Denial should show a yellow unverified state with privacy/relaunch guidance; recheck after granting. Quit/reopen if macOS requires it. Revoke access and explicitly Check again; failure must clear session verification. Setup must never start a recording. Not exercised by the agent.
+
+## 0.7.0 — calendar and meeting prompt acceptance (user-run only)
+
+- Import a Desktop OAuth client; reject Web client JSON. Cancel sign-in, decline permissions, and allow it to time out. Confirm no token content is surfaced.
+- Connect two Google accounts; select multiple calendars in each. Verify recurring instances, timezone offsets/DST, shared calendars, next-page results, cancelled/declined events and per-calendar exclusion. Restart and verify choices persist.
+- Reconnect revoked/expired credentials; test offline and API-disabled errors. Disconnect during background sync and change calendar choices mid-sync: removed events must not return. Check duplicate Mac/Google copies show only once.
+- Observe a near-start reminder without losing typing focus; exercise Join & take notes, dismiss, snooze, timeout, overlapping events and restart after dismiss. Cancel/remove an event while its reminder is visible; stale action must not start recording.
+- Enable possible-call detection. Exercise known native apps and browsers, sustained mic activity, microphone pauses, unsupported/muted calls and one prompt per activity session. This is deliberately approximate, not universal detection.
+- Confirm no reminders during onboarding, voice or meeting recording. Confirm only an explicit action (or separately opted-in scheduled automation) starts recording. Verify disabled reminder settings and quit stop further prompts.
+- Verify calendar reminders with main window closed, multiple displays/spaces and full-screen apps. Custom panels do not inherit Notification Center Focus settings. Assess layout and keyboard/accessibility yourself.
+
+No application, browser sign-in, audio capture, permissions or visual QA was run by the agent. Google setup remains required before end-to-end validation.

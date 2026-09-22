@@ -20,16 +20,16 @@ struct MeetingsView: View {
             )
             .font(.system(size: 13)).lineSpacing(4).foregroundStyle(Theme.secondary).frame(
                 maxWidth: 700, alignment: .leading)
-            if !model.schedule.hasAccess {
+            if !model.schedule.hasCalendarConnection {
                 HStack {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Bring your calendar along.").font(Theme.heading(22))
-                        Text("Connect the calendars already on your Mac to find upcoming calls.").font(
+                        Text("Connect Google accounts or calendars on your Mac to find upcoming calls.").font(
                             .system(size: 12)
                         ).foregroundStyle(Theme.secondary)
                     }
                     Spacer()
-                    Button("Connect Calendar") { Task { await model.schedule.requestAccess() } }.buttonStyle(
+                    Button("Connect calendars") { model.presentSettings() }.buttonStyle(
                         QuietButtonStyle())
                 }.surface()
             }

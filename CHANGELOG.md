@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0 — 2026-09-22
+
+- Add nonactivating desktop meeting prompts with Join & take notes, dismiss and five-minute snooze, styled for Toby’s black interface.
+- Connect multiple Google accounts directly with desktop OAuth/PKCE, Keychain credentials, per-account calendar selection, recurring-event expansion, pagination and background refresh. Include an in-drawer OAuth setup guide and client JSON import.
+- Merge Google and optional macOS calendars, combine duplicate conference occurrences and ignore declined/cancelled events.
+- Add opt-in possible-call reminders from supported apps’ microphone activity on macOS 14.2+. Detection never records audio or proves meeting attendance.
+- Build/package/static validation only; OAuth, permissions, desktop prompts and real calls remain for user QA.
+
 ## 0.6.1 — 2026-09-22
 
 - Verify meeting-audio setup through the same ScreenCaptureKit source enumeration used by recording instead of requesting access through CoreGraphics alone.

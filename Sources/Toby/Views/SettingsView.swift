@@ -56,13 +56,27 @@ struct SettingsView: View {
                         ).font(.caption).foregroundStyle(.secondary)
                     }
                     SettingsSection(title: "Meetings") {
-                        HStack {
-                            StatusLabel(
-                                text: model.schedule.hasAccess
-                                    ? "Calendar connected" : "Calendar not connected",
-                                tone: model.schedule.hasAccess ? .success : .warning)
-                            Spacer()
-                            Button("Connect Calendar") { Task { await model.schedule.requestAccess() } }
+                        CalendarConnectionsView(schedule: model.schedule)
+                        Toggle(
+                            "Show meeting reminders",
+                            isOn: Binding(
+                                get: { model.schedule.remindersEnabled },
+                                set: { model.schedule.remindersEnabled = $0 }))
+                        Text(
+                            "A desktop prompt appears one minute before a scheduled call. Join & take notes opens its link and starts recording. Dismiss or snooze it for five minutes."
+                        )
+                        .font(.caption).foregroundStyle(.secondary)
+                        Toggle(
+                            "Detect possible calls on this Mac",
+                            isOn: Binding(
+                                get: { model.callDetection.enabled },
+                                set: { model.callDetection.enabled = $0 }))
+                        Text(
+                            "Prompts when supported call apps or browsers use the microphone. This is a hint, not proof of a meeting; muted calls and some apps may not be detected. Nothing is recorded until you choose Take notes. Requires macOS 14.2 or later."
+                        )
+                        .font(.caption).foregroundStyle(.secondary)
+                        if model.callDetection.unavailable {
+                            StatusLabel(text: "Call detection is unavailable on this Mac.", tone: .warning)
                         }
                         Toggle(
                             "Automatically record scheduled calls",
@@ -75,9 +89,9 @@ struct SettingsView: View {
                                         model.schedule.automaticallyRecord = false
                                     }
                                 })
-                        ).disabled(!model.schedule.hasAccess)
+                        ).disabled(!model.schedule.hasCalendarConnection)
                         Text(
-                            "When Toby is open, recording begins at the start of calendar events with Zoom, Google Meet, Teams or Webex links and stops at their scheduled end. This is based on the calendar, not whether you joined the call. Skip individual events in Meetings. Unscheduled calls can be recorded manually."
+                            "When Toby is open, recording begins at the start of calendar events with Zoom, Google Meet, Teams or Webex links and stops at their scheduled end. This is based on the calendar, not whether you joined the call. Skip individual events in Meetings. Possible unscheduled calls can offer a reminder when detection is enabled."
                         ).font(.caption).foregroundStyle(.secondary)
                         Text(
                             "Meeting recording saves microphone and all Mac audio, excluding Toby, as separate local tracks. macOS may ask for Screen & System Audio Recording access. No screen images are saved. Enable automatic recording only for calls you intend to record, with participants informed."
@@ -109,7 +123,7 @@ struct SettingsView: View {
                         LabeledContent(
                             "Version",
                             value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-                                ?? "0.6.1")
+                                ?? "0.7.0")
                         Text(
                             "This fresh app has its own library. Existing Toby data is not imported or modified."
                         )
