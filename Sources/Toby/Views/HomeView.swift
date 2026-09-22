@@ -16,7 +16,7 @@ struct HomeView: View {
             }.padding(.top, 10)
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
-                    Button(action: model.startVoice) {
+                    Button(action: { model.startVoice() }) {
                         Label("Talk to Toby", systemImage: "waveform")
                     }.buttonStyle(PrimaryButtonStyle())
                     Text("⌃ ⌥ Space").font(Theme.caption).foregroundStyle(Theme.secondary)
@@ -62,7 +62,7 @@ struct HomeView: View {
                 HStack {
                     Text("Pick up where you left off").font(Theme.heading(20))
                     Spacer()
-                    Button("View all →") { model.page = .library }.buttonStyle(.plain)
+                    Button("View all →") { model.navigate(to: .library) }.buttonStyle(.plain)
                         .font(.system(size: 13)).foregroundStyle(Theme.secondary)
                 }
                 if recent.isEmpty {
@@ -70,7 +70,7 @@ struct HomeView: View {
                         .foregroundStyle(Theme.secondary).padding(.vertical, 20)
                 } else {
                     LazyVStack(spacing: 4) {
-                        ForEach(recent) { item in LibraryRow(item: item) { model.selected = item } }
+                        ForEach(recent) { item in LibraryRow(item: item) { model.openItem(item) } }
                     }
                 }
             }

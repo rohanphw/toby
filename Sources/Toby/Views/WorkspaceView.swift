@@ -32,7 +32,7 @@ struct WorkspaceView: View {
                             Label("Voice session active", systemImage: "waveform").foregroundStyle(
                                 Theme.accent)
                             Spacer()
-                            Button("Return to conversation") { model.selected = model.voice.item }
+                            Button("Return to conversation") { model.openItem(model.voice.item) }
                             Button("End voice") { model.endVoice() }
                         }.buttonStyle(QuietButtonStyle()).surface()
                     }
@@ -51,7 +51,7 @@ struct WorkspaceView: View {
                 }.frame(maxWidth: 920).padding(.horizontal, 48).padding(.top, 36).padding(.bottom, 60).frame(
                     maxWidth: .infinity)
             }
-            .id(model.selected?.id)
+            .id(model.selected?.id.uuidString ?? model.page.rawValue)
             if model.agent.isRunning {
                 HStack(spacing: 10) {
                     ProgressView().controlSize(.small)
@@ -61,7 +61,7 @@ struct WorkspaceView: View {
                             ? .neutral : .warning)
                     Spacer()
                     Button("Show work") {
-                        model.selected = model.library.items.first { $0.id == model.agent.activeItemID }
+                        model.openItem(model.library.items.first { $0.id == model.agent.activeItemID })
                     }
                     Button("Stop", role: .destructive) {
                         model.agent.stop()
@@ -91,6 +91,13 @@ struct WorkspaceView: View {
             }
         }
         .animation(reduceMotion ? nil : .easeOut(duration: 0.25), value: model.showSettings)
+        .background(
+            TrackpadNavigation(enabled: model.navigationEnabled) { backward in
+                withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
+                    model.swipeNavigation(backward: backward)
+                }
+            }
+        )
         .frame(minWidth: 880, minHeight: 620)
         .sheet(isPresented: $model.showSearch) { SearchView(model: model) }
         .sheet(item: Binding(get: { model.agent.approvals.first }, set: { _ in })) { approval in
@@ -105,7 +112,7 @@ struct WorkspaceView: View {
                 NSApp.activate(ignoringOtherApps: true)
             }
         }
-        .onDisappear { if model.voice.active { model.endVoice() } }
+        .onDisappear { if model.voice.active && !model.backgroundVoice { model.endVoice() } }
         .onChange(of: model.agent.error) { _, error in
             if let error, model.voice.active {
                 model.voice.error = error
@@ -120,8 +127,7 @@ private struct WorkspaceNavigation: View {
     var body: some View {
         HStack(spacing: 22) {
             Button {
-                model.selected = nil
-                model.page = .home
+                model.navigate(to: .home)
             } label: {
                 HStack(spacing: 8) {
                     if let logo = Theme.logo {
@@ -134,8 +140,7 @@ private struct WorkspaceNavigation: View {
             Rectangle().fill(Theme.line).frame(width: 1, height: 20)
             ForEach(AppModel.Page.allCases, id: \.self) { page in
                 Button {
-                    model.selected = nil
-                    model.page = page
+                    model.navigate(to: page)
                 } label: {
                     Text(page.rawValue).font(.system(size: 13, weight: .medium))
                         .foregroundStyle(
@@ -143,6 +148,18 @@ private struct WorkspaceNavigation: View {
                 }.buttonStyle(.plain)
             }
             Spacer(minLength: 10)
+            Button {
+                model.goBack()
+            } label: {
+                Image(systemName: "chevron.left")
+            }
+            .disabled(!model.canGoBack).help("Back · ⌘[").accessibilityLabel("Go back")
+            Button {
+                model.goForward()
+            } label: {
+                Image(systemName: "chevron.right")
+            }
+            .disabled(!model.canGoForward).help("Forward · ⌘]").accessibilityLabel("Go forward")
             Button {
                 model.showSearch = true
             } label: {
@@ -180,7 +197,7 @@ private struct RecordingBanner: View {
                 Text(started, style: .timer).monospacedDigit().font(.system(size: 12))
             }
             if model.selected?.id != model.meetings.item?.id {
-                Button("Open recording") { model.selected = model.meetings.item }.buttonStyle(
+                Button("Open recording") { model.openItem(model.meetings.item) }.buttonStyle(
                     QuietButtonStyle())
             }
             Button("Finish & take notes") { model.finishMeeting() }.buttonStyle(QuietButtonStyle()).disabled(

@@ -17,12 +17,17 @@ struct CLIConnectionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
+                ProviderMark(provider: account.provider, size: 24)
                 Text(account.provider.title).font(.system(size: 18, weight: .semibold))
                 Spacer()
                 StatusLabel(text: status, tone: tone)
             }
             if account.isReady {
-                Text(account.status).font(Theme.caption).foregroundStyle(Theme.secondary)
+                Text(
+                    account.status.replacingOccurrences(of: "CLI session · ", with: "").replacingOccurrences(
+                        of: "Using authenticated Codex CLI", with: "Signed in on this Mac"
+                    ).replacingOccurrences(of: "Using authenticated Grok CLI", with: "Signed in on this Mac")
+                ).font(Theme.caption).foregroundStyle(Theme.secondary)
             }
             if let error = account.error { ErrorNotice(message: error) }
             HStack(spacing: 12) {
@@ -34,7 +39,7 @@ struct CLIConnectionView: View {
                     Button("Copy login command") { account.copyLoginCommand() }.buttonStyle(
                         QuietButtonStyle())
                 }
-                Button(showDetails ? "Hide details" : "Connection details") { showDetails.toggle() }
+                Button(showDetails ? "Hide details" : "Manage connection") { showDetails.toggle() }
                     .buttonStyle(.plain).font(Theme.caption).foregroundStyle(Theme.secondary)
             }
             if showDetails {

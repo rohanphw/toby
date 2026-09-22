@@ -7,6 +7,7 @@ struct ModelOption: Identifiable {
 }
 @MainActor @Observable final class AccountConnection {
     let provider: CLIProvider
+    let usage = ProviderUsage()
     var status = "CLI session not checked"
     var isBusy = false
     var models: [ModelOption] = []
@@ -22,6 +23,7 @@ struct ModelOption: Identifiable {
     private var generation = UUID()
     init(provider: CLIProvider = .codex) { self.provider = provider }
     func cancel() {
+        usage.cancel()
         generation = UUID()
         operation?.cancel()
         transport?.stop()

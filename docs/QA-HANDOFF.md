@@ -65,3 +65,12 @@ No application, browser sign-in, audio capture, permissions or visual QA was run
 Quit all Toby instances and open the rebuilt canonical `gary-app/dist/Toby.app`. Use Settings → This Mac to verify its path and `com.rohan.toby.next` ID. Reopen setup and Check / enable access. The development-signature transition may require one fresh permission grant and a quit/reopen before capture works. Check actual meeting-audio capture after authorization; a green setup status alone does not verify audio buffers.
 
 The older `gary/dist/Toby.app` uses `com.toby.agent` but has the same display name. It remains untouched. Any stale Toby permission entries must be identified/reauthorized by the user in System Settings; no `tccutil reset`, TCC database edits or legacy app removal was performed. Verify permission survives the next rebuild under the pinned certificate. If access still fails, collect the full in-app error including its app path.
+
+## 0.8.0 (user-run after final configuration)
+
+- Swipe right/left through page and item history; verify page boundaries, deleted items, back from Settings, Cmd-[ / Cmd-], and no repeat navigation from momentum. Vertical/diagonal scrolling, text editors, horizontal content, model popovers and sheets should keep normal behavior. Verify both Natural Scrolling settings.
+- Start talking from the menu bar while another app is active. Confirm the main workspace stays behind, a new conversation saves, phase/transcript/reply update, closing the main window preserves this session, and End voice/quit stop capture. Ordinary workspace Talk remains foreground. Missing permissions/setup should show a message without opening the workspace automatically.
+- Check Settings at minimum window size, provider marks, tab navigation, language selection, connection recovery and disclosures. Check Codex usage/reset display against the CLI, including missing windows and unavailable API-key account quotas. Grok must show unavailable rather than fake limits.
+- After bundling Toby’s OAuth client, Connect Google must go straight to the browser; no client-import or Cloud setup UI should appear. Validate multi-account consent/refresh/revocation yourself.
+
+Agent validation is limited to compilation, source review and packaging checks once configured. No app runtime, visual or live authentication/usage tests have been run.

@@ -49,6 +49,12 @@ import SwiftUI
             CommandGroup(replacing: .appSettings) {
                 Button("Settings…") { model?.presentSettings() }.keyboardShortcut(",")
             }
+            CommandMenu("Navigate") {
+                Button("Back") { model?.goBack() }.keyboardShortcut("[")
+                    .disabled(model?.canGoBack != true || model?.navigationEnabled != true)
+                Button("Forward") { model?.goForward() }.keyboardShortcut("]")
+                    .disabled(model?.canGoForward != true || model?.navigationEnabled != true)
+            }
             CommandGroup(replacing: .newItem) {
                 Button("New Note") { model?.newNote() }.keyboardShortcut("n")
                 Button("Search Your Library") { model?.showSearch = true }.keyboardShortcut("k")

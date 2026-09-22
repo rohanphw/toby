@@ -64,7 +64,7 @@ struct MeetingsView: View {
                     detail: "Your recordings, transcripts and notes will be waiting here afterward.")
             }
             LazyVStack(spacing: 4) {
-                ForEach(items) { item in LibraryRow(item: item) { model.selected = item } }
+                ForEach(items) { item in LibraryRow(item: item) { model.openItem(item) } }
             }
         }
     }

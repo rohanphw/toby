@@ -18,8 +18,80 @@ import Observation
     private let meetingPrompt = MeetingPrompt()
     let account = AccountConnection()
     let grokAccount = AccountConnection(provider: .grok)
-    var page: Page = .home
-    var selected: LibraryItem?
+    private(set) var page: Page = .home
+    private(set) var selected: LibraryItem?
+    private(set) var backgroundVoice = false
+    private struct Destination: Equatable {
+        let page: Page
+        let itemID: UUID?
+    }
+    private var backHistory: [Destination] = []
+    private var forwardHistory: [Destination] = []
+    private var destination: Destination { Destination(page: page, itemID: selected?.id) }
+    var canGoBack: Bool { showSettings || !backHistory.isEmpty || selected != nil }
+    var canGoForward: Bool { !showSettings && !forwardHistory.isEmpty }
+    var navigationEnabled: Bool {
+        !onboarding.isPresented && !showSearch && agent.approvals.isEmpty && agent.question == nil
+    }
+    func navigate(to page: Page) { visit(Destination(page: page, itemID: nil)) }
+    func openItem(_ item: LibraryItem?) {
+        guard let item else { return }
+        visit(Destination(page: page, itemID: item.id))
+    }
+    private func visit(_ next: Destination) {
+        guard next != destination else { return }
+        backHistory.append(destination)
+        if backHistory.count > 100 { backHistory.removeFirst() }
+        forwardHistory.removeAll()
+        restore(next)
+    }
+    private func restore(_ next: Destination) {
+        page = next.page
+        selected = next.itemID.flatMap { id in library.items.first { $0.id == id } }
+    }
+    func goBack() {
+        guard navigationEnabled else { return }
+        if showSettings {
+            showSettings = false
+            return
+        }
+        while let previous = backHistory.popLast() {
+            if let id = previous.itemID, !library.items.contains(where: { $0.id == id }) { continue }
+            forwardHistory.append(destination)
+            restore(previous)
+            return
+        }
+        if selected != nil {
+            forwardHistory.append(destination)
+            selected = nil
+        }
+    }
+    func goForward() {
+        guard navigationEnabled, !showSettings else { return }
+        while let next = forwardHistory.popLast() {
+            if let id = next.itemID, !library.items.contains(where: { $0.id == id }) { continue }
+            backHistory.append(destination)
+            restore(next)
+            return
+        }
+    }
+    func swipeNavigation(backward: Bool) {
+        guard navigationEnabled else { return }
+        if backward, canGoBack {
+            goBack()
+            return
+        }
+        if !backward, canGoForward {
+            goForward()
+            return
+        }
+        guard selected == nil, !showSettings,
+            let index = Page.allCases.firstIndex(of: page)
+        else { return }
+        let next = index + (backward ? -1 : 1)
+        guard Page.allCases.indices.contains(next) else { return }
+        navigate(to: Page.allCases[next])
+    }
     var search = ""
     var showSearch = false
     var notice: String?
@@ -114,12 +186,27 @@ import Observation
         showSettings = true
         revealWorkspace?()
     }
-    func startVoice() {
-        revealWorkspace?()
+    func startVoice(inBackground: Bool = false) {
+        if !inBackground { revealWorkspace?() }
+        if inBackground {
+            notice = nil
+            onboarding.refresh()
+            guard !onboarding.isPresented else {
+                notice = "Complete or skip setup in the workspace before talking."
+                return
+            }
+            guard onboarding.microphone == .authorized, onboarding.speech == .authorized else {
+                notice = "Allow microphone and speech recognition in setup first, then start talking here."
+                return
+            }
+        }
         guard !onboarding.isPresented else { return }
         showSettings = false
         if voice.active {
-            selected = voice.item
+            if !inBackground {
+                backgroundVoice = false
+                openItem(voice.item)
+            }
             return
         }
         guard !meetings.active else {
@@ -131,10 +218,12 @@ import Observation
             return
         }
         meetingPrompt.hide()
+        backgroundVoice = inBackground
         voice.start()
-        selected = voice.item
+        if !inBackground { openItem(voice.item) }
     }
     func endVoice() {
+        backgroundVoice = false
         voice.stop()
         if agent.activeItemID == voice.item?.id { agent.stop() }
     }
@@ -147,14 +236,14 @@ import Observation
             return false
         }
         guard !meetings.active else {
-            selected = meetings.item
+            openItem(meetings.item)
             return false
         }
         meetingPrompt.hide()
         if let event { schedule.skip(event) }
         meetings.start(
             title: event?.title ?? "Meeting · \(Date().formatted(date: .abbreviated, time: .shortened))")
-        selected = meetings.item
+        openItem(meetings.item)
         return true
     }
     func finishMeeting() {
@@ -166,7 +255,7 @@ import Observation
             revealWorkspace?()
             return
         }
-        selected = library.create(.thought, title: "Untitled note")
+        openItem(library.create(.thought, title: "Untitled note"))
     }
     func ask(_ text: String) {
         guard !onboarding.isPresented else { return }
@@ -176,7 +265,7 @@ import Observation
             return
         }
         let item = library.create(.conversation, title: String(text.prefix(70)))
-        selected = item
+        openItem(item)
         agent.send(text, to: item)
     }
     func generateNotes(_ item: LibraryItem) {

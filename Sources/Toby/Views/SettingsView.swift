@@ -3,143 +3,215 @@ import SwiftUI
 
 struct SettingsView: View {
     let model: AppModel
+    private enum Section: String, CaseIterable {
+        case models = "Models"
+        case capture = "Capture"
+        case calendars = "Calendars"
+        case general = "General"
+    }
+    @State private var section: Section = .models
     @AppStorage("agentProvider") private var provider = "codex"
     @AppStorage("codexModel") private var codexModel = ""
     @AppStorage("grokModel") private var grokModel = ""
     @AppStorage("speechLocale") private var locale = "en-US"
+    @State private var languageOpen = false
     @State private var showAutomaticConfirmation = false
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var error: String?
+    private let languages = [
+        ("en-US", "English (US)"), ("en-GB", "English (UK)"), ("en-IN", "English (India)"),
+        ("hi-IN", "Hindi"), ("fr-FR", "French"), ("de-DE", "German"), ("es-ES", "Spanish"),
+    ]
+    private var account: AccountConnection { provider == "grok" ? model.grokAccount : model.account }
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Text("Make it yours").font(Theme.heading(26))
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Settings").font(Theme.heading(27))
+                    Text("A little more you.").font(Theme.caption).foregroundStyle(Theme.secondary)
+                }
                 Spacer()
                 Button {
                     model.showSettings = false
                 } label: {
                     Image(systemName: "xmark")
                 }
-                .buttonStyle(QuietButtonStyle()).keyboardShortcut(.cancelAction)
-                .accessibilityLabel("Close settings")
+                .buttonStyle(QuietButtonStyle()).keyboardShortcut(.cancelAction).accessibilityLabel(
+                    "Close settings")
             }.padding(24)
+            HStack(spacing: 0) {
+                ForEach(Section.allCases, id: \.self) { item in
+                    Button {
+                        section = item
+                    } label: {
+                        Text(item.rawValue).font(Theme.label).foregroundStyle(
+                            section == item ? Theme.ink : Theme.secondary
+                        )
+                        .frame(maxWidth: .infinity).padding(.bottom, 13)
+                        .overlay(alignment: .bottom) {
+                            Rectangle().fill(section == item ? Theme.ink : .clear).frame(height: 2)
+                        }
+                    }.buttonStyle(.plain).accessibilityAddTraits(section == item ? .isSelected : [])
+                }
+            }.padding(.horizontal, 24)
+            Rectangle().fill(Theme.line).frame(height: 1)
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    SettingsSection(title: "Intelligence") {
-                        ProviderSelector(selection: $provider).disabled(model.agent.isRunning)
-                        CLIConnectionView(account: model.account)
-                        DefaultModelPicker(account: model.account, selection: $codexModel)
-                            .disabled(model.agent.isRunning)
-                        Divider()
-                        CLIConnectionView(account: model.grokAccount)
-                        DefaultModelPicker(account: model.grokAccount, selection: $grokModel)
-                            .disabled(model.agent.isRunning)
-                        Text(
-                            "Toby uses the authenticated CLI installations on this Mac. Sign in through the CLI once, then Check CLI session here. Credentials and refresh remain owned by the CLIs; Toby never imports tokens or requests an API key."
-                        )
-                        .font(.caption).foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 28) {
+                    switch section {
+                    case .models: models
+                    case .capture: capture
+                    case .calendars: calendars
+                    case .general: general
                     }
-                    SettingsSection(title: "Voice") {
-                        Label("You talk. Toby writes back.", systemImage: "text.bubble")
-                        Picker("Recognition language", selection: $locale) {
-                            Text("English (US)").tag("en-US")
-                            Text("English (UK)").tag("en-GB")
-                            Text("English (India)").tag("en-IN")
-                            Text("Hindi").tag("hi-IN")
-                            Text("French").tag("fr-FR")
-                            Text("German").tag("de-DE")
-                            Text("Spanish").tag("es-ES")
-                        }.disabled(model.voice.active || model.meetings.active)
-                        LabeledContent("Talk shortcut", value: "Control + Option + Space")
-                        Text(
-                            "Speech recognition runs on this Mac. Talking mode sends after a short pause; use Send now whenever you’re ready. Replies always appear as text in your thread. Listening resumes after each reply; End voice turns the microphone off."
-                        ).font(.caption).foregroundStyle(.secondary)
-                    }
-                    SettingsSection(title: "Meetings") {
-                        CalendarConnectionsView(schedule: model.schedule)
-                        Toggle(
-                            "Show meeting reminders",
-                            isOn: Binding(
-                                get: { model.schedule.remindersEnabled },
-                                set: { model.schedule.remindersEnabled = $0 }))
-                        Text(
-                            "A desktop prompt appears one minute before a scheduled call. Join & take notes opens its link and starts recording. Dismiss or snooze it for five minutes."
-                        )
-                        .font(.caption).foregroundStyle(.secondary)
-                        Toggle(
-                            "Detect possible calls on this Mac",
-                            isOn: Binding(
-                                get: { model.callDetection.enabled },
-                                set: { model.callDetection.enabled = $0 }))
-                        Text(
-                            "Prompts when supported call apps or browsers use the microphone. This is a hint, not proof of a meeting; muted calls and some apps may not be detected. Nothing is recorded until you choose Take notes. Requires macOS 14.2 or later."
-                        )
-                        .font(.caption).foregroundStyle(.secondary)
-                        if model.callDetection.unavailable {
-                            StatusLabel(text: "Call detection is unavailable on this Mac.", tone: .warning)
-                        }
-                        Toggle(
-                            "Automatically record scheduled calls",
-                            isOn: Binding(
-                                get: { model.schedule.automaticallyRecord },
-                                set: { enabled in
-                                    if enabled {
-                                        showAutomaticConfirmation = true
-                                    } else {
-                                        model.schedule.automaticallyRecord = false
-                                    }
-                                })
-                        ).disabled(!model.schedule.hasCalendarConnection)
-                        Text(
-                            "When Toby is open, recording begins at the start of calendar events with Zoom, Google Meet, Teams or Webex links and stops at their scheduled end. This is based on the calendar, not whether you joined the call. Skip individual events in Meetings. Possible unscheduled calls can offer a reminder when detection is enabled."
-                        ).font(.caption).foregroundStyle(.secondary)
-                        Text(
-                            "Meeting recording saves microphone and all Mac audio, excluding Toby, as separate local tracks. macOS may ask for Screen & System Audio Recording access. No screen images are saved. Enable automatic recording only for calls you intend to record, with participants informed."
-                        ).font(.caption).foregroundStyle(.secondary)
-                        if showAutomaticConfirmation {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("Enable automatic recording?").font(.headline)
-                                Text(
-                                    "While Toby is open, it will capture your microphone and Mac audio during supported calendar calls without asking each time, even if you haven’t joined. Inform participants before recording."
-                                ).font(.caption)
-                                HStack {
-                                    Button("Enable") {
-                                        model.schedule.automaticallyRecord = true
-                                        showAutomaticConfirmation = false
-                                    }.buttonStyle(QuietButtonStyle())
-                                    Button("Cancel") { showAutomaticConfirmation = false }.buttonStyle(
-                                        QuietButtonStyle())
-                                }
-                            }.padding(16).background(
-                                Theme.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
-                        }
-                    }
-                    SettingsSection(title: "This Mac") {
-                        Button("Reopen setup") { model.reopenSetup() }.buttonStyle(QuietButtonStyle())
-                        Toggle(
-                            "Open Toby at login", isOn: Binding(get: { launchAtLogin }, set: setLaunchAtLogin)
-                        )
-                        Button("Open local library folder") { NSWorkspace.shared.open(AppPaths.root) }
-                        LabeledContent(
-                            "Version",
-                            value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-                                ?? "0.7.1")
-                        Text(
-                            "App location: \(Bundle.main.bundleURL.path)\nIdentity: \(Bundle.main.bundleIdentifier ?? "Unknown")"
-                        )
-                        .font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
-                        Button("Show this copy in Finder") {
-                            NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
-                        }
-                        Text(
-                            "This fresh app has its own library. Existing Toby data is not imported or modified."
-                        )
-                        .font(.caption).foregroundStyle(.secondary)
-                        if let error { Text(error).font(.caption).foregroundStyle(Theme.failure) }
-                    }
-                }.padding(.horizontal, 24).padding(.bottom, 28)
+                }.frame(maxWidth: .infinity, alignment: .leading).padding(24)
+            }.id(section)
+        }.frame(maxHeight: .infinity).foregroundStyle(Theme.ink).font(Theme.body)
+            .buttonStyle(QuietButtonStyle())
+    }
+    private var models: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            SettingsGroup("Think with") {
+                ProviderSelector(selection: $provider).disabled(model.agent.isRunning)
+                Text("Your default for new conversations.").font(Theme.caption).foregroundStyle(
+                    Theme.secondary)
             }
-        }.frame(maxHeight: .infinity).foregroundStyle(Theme.ink)
+            CLIConnectionView(account: account)
+            DefaultModelPicker(account: account, selection: provider == "grok" ? $grokModel : $codexModel)
+                .disabled(model.agent.isRunning)
+            Divider()
+            ProviderUsageView(account: account).id(provider)
+            DisclosureGroup("How accounts connect") {
+                Text(
+                    "Toby uses your existing Codex or Grok sign-in on this Mac. Account credentials stay with their command-line apps."
+                )
+                .font(Theme.caption).foregroundStyle(Theme.secondary).padding(.top, 8)
+            }.font(Theme.caption).foregroundStyle(Theme.secondary)
+        }
+    }
+    private var capture: some View {
+        VStack(alignment: .leading, spacing: 28) {
+            SettingsGroup("Voice") {
+                Text("You talk. Toby writes back.").font(Theme.caption).foregroundStyle(Theme.secondary)
+                HStack {
+                    Text("Language").font(Theme.label)
+                    Spacer()
+                    Button {
+                        languageOpen.toggle()
+                    } label: {
+                        HStack(spacing: 10) {
+                            Text(languages.first(where: { $0.0 == locale })?.1 ?? locale)
+                            Image(systemName: "chevron.down").font(.system(size: 9))
+                        }
+                    }.disabled(model.voice.active || model.meetings.active)
+                        .popover(isPresented: $languageOpen, arrowEdge: .bottom) {
+                            VStack(spacing: 3) {
+                                ForEach(languages, id: \.0) { language in
+                                    Button {
+                                        locale = language.0
+                                        languageOpen = false
+                                    } label: {
+                                        HStack {
+                                            Text(language.1)
+                                            Spacer()
+                                            if locale == language.0 { Image(systemName: "checkmark") }
+                                        }
+                                        .padding(10).contentShape(Rectangle())
+                                    }.buttonStyle(.plain)
+                                }
+                            }.font(Theme.label).padding(8).frame(width: 220).background(Theme.drawer)
+                        }
+                }
+                LabeledContent("Open Talk", value: "⌃ ⌥ Space").font(Theme.caption)
+                Text("Use Start talking in the menu bar to keep working in your current app.")
+                    .font(Theme.caption).foregroundStyle(Theme.secondary)
+            }
+            SettingsGroup("Meetings") {
+                SettingsToggle(
+                    "Meeting reminders", detail: "A nudge before your next call.",
+                    isOn: Binding(
+                        get: { model.schedule.remindersEnabled },
+                        set: { model.schedule.remindersEnabled = $0 }))
+                SettingsToggle(
+                    "Detect calls", detail: "Offer to take notes when a call app uses your mic.",
+                    isOn: Binding(
+                        get: { model.callDetection.enabled }, set: { model.callDetection.enabled = $0 }))
+                if model.callDetection.unavailable {
+                    StatusLabel(text: "Call detection is unavailable on this Mac.", tone: .warning)
+                }
+                SettingsToggle(
+                    "Record automatically",
+                    detail: "Start and stop at calendar times, even if you haven’t joined.",
+                    isOn: Binding(
+                        get: { model.schedule.automaticallyRecord },
+                        set: { enabled in
+                            if enabled {
+                                showAutomaticConfirmation = true
+                            } else {
+                                model.schedule.automaticallyRecord = false
+                            }
+                        })
+                ).disabled(!model.schedule.hasCalendarConnection)
+                if showAutomaticConfirmation {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Record scheduled calls?").font(Theme.label)
+                        Text(
+                            "Toby will capture your microphone and Mac audio without asking each time. Let participants know before recording."
+                        )
+                        .font(Theme.caption).foregroundStyle(Theme.secondary)
+                        HStack {
+                            Button("Enable") {
+                                model.schedule.automaticallyRecord = true
+                                showAutomaticConfirmation = false
+                            }
+                            Button("Cancel") { showAutomaticConfirmation = false }
+                        }
+                    }.padding(14).background(Theme.surface, in: RoundedRectangle(cornerRadius: 10))
+                }
+            }
+            DisclosureGroup("Recording details") {
+                Text(
+                    "Recordings stay on this Mac. Meeting notes send transcript text to your selected provider. System audio can include other apps. No screen images are saved. Call detection is approximate and may miss muted calls; it never starts a recording by itself."
+                )
+                .font(Theme.caption).foregroundStyle(Theme.secondary).padding(.top, 8)
+            }.font(Theme.caption)
+            Button("Manage permissions") { model.reopenSetup() }
+        }
+    }
+    private var calendars: some View {
+        SettingsGroup("Your calendars") { CalendarConnectionsView(schedule: model.schedule) }
+    }
+    private var general: some View {
+        VStack(alignment: .leading, spacing: 26) {
+            SettingsGroup("At home on your Mac") {
+                SettingsToggle(
+                    "Launch at login", detail: "Keep Toby close by.",
+                    isOn: Binding(get: { launchAtLogin }, set: setLaunchAtLogin))
+                Button("Open library folder") { NSWorkspace.shared.open(AppPaths.root) }
+                Button("Reopen setup") { model.reopenSetup() }
+            }
+            SettingsGroup("Navigation") {
+                LabeledContent("Back / forward", value: "⌘[ / ⌘]").font(Theme.caption)
+                Text(
+                    "Swipe sideways with two fingers to navigate. Vertical scrolls and text editors keep their usual behavior."
+                )
+                .font(Theme.caption).foregroundStyle(Theme.secondary)
+            }
+            Divider()
+            LabeledContent(
+                "Toby", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.8.0"
+            )
+            .font(Theme.caption).foregroundStyle(Theme.secondary)
+            DisclosureGroup("App details") {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("\(Bundle.main.bundleURL.path)\n\(Bundle.main.bundleIdentifier ?? "Unknown")")
+                        .textSelection(.enabled)
+                    Button("Show in Finder") {
+                        NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
+                    }
+                }.font(Theme.caption).foregroundStyle(Theme.secondary).padding(.top, 8)
+            }.font(Theme.caption)
+            if let error { ErrorNotice(message: error) }
+        }
     }
     private func setLaunchAtLogin(_ enabled: Bool) {
         do {
@@ -149,16 +221,35 @@ struct SettingsView: View {
     }
 }
 
-private struct SettingsSection<Content: View>: View {
+private struct SettingsGroup<Content: View>: View {
     let title: String
-    @ViewBuilder var content: Content
+    @ViewBuilder let content: Content
+    init(_ title: String, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.content = content()
+    }
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text(title).font(Theme.heading(19)).foregroundStyle(Theme.accent)
+        VStack(alignment: .leading, spacing: 16) {
+            Text(title).font(Theme.heading(18))
             content
-        }.buttonStyle(QuietButtonStyle()).font(.system(size: 13)).frame(
-            maxWidth: .infinity, alignment: .leading
-        )
-        .padding(.top, 16).overlay(alignment: .top) { Rectangle().fill(Theme.line).frame(height: 1) }
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+private struct SettingsToggle: View {
+    let title: String
+    let detail: String
+    @Binding var isOn: Bool
+    init(_ title: String, detail: String, isOn: Binding<Bool>) {
+        self.title = title
+        self.detail = detail
+        _isOn = isOn
+    }
+    var body: some View {
+        Toggle(isOn: $isOn) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title).font(Theme.label)
+                Text(detail).font(Theme.caption).foregroundStyle(Theme.secondary)
+            }.padding(.trailing, 10)
+        }.toggleStyle(.switch).controlSize(.small).padding(.vertical, 3)
     }
 }

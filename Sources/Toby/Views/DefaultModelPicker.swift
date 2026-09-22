@@ -14,7 +14,7 @@ struct DefaultModelPicker: View {
             expanded.toggle()
         } label: {
             HStack(spacing: 10) {
-                Image(systemName: "cpu").foregroundStyle(Theme.secondary)
+                ProviderMark(provider: account.provider, size: 18)
                 Text(title).lineLimit(1)
                 Spacer(minLength: 4)
                 if account.isBusy {
@@ -124,14 +124,17 @@ struct ProviderSelector: View {
                 Button {
                     selection = provider.rawValue
                 } label: {
-                    Text(provider.title).font(.system(size: 13, weight: .medium))
-                        .frame(maxWidth: .infinity).padding(.vertical, 10)
-                        .background(
-                            selection == provider.rawValue ? Color(white: 0.16) : .clear,
-                            in: RoundedRectangle(cornerRadius: 9)
-                        )
-                        .foregroundStyle(selection == provider.rawValue ? Theme.ink : Theme.secondary)
-                        .contentShape(Rectangle())
+                    HStack(spacing: 8) {
+                        ProviderMark(provider: provider, size: 17)
+                        Text(provider.title).font(.system(size: 13, weight: .medium))
+                    }
+                    .frame(maxWidth: .infinity).padding(.vertical, 10)
+                    .background(
+                        selection == provider.rawValue ? Color(white: 0.16) : .clear,
+                        in: RoundedRectangle(cornerRadius: 9)
+                    )
+                    .foregroundStyle(selection == provider.rawValue ? Theme.ink : Theme.secondary)
+                    .contentShape(Rectangle())
                 }.buttonStyle(.plain).accessibilityAddTraits(
                     selection == provider.rawValue ? .isSelected : [])
             }

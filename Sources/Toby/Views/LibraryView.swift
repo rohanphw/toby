@@ -49,7 +49,7 @@ struct LibraryView: View {
                         : "Try another word or a different filter.")
             } else {
                 LazyVStack(spacing: 4) {
-                    ForEach(items) { item in LibraryRow(item: item) { model.selected = item } }
+                    ForEach(items) { item in LibraryRow(item: item) { model.openItem(item) } }
                 }
             }
         }
@@ -91,7 +91,7 @@ struct SearchView: View {
                 LazyVStack(alignment: .leading, spacing: 4) {
                     ForEach(results) { item in
                         Button {
-                            model.selected = item
+                            model.openItem(item)
                             dismiss()
                         } label: {
                             HStack(spacing: 12) {

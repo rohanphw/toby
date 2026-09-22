@@ -10,7 +10,7 @@ struct ItemDetailView: View {
         VStack(alignment: .leading, spacing: 24) {
             HStack {
                 Button {
-                    model.selected = nil
+                    model.goBack()
                 } label: {
                     Label("Back", systemImage: "arrow.left")
                 }.buttonStyle(.plain).foregroundStyle(Theme.secondary)
@@ -93,7 +93,7 @@ struct ItemDetailView: View {
         }
         .confirmationDialog("Delete ‘\(item.title)’?", isPresented: $confirmDelete) {
             Button("Delete item and move its files to Trash", role: .destructive) {
-                model.selected = nil
+                model.goBack()
                 model.library.delete(item)
             }
         } message: {

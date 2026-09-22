@@ -9,3 +9,7 @@ client_secret*.json
 
 # Machine-local signing certificate selection
 .local-code-sign-identity
+
+# Local application OAuth build configuration
+.local/
+GoogleOAuthClient.json

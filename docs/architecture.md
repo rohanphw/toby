@@ -63,3 +63,13 @@ Packaging refuses to replace the exact executable of a running app. `APP_BUNDLE_
 After the one-time signature transition, macOS may require a new grant and relaunch. Settings → This Mac and permission errors expose the current bundle path/identifier. Permission verification remains real ScreenCaptureKit enumeration; no persisted boolean can bypass macOS capture authorization.
 
 Reference: [Apple DTS confirmation of ad-hoc permission identity changes](https://developer.apple.com/forums/thread/819406).
+
+## Navigation, menu-bar voice and settings (0.8.0)
+
+AppModel owns a bounded back/forward destination history (page plus optional library ID). All entry points use navigate/openItem; restoring a route does not create history and deleted items are skipped. The local NSEvent monitor is scoped to the workspace window. It accepts precise horizontal trackpad scroll gestures with an axis threshold and one action at gesture end. It ignores momentum, modified scrolling, sheets, onboarding, text editors and horizontal scroll surfaces. No global gesture capture or input permission is used. Back closes Settings first; history boundaries move between adjacent Home/Library/Meetings/Memory pages.
+
+Menu-bar Start talking calls startVoice(inBackground: true), which never opens or activates the workspace, leaves the visible route intact and checks permissions before starting. The menu panel shows voice phase/transcript/latest written response and stop/send controls. Closing the main workspace does not stop a background voice session; quitting the app does. Normal workspace Talk and the existing global shortcut retain their foreground behavior. Tool approvals and questions require explicit Open workspace.
+
+Settings uses four compact tabs with repair/privacy details in disclosures. Provider marks are local image assets loaded from app resources (SwiftPM resource fallback for development), with source attribution alongside them. ProviderUsage reads Codex account/rateLimits/read, prefers rateLimitsByLimitId and renders only non-null reported windows. It never treats missing fields as 0% used. Quotas are account-wide, not per-model allocations. Grok CLI 1.0.40 help exposes session token/cost usage, but no verified account-quota read contract was found; its usage area reports unavailable instead of inventing balances.
+
+Google app client configuration is now owned by the distribution, loaded only from the signed bundle, and required by build-app.sh. User token storage stays in Keychain. Source builds still compile with an unconfigured Google state; no final bundle should be shipped until the maintainer supplies the Desktop OAuth client. See docs/google-calendar.md.

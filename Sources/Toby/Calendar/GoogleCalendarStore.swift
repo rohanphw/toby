@@ -1,6 +1,5 @@
 import AppKit
 import Observation
-import UniformTypeIdentifiers
 
 struct GoogleCalendarChoice: Codable, Identifiable {
     let id: String
@@ -34,37 +33,20 @@ struct GoogleCalendarAccount: Codable, Identifiable {
             accounts = (try? JSONDecoder().decode([GoogleCalendarAccount].self, from: data)) ?? []
         }
         do {
-            let client: GoogleClient? = try CalendarKeychain.read("client")
+            let client = try Self.appClient()
             hasClient = client != nil
         } catch { self.error = error.localizedDescription }
     }
-    func importClient() {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.json]
-        panel.canChooseDirectories = false
-        panel.allowsMultipleSelection = false
-        panel.message = "Choose the Desktop OAuth client JSON downloaded from Google Cloud."
-        panel.begin { [weak self] result in
-            Task { @MainActor in
-                guard let self, result == .OK, let url = panel.url else { return }
-                do {
-                    struct Download: Decodable { let installed: GoogleClient }
-                    let client = try JSONDecoder().decode(Download.self, from: Data(contentsOf: url))
-                        .installed
-                    guard client.clientID.hasSuffix(".apps.googleusercontent.com") else {
-                        throw CalendarFailure(message: "Choose a Google Desktop OAuth client JSON.")
-                    }
-                    let old: GoogleClient? = try CalendarKeychain.read("client")
-                    guard self.accounts.isEmpty || old?.clientID == client.clientID else {
-                        throw CalendarFailure(
-                            message: "Disconnect existing Google accounts before replacing the OAuth client.")
-                    }
-                    try CalendarKeychain.save(client, key: "client")
-                    self.hasClient = true
-                    self.error = nil
-                } catch { self.error = error.localizedDescription }
-            }
+    private static func appClient() throws -> GoogleClient? {
+        guard let url = Bundle.main.url(forResource: "GoogleOAuthClient", withExtension: "json") else {
+            return nil
         }
+        struct Configuration: Decodable { let installed: GoogleClient }
+        let client = try JSONDecoder().decode(Configuration.self, from: Data(contentsOf: url)).installed
+        guard client.clientID.hasSuffix(".apps.googleusercontent.com") else {
+            throw CalendarFailure(message: "This build’s Google sign-in configuration is invalid.")
+        }
+        return client
     }
     func connect() {
         guard !connecting else { return }
@@ -77,8 +59,8 @@ struct GoogleCalendarAccount: Codable, Identifiable {
                 connectTask = nil
             }
             do {
-                guard let client: GoogleClient = try CalendarKeychain.read("client") else {
-                    throw CalendarFailure(message: "Import a Google Desktop OAuth client first.")
+                guard let client = try Self.appClient() else {
+                    throw CalendarFailure(message: "Google sign-in is not configured in this build.")
                 }
                 let auth = GoogleOAuth()
                 oauth = auth
@@ -251,7 +233,7 @@ struct GoogleCalendarAccount: Codable, Identifiable {
         }
         if (token.expiresAt ?? .distantPast).timeIntervalSinceNow > 120 { return token.accessToken }
         guard let refresh = token.refreshToken,
-            let client: GoogleClient = try CalendarKeychain.read("client")
+            let client = try Self.appClient()
         else { throw CalendarFailure(message: "Reconnect this Google account.") }
         let renewed = try await GoogleOAuth.tokenRequest([
             "client_id": client.clientID, "client_secret": client.clientSecret ?? "",
