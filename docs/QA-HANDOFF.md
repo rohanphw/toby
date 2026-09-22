@@ -1,0 +1,22 @@
+# Manual QA handoff — 0.1.0
+
+Per Rohan’s instruction, the agent did not launch the app, capture screenshots, perform visual QA, control the app/device, or run functionality tests. Build success does not establish any of the behaviors below on a real device.
+
+Use the packaged `dist/Toby.app`, not the bare SwiftPM executable, for your pass.
+
+## Your first pass
+
+1. Open Settings, Check the Codex connection, select a model if desired. Start a typed task. Confirm separate progress/answer messages, a usable final response and a generated file under Outputs.
+2. Stop during Connecting, during response streaming and during a command. Start another task immediately afterward. Refresh the connection during a run; the run should continue.
+3. Ask for an action that needs approval. Inspect the requested command/scope, deny it, then try a separate task and approve once. Confirm the UI remains usable.
+4. Open Talk or use Control–Option–Space. Grant microphone and speech permissions. Speak, pause, hear the reply, interrupt it, then close the voice window. Verify microphone capture stops and the conversation remains in Library.
+5. Record a meeting with headphones. Verify both local and remote speech, record longer than one minute, finish, and inspect transcript, source audio tracks and generated notes. Edit notes and reopen them.
+6. Connect Calendar. Confirm conference events appear, explicitly enable auto-recording and try a short scheduled event. Confirm visible capture at its start, Finish, per-event Skip and scheduled-end behavior. Verify it does not repeatedly record the same event after relaunch.
+7. Deny/revoke microphone, Speech Recognition and system-audio permissions independently. Confirm actionable errors and saved partial data rather than a stuck capture state.
+8. Create/edit a note, mark it Remember, ask a relevant question in a different item, unmark it, pin/unpin, search, export, attach files and inspect generated files in Finder.
+9. Quit during capture and during a task. Relaunch, inspect saved drafts/responses and interrupted states. Verify no recording or task restarts without a new action.
+10. Evaluate typography, spacing, window resizing, keyboard access, VoiceOver labels, reduced motion/transparency and the voice panel. No visual fidelity claims have been made by the agent.
+
+## Known first-release limits
+
+See README’s Current boundaries. In particular: calendar-triggered recording is not live call detection; voice uses explicit turn boundaries; speech is dependent on installed on-device language support; there is no speaker diarization; very long meeting summaries are bounded; cloud/sync/Google helpers/playbooks are not implemented.

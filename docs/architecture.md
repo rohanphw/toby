@@ -1,0 +1,46 @@
+# Architecture — 0.1.0
+
+## Product
+
+Toby is a native, local-first personal workspace. Voice is an entry point, meetings are source material, and notes/files are durable outcomes. Navigation is top-level and content-led; conversation history belongs to an item rather than a permanent sidebar.
+
+## Ownership
+
+- `AppModel`: dependency composition, navigation and cross-feature handoffs.
+- `Library`: one SwiftData model context, mutations, bounded checkpoints, import/export and recovery.
+- `AgentSession`: one active run with generation ownership, event projection, approvals and completion callbacks.
+- `CodexTransport`: one app-server process, serialized stdout framing, request deadlines, cancellation and stale-process isolation.
+- `AccountConnection`: a separate, short-lived transport for sign-in, status and model discovery. It cannot stop a task’s process.
+- `VoiceSession`: talking lifecycle, silence boundary, interrupted replies and speech synthesis.
+- `MeetingSession`: meeting lifecycle, transcript assembly and local recording ownership.
+- `AudioCapture`: permissions, AVAudioEngine and ScreenCaptureKit. No video output is registered or persisted.
+- `AudioSink`: off-render-thread serialized audio file writes and recognition. Recognition rolls every 45 seconds to keep meeting sessions bounded.
+- `MeetingSchedule`: read-only EventKit projection and explicit calendar-based automatic recording policy.
+
+## Persistence schema 1
+
+`LibraryItem` has a stable UUID, kind, title, source body, generated notes, draft, timestamps, pin/memory flags, runtime thread ID, recording state, attachment names and a cascade relationship to messages. `Message` has its own UUID, role, text, state, timestamp and runtime item ID.
+
+The initial SwiftData model is the baseline schema. Do not rename/remove stored properties or change relationship semantics without adding a versioned schema and migration. The app refuses to open a damaged/incompatible store rather than deleting it or silently creating an empty replacement.
+
+Audio lives outside the database. Each item owns one directory under `Workspaces/<UUID>`. Audio source tracks are separate CAF files. The app deliberately uses a new bundle ID and a new Application Support root; the previous Toby library is not touched.
+
+Streaming updates are checkpointed at most 500ms after the first unsaved change, including during continuous streaming. Completed messages and runtime IDs are saved immediately. On relaunch, streaming messages and recording states become interrupted. This is recovery of saved work, not resumption of a terminated process.
+
+## Runtime protocol
+
+The local app-server uses newline-delimited JSON over stdio. Each request has a 30-second deadline and cancellation cleanup. Process identity is generation-scoped to prevent callbacks from a terminated child affecting a new owner. Each task resumes the item’s runtime thread or creates one in that same item’s workspace. User-configured models apply to the next task. Command/file approvals are one-time; unknown server requests are explicitly rejected. User-input questions are presented in a native sheet.
+
+Agent messages retain their runtime item identity. Completed message text can reconcile missed deltas. Status checks are isolated. Stop closes stdin, terminates the child and schedules a force kill if it remains alive. No provider call runs merely because the app launches.
+
+A three-minute event-silence watchdog stops unresponsive work, except while the app waits for an approval or a user answer. The UI exposes status and errors and retains the user prompt for a subsequent follow-up.
+
+## Capture policy
+
+Talking mode starts only from its dedicated user-invoked surface. A short pause submits the utterance. Mic capture pauses during execution and speech playback. Explicit interruption stops execution/playback and resumes listening. Closing the voice window ends capture.
+
+Meeting capture records microphone and all system audio except this app. Both sources are transcribed on-device. Calendar automation is opt-in and checks every 20 seconds while the app is open. Supported conferencing events begin recording near their scheduled start and finish at the scheduled end. A persisted event-occurrence key prevents immediate re-recording after relaunch. Skipping an event persists the same exclusion. No browser/app surveillance or inferred call detection is performed.
+
+## Build/distribution
+
+SwiftPM builds the executable. `scripts/build-app.sh` creates an app bundle with its icon, Info.plist usage descriptions and ad-hoc signature. It does not launch or install the app. Developer ID signing/notarization and a fully packaged Codex runtime remain distribution work.

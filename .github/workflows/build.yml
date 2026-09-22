@@ -1,0 +1,17 @@
+name: Compile macOS app
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  compile:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile release
+        run: swift build -c release
+      - name: Validate bundle metadata
+        run: plutil -lint Packaging/Info.plist Packaging/Toby.entitlements
