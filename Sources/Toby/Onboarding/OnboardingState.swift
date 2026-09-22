@@ -2,6 +2,7 @@ import AVFoundation
 import AppKit
 import CoreGraphics
 import Observation
+import ScreenCaptureKit
 import Speech
 
 @MainActor @Observable final class OnboardingState {
@@ -13,6 +14,9 @@ import Speech
     private(set) var microphone = AVCaptureDevice.authorizationStatus(for: .audio)
     private(set) var speech = SFSpeechRecognizer.authorizationStatus()
     private(set) var systemAudio = false
+    private(set) var checkingSystemAudio = false
+    private(set) var systemAudioMessage: String?
+    private var verifiedWithCaptureKit = false
     private(set) var folderName: String?
     private(set) var busy = false
     var error: String?
@@ -25,7 +29,9 @@ import Speech
     func refresh() {
         microphone = AVCaptureDevice.authorizationStatus(for: .audio)
         speech = SFSpeechRecognizer.authorizationStatus()
-        systemAudio = CGPreflightScreenCaptureAccess()
+        // A successful ScreenCaptureKit check is stronger evidence for our capture path
+        // than a negative legacy preflight. Do not overwrite it on app activation.
+        systemAudio = verifiedWithCaptureKit || CGPreflightScreenCaptureAccess()
         folderName = LocalFolderAccess.resolve()?.path
     }
     func finish(_ outcome: Outcome) {
@@ -62,10 +68,27 @@ import Speech
         busy = false
         refresh()
     }
-    func requestSystemAudio() {
-        _ = CGRequestScreenCaptureAccess()
-        refresh()
-        if !systemAudio { openPrivacy("Privacy_ScreenCapture") }
+    func requestSystemAudio() async {
+        guard !busy else { return }
+        busy = true
+        checkingSystemAudio = true
+        systemAudioMessage = nil
+        defer {
+            busy = false
+            checkingSystemAudio = false
+        }
+        do {
+            // Match AudioCapture's permission boundary. Enumerate available sources only;
+            // never construct a stream or capture audio/images during setup.
+            _ = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false)
+            verifiedWithCaptureKit = true
+            systemAudio = true
+        } catch {
+            verifiedWithCaptureKit = false
+            systemAudio = false
+            systemAudioMessage =
+                "macOS could not confirm meeting-audio access. If Toby is already enabled in System Settings → Privacy & Security → Screen & System Audio Recording, quit and reopen this copy of Toby, then check again. \(error.localizedDescription)"
+        }
     }
     func openPrivacy(_ pane: String) {
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?\(pane)") {

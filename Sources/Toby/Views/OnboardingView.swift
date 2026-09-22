@@ -121,10 +121,16 @@ struct OnboardingView: View {
                 symbol: "speaker.wave.2", title: "Meeting audio",
                 detail:
                     "Optional. Captures audio from other apps during a recording. macOS calls this Screen & System Audio Recording; Toby saves no screen images. A restart may be needed after granting access.",
-                status: setup.systemAudio ? "Allowed" : "Not enabled",
+                status: setup.checkingSystemAudio
+                    ? "Checking access…" : setup.systemAudio ? "Access confirmed" : "Access not verified",
                 tone: setup.systemAudio ? .success : .warning,
-                action: "Enable access", enabled: !setup.systemAudio && !setup.busy
-            ) { setup.requestSystemAudio() }
+                action: setup.systemAudio ? "Check again" : "Check / enable access", enabled: !setup.busy
+            ) { Task { await setup.requestSystemAudio() } }
+            if let message = setup.systemAudioMessage {
+                ErrorNotice(message: message, tone: .warning)
+                Button("Open audio privacy settings") { setup.openPrivacy("Privacy_ScreenCapture") }
+                    .buttonStyle(QuietButtonStyle()).padding(.vertical, 10)
+            }
             SetupRow(
                 symbol: "calendar", title: "Calendar",
                 detail:

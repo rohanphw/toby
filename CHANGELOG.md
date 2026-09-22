@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1 — 2026-09-22
+
+- Verify meeting-audio setup through the same ScreenCaptureKit source enumeration used by recording instead of requesting access through CoreGraphics alone.
+- Replace an unconfirmed negative preflight with “Access not verified”; retain successful session verification across app activation, allow explicit rechecking, and show actionable privacy/relaunch guidance on failure.
+- Permission verification creates no capture stream. Build/package validation only; no app launch or permission/recording test.
+
 ## 0.6.0 — 2026-09-22
 
 - Unify interface typography around native SF with a tighter heading scale, smaller content titles and explicit primary/secondary button hierarchy.
