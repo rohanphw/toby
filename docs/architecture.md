@@ -53,3 +53,13 @@ Meeting-audio permission checks now run ScreenCaptureKit enumeration only after 
 `MeetingPrompt` owns one nonactivating AppKit panel hosting a SwiftUI card. It stays independent of the main workspace, has explicit dismiss/snooze/action controls and a 45-second lifetime. `AppModel` gates presentation during onboarding/capture, revalidates a scheduled occurrence before acting, and hides prompts when capture starts or the app shuts down. It opens links only after user action.
 
 `CallDetection` uses Core Audio process input activity and process IDs to identify recognized app bundles on macOS 14.2+. Metadata only; it does not create audio streams or detect actual attendance. A sustained-activity threshold and per-session debounce reduce repeated prompts. It is disabled by default and unrelated to the existing automatic-recording opt-in. See `docs/google-calendar.md` for setup and runtime limits.
+
+## Stable local signing (0.7.1)
+
+The prior ad-hoc app signature had a designated requirement tied to its CDHash. Each new binary could invalidate TCC's previous grant even while Settings still showed an enabled Toby row. Local packaging now uses an available Apple Development certificate and pins the successful identity in ignored `.local-code-sign-identity`. Explicit `CODE_SIGN_IDENTITY` overrides are supported; missing/invalid identities fail rather than falling back to ad-hoc signing. This is development signing, not a notarized distribution build.
+
+Packaging refuses to replace the exact executable of a running app. `APP_BUNDLE_PATH` can stage a build elsewhere. Keep using the canonical `dist/Toby.app` after quitting and rebuilding. The legacy `gary/dist/Toby.app` (`com.toby.agent`) and current `gary-app/dist/Toby.app` (`com.rohan.toby.next`) are distinct TCC clients despite both displaying Toby. No old app/data or system permission records are modified.
+
+After the one-time signature transition, macOS may require a new grant and relaunch. Settings → This Mac and permission errors expose the current bundle path/identifier. Permission verification remains real ScreenCaptureKit enumeration; no persisted boolean can bypass macOS capture authorization.
+
+Reference: [Apple DTS confirmation of ad-hoc permission identity changes](https://developer.apple.com/forums/thread/819406).

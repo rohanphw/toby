@@ -87,7 +87,7 @@ import Speech
             verifiedWithCaptureKit = false
             systemAudio = false
             systemAudioMessage =
-                "macOS could not confirm meeting-audio access. If Toby is already enabled in System Settings → Privacy & Security → Screen & System Audio Recording, quit and reopen this copy of Toby, then check again. \(error.localizedDescription)"
+                "macOS could not confirm meeting-audio access. If Toby is already enabled in System Settings → Privacy & Security → Screen & System Audio Recording, quit and reopen this copy of Toby, then check again. This copy: \(Bundle.main.bundleURL.path) (\(Bundle.main.bundleIdentifier ?? "unknown identity")). \(error.localizedDescription)"
         }
     }
     func openPrivacy(_ pane: String) {

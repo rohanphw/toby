@@ -59,3 +59,9 @@ With Toby enabled in Screen & System Audio Recording, click Check / enable acces
 - Verify calendar reminders with main window closed, multiple displays/spaces and full-screen apps. Custom panels do not inherit Notification Center Focus settings. Assess layout and keyboard/accessibility yourself.
 
 No application, browser sign-in, audio capture, permissions or visual QA was run by the agent. Google setup remains required before end-to-end validation.
+
+## 0.7.1 — permission identity recovery (user-run only)
+
+Quit all Toby instances and open the rebuilt canonical `gary-app/dist/Toby.app`. Use Settings → This Mac to verify its path and `com.rohan.toby.next` ID. Reopen setup and Check / enable access. The development-signature transition may require one fresh permission grant and a quit/reopen before capture works. Check actual meeting-audio capture after authorization; a green setup status alone does not verify audio buffers.
+
+The older `gary/dist/Toby.app` uses `com.toby.agent` but has the same display name. It remains untouched. Any stale Toby permission entries must be identified/reauthorized by the user in System Settings; no `tccutil reset`, TCC database edits or legacy app removal was performed. Verify permission survives the next rebuild under the pinned certificate. If access still fails, collect the full in-app error including its app path.

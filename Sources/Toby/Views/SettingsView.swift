@@ -123,7 +123,14 @@ struct SettingsView: View {
                         LabeledContent(
                             "Version",
                             value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-                                ?? "0.7.0")
+                                ?? "0.7.1")
+                        Text(
+                            "App location: \(Bundle.main.bundleURL.path)\nIdentity: \(Bundle.main.bundleIdentifier ?? "Unknown")"
+                        )
+                        .font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
+                        Button("Show this copy in Finder") {
+                            NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
+                        }
                         Text(
                             "This fresh app has its own library. Existing Toby data is not imported or modified."
                         )

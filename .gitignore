@@ -6,3 +6,6 @@ dist/
 
 # Downloaded Google OAuth client configuration
 client_secret*.json
+
+# Machine-local signing certificate selection
+.local-code-sign-identity

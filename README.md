@@ -2,7 +2,7 @@
 
 A voice-first personal workspace for macOS. Think out loud, capture meetings, keep useful notes, and ask an agent to do the follow-through.
 
-This is the fresh implementation in `gary-app`, version **0.7.0**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
+This is the fresh implementation in `gary-app`, version **0.7.1**. It preserves the previous Toby app’s dark, editorial direction while replacing its architecture. No permanent conversation sidebar. No data migration from the old app.
 
 ## Build
 
@@ -13,9 +13,9 @@ swift build
 scripts/build-app.sh
 ```
 
-The second command produces `dist/Toby.app` with its icon, permission descriptions and local ad-hoc signature. It does **not** launch it. Open that bundle yourself for microphone, speech and calendar permissions; do not use `swift run` for permission-sensitive QA. Move the bundle to Applications if enabling launch at login.
+The second command produces `dist/Toby.app` with its icon, permission descriptions and stable development signature. It does **not** launch it. Open that bundle yourself for microphone, speech and calendar permissions; do not use `swift run` for permission-sensitive QA. Move the bundle to Applications if enabling launch at login.
 
-The package can also be opened in Xcode using `Package.swift`. No third-party Swift dependencies.
+The package can also be opened in Xcode using `Package.swift`. No third-party Swift dependencies. Local builds require an Apple Development signing certificate in Keychain (create one through Xcode Settings → Accounts → Manage Certificates). The build script pins the first available certificate locally; `CODE_SIGN_IDENTITY` can explicitly override it. Ad-hoc signing is rejected because it changes permission identity between builds. Quit Toby before rebuilding its bundle; running copies are never overwritten.
 
 ## First-launch setup
 
@@ -60,7 +60,7 @@ This is a first implementation for Rohan’s manual QA, not a runtime-verified r
 - The model receives at most 100,000 characters of an item’s reference body, 30,000 characters of existing notes, and 20 remembered items of 2,000 characters each. Original recordings and transcripts are retained locally; longer meetings need a future chunked summarization pipeline.
 - No Gmail/Drive integration, cloud agent, cross-device sync, autonomous messaging, imported legacy data, speaker identification or playbook system is included in this baseline.
 - Both CLIs own authentication and may use their existing local configuration. Toby never reads credential files, copies tokens or asks for an API key. Grok explicitly authenticates with its cached CLI token; no API-key fallback is selected by Toby. Grok uses the resolved or explicitly selected model and native tools; permission requests are presented for one-time approval. Executable discovery supports standard installs and NVM; Settings can select a custom executable.
-- Local builds are ad-hoc signed, not Developer ID signed or notarized. Distribution packaging needs a signed runtime bundle and notarization work.
+- Local builds use an Apple Development certificate, not Developer ID distribution signing or notarization. Distribution packaging needs a signed runtime bundle and notarization work.
 
 ## Data and privacy
 

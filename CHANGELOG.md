@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.1 — 2026-09-22
+
+- Replace ad-hoc signing with a persistent, locally pinned development certificate so permission identity no longer changes with the binary hash. Reject ad-hoc fallback.
+- Refuse to overwrite a running Toby bundle; support an explicit staging path for builds.
+- Show the current app path and bundle ID in Settings and failed meeting-audio verification guidance to distinguish legacy/new copies.
+- No permission resets, old-app removal, app launch or audio testing. Existing stale permission grants may need reauthorization after switching signing identity.
+
 ## 0.7.0 — 2026-09-22
 
 - Add nonactivating desktop meeting prompts with Join & take notes, dismiss and five-minute snooze, styled for Toby’s black interface.
