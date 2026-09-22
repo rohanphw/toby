@@ -11,6 +11,7 @@ struct ModelOption: Identifiable {
     var isBusy = false
     var models: [ModelOption] = []
     var error: String?
+    private(set) var defaultModelID: String?
     private var operation: Task<Void, Never>?
     private var transport: CLITransport?
     private var generation = UUID()
@@ -57,7 +58,13 @@ struct ModelOption: Identifiable {
                     let response = try await client.request(
                         "model/list", ["includeHidden": .bool(false), "limit": .number(100)])
                     guard generation == token else { return }
-                    models = (response["data"].array ?? []).compactMap {
+                    let config = try await client.request("config/read", ["includeLayers": .bool(false)])
+                    guard generation == token else { return }
+                    let catalog = response["data"].array ?? []
+                    defaultModelID =
+                        config["config"]["model"].string
+                        ?? catalog.first(where: { $0["isDefault"].bool == true })?["model"].string
+                    models = catalog.compactMap {
                         guard let model = $0["model"].string else { return nil }
                         return ModelOption(id: model, name: $0["displayName"].string ?? model)
                     }
@@ -74,6 +81,7 @@ struct ModelOption: Identifiable {
                         throw TobyError(
                             "Grok did not return a model catalog. Update the Grok CLI, then check again.")
                     }
+                    defaultModelID = response["result"]["currentModelId"].string
                     models = available.compactMap {
                         guard let id = $0["modelId"].string else { return nil }
                         return ModelOption(id: id, name: $0["name"].string ?? id)
@@ -83,6 +91,18 @@ struct ModelOption: Identifiable {
                             "No Grok models are available for this CLI session. Check your Grok login, then refresh."
                         )
                     }
+                }
+                guard let defaultModelID, !defaultModelID.isEmpty else {
+                    throw TobyError(
+                        "The \(provider.title) CLI did not report its default model. Check its configuration in Terminal, then retry in Settings."
+                    )
+                }
+                if !models.contains(where: { $0.id == defaultModelID }) {
+                    models.append(ModelOption(id: defaultModelID, name: defaultModelID))
+                }
+                let key = provider.rawValue + "Model"
+                if (UserDefaults.standard.string(forKey: key) ?? "").isEmpty {
+                    UserDefaults.standard.set(defaultModelID, forKey: key)
                 }
             } catch is CancellationError {} catch {
                 guard generation == token else { return }

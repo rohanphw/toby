@@ -1,4 +1,4 @@
-# Architecture — 0.4.0
+# Architecture — 0.4.1
 
 ## Product
 
@@ -31,7 +31,7 @@ Streaming updates are checkpointed at most 500ms after the first unsaved change,
 
 The local app-server uses newline-delimited JSON over stdio. Each request has a 30-second deadline and cancellation cleanup. Process identity is generation-scoped to prevent callbacks from a terminated child affecting a new owner. Each task resumes the item’s runtime thread or creates one in that same item’s workspace. User-configured models apply to the next task. Command/file approvals are one-time; unknown server requests are explicitly rejected. User-input questions are presented in a native sheet.
 
-Agent messages retain their runtime item identity. Completed message text can reconcile missed deltas. Status checks are isolated. Stop closes stdin, terminates the child and schedules a force kill if it remains alive. No provider call runs merely because the app launches.
+Agent messages retain their runtime item identity. Completed message text can reconcile missed deltas. Status checks are isolated. Stop closes stdin, terminates the child and schedules a force kill if it remains alive. Launch performs isolated CLI authentication, model-catalog and default-model discovery, without sending any prompt.
 
 A three-minute event-silence watchdog stops unresponsive work, except while the app waits for an approval or a user answer. The UI exposes status and errors and retains the user prompt for a subsequent follow-up.
 
@@ -55,6 +55,6 @@ Codex uses `account/read` on its authenticated app-server. Grok runs `agent --no
 
 Protocol references: [xAI headless/ACP documentation](https://docs.x.ai/build/cli/headless-scripting), [official agent-mode documentation](https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-pager/docs/user-guide/15-agent-mode.md). Installed CLI help was inspected; provider sessions were not exercised.
 
-Home and Settings share persisted `agentProvider`, `codexModel` and `grokModel` defaults through the same picker component. Explicit discovery uses each provider’s isolated account connection; opening Home does not start a CLI process. Grok discovery calls `_x.ai/models/list` after cached-token authentication and reads the extension result envelope’s `availableModels` (`modelId`, `name`). Before prompting a new Grok session, a nonempty selected model is applied with `session/set_model`; rejection stops the task before the prompt, without a fallback to another model. Empty selection leaves the CLI default intact. See [Grok model research](grok-models.md).
+Home and Settings share persisted `agentProvider`, `codexModel` and `grokModel` defaults through the same picker component. Both provider catalogs load once on app launch in separate account connections. Settings can retry failed checks. Grok discovery calls `_x.ai/models/list` after cached-token authentication and reads the extension result envelope’s `availableModels` (`modelId`, `name`). Before prompting a new Grok session, a nonempty selected model is applied with `session/set_model`; rejection stops the task before the prompt, without a fallback to another model. Unset choices are resolved and saved as concrete IDs: Codex uses `config/read.config.model`, falling back to the catalog `isDefault` only when no model is configured; Grok uses `currentModelId`. Existing explicit choices are preserved. A task cannot run with an unresolved empty model. See [Grok model research](grok-models.md).
 
-The main header reads the existing `Toby.icns` image directly from the packaged app resources. It adds no asset dependency and preserves the Dock icon. Glossy black background highlights fall back to solid black with Reduce Transparency.
+The main header reads the existing `Toby.icns` image directly from the packaged app resources. It adds no asset dependency and preserves the Dock icon. The canvas, surface outlines, and hover fills contain no gradients. The header logo is 48 points. Custom model popovers provide search, arrow navigation, Return selection, Escape dismissal and selected-state accessibility. Search fields use plain text editing with custom solid fill, focus border and clear buttons.

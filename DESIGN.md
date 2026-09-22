@@ -2,11 +2,11 @@
 
 ## Scene and direction
 
-A personal Mac workspace for thinking between calls and returning to unfinished ideas in the evening. Glossy black surfaces, restrained highlights and soft native typography give Toby a distinct personal Mac identity. The original Toby logo sits immediately left of the header wordmark.
+A personal Mac workspace for thinking between calls and returning to unfinished ideas in the evening. Flat black surfaces, restrained solid borders and soft native typography give Toby a distinct personal Mac identity. The original Toby logo sits immediately left of the header wordmark.
 
 ## Palette
 
-Neutral black canvas #000000, surfaces around #0E0E0E, drawer #131313, text #F5F5F5, secondary #A3A3A3, silver-blue accent #D4E0F0. A subdued diagonal light falloff and fine highlighted surface edges create gloss without blur or tinted brown backgrounds. Reduce Transparency uses a solid black canvas.
+Neutral black canvas #000000, surfaces around #0E0E0E, drawer #131313, text #F5F5F5, secondary #A3A3A3, silver-blue accent #D4E0F0. No gradients anywhere, including background, surface borders or hover states. Use solid black/neutral fills and thin solid borders. The header logo is 48 points.
 
 ## Type
 
@@ -14,7 +14,7 @@ Native SF rounded for prominent titles and the wordmark; regular SF for prose an
 
 ## Layout
 
-Top navigation remains compact. Home has a clear voice entry, an understated writing input, and a chronological shelf of actual work. Notes and meetings use grouped rows rather than a repeated card grid. Thread content is readable, left-aligned and centered within the available page.
+Top navigation uses a larger logo next to Toby. Provider selection uses custom segments; models use a searchable custom list. Search fields have custom solid backgrounds, focus borders and clear actions. Home has a clear voice entry, an understated writing input, and a chronological shelf of actual work. Notes and meetings use grouped rows rather than a repeated card grid. Thread content is readable, left-aligned and centered within the available page.
 
 ## Voice
 

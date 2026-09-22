@@ -1,4 +1,4 @@
-# Manual QA handoff — 0.4.0
+# Manual QA handoff — 0.4.1
 
 Per Rohan’s instruction, the agent did not launch the app, capture screenshots, perform visual QA, control the app/device, or run functionality tests. Build success does not establish any of the behaviors below on a real device.
 
@@ -36,8 +36,12 @@ Rohan reported voice working before this iteration. This redesign has compile/pa
 
 ## Home model selector
 
-Load Codex models from Home, choose a default, confirm Settings reflects it, and verify the next typed/voice task uses it. Relaunch and confirm the choice persists. Switch to Grok, load its models, save a specific choice and verify the next task uses it. Repeat with CLI default. Verify loading failures appear inline and Home selection is disabled during an active task. These checks are for Rohan; the agent has not exercised provider sessions.
+Wait for automatic model discovery on Home, choose a default, confirm Settings reflects it, and verify the next typed/voice task uses it. Relaunch and confirm the choice persists. Switch to Grok, inspect its automatically loaded models, save a specific choice and verify the next task uses it. With no saved Toby choice, confirm the real CLI-configured model is selected. Verify loading failures appear inline and Home selection is disabled during an active task. These checks are for Rohan; the agent has not exercised provider sessions.
 
 ## Grok model and black-theme update
 
 Verify Home and Settings synchronize each provider’s separate saved choice, including after relaunch. Try model-load failure, stale/unavailable selection and switching providers; a rejected explicit Grok model must not silently run a different one. Confirm the logo appears to the left of Toby in the packaged app header, black surfaces remain readable at minimum window size, and Reduce Transparency removes the background gloss. These are manual checks for Rohan, not agent-verified behavior.
+
+## Custom controls and automatic defaults
+
+Verify both catalogs load at launch without a button, failed discovery stays visible and retry works in Settings. With an unset Toby model, confirm Codex honors its configured model and Grok its current model ID; existing explicit choices must survive relaunch. Check model-search typing, Up/Down/Return/Escape, outside dismissal, VoiceOver selection, and long names. Check library/search clear buttons, keyboard focus, larger header logo, flat backgrounds and solid hover fills. Not run by the agent.

@@ -140,25 +140,12 @@ private struct HomeModelSelector: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
                 Text("Default model").foregroundStyle(Theme.secondary)
-                Picker("Provider", selection: $provider) {
-                    ForEach(CLIProvider.allCases) { Text($0.title).tag($0.rawValue) }
-                }.labelsHidden().frame(width: 110)
+                ProviderSelector(selection: $provider).frame(width: 150)
                 DefaultModelPicker(
                     account: account,
                     selection: provider == CLIProvider.grok.rawValue ? $grokModel : $codexModel
                 )
                 .labelsHidden().frame(maxWidth: 240)
-                if account.isBusy {
-                    ProgressView().controlSize(.small).accessibilityLabel("Loading models")
-                } else {
-                    Button {
-                        account.refresh()
-                    } label: {
-                        Label(
-                            account.models.isEmpty ? "Load models" : "Refresh", systemImage: "arrow.clockwise"
-                        )
-                    }.buttonStyle(QuietButtonStyle())
-                }
                 Spacer(minLength: 0)
             }.font(.system(size: 13)).disabled(model.agent.isRunning)
             if let error = account.error {

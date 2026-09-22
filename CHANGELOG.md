@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1 — 2026-09-22
+
+- Remove all background and surface-border gradients; use solid hover fills. Enlarge the header logo to 48 points.
+- Replace native model/provider pickers and search chrome with custom styled controls, searchable model lists and library filter segments.
+- Load both CLI model catalogs at launch. Resolve unset defaults to concrete configured model IDs, preserve explicit choices, and remove the Home load button and CLI-default option.
+- Build/package validation only; no visual or functionality QA.
+
 ## 0.4.0 — 2026-09-22
 
 - Discover Grok models through its authenticated ACP catalog and apply the saved choice before prompting each session. Home and Settings share model pickers for both providers; CLI default remains available.

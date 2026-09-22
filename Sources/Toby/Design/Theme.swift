@@ -14,26 +14,12 @@ enum Theme {
     static func heading(_ size: CGFloat) -> Font { .system(size: size, weight: .medium, design: .rounded) }
 }
 struct WorkspaceBackground: View {
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    var body: some View {
-        ZStack {
-            Theme.canvas
-            if !reduceTransparency {
-                LinearGradient(
-                    colors: [Color(white: 0.10), Color(white: 0.025), .black],
-                    startPoint: .topLeading, endPoint: .bottomTrailing)
-            }
-        }.ignoresSafeArea()
-    }
+    var body: some View { Theme.canvas.ignoresSafeArea() }
 }
 struct Surface: ViewModifier {
     func body(content: Content) -> some View {
-        content.padding(22).background(Theme.surface.opacity(0.7), in: RoundedRectangle(cornerRadius: 18))
-            .overlay(
-                RoundedRectangle(cornerRadius: 18).stroke(
-                    LinearGradient(
-                        colors: [.white.opacity(0.19), Theme.line.opacity(0.3)],
-                        startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1))
+        content.padding(22).background(Theme.surface, in: RoundedRectangle(cornerRadius: 18))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.line, lineWidth: 1))
     }
 }
 extension View { func surface() -> some View { modifier(Surface()) } }

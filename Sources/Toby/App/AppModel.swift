@@ -22,6 +22,7 @@ import Observation
     var notice: String?
     var showSettings = false
     var revealWorkspace: (() -> Void)?
+    private var servicesStarted = false
     private let hotkey = GlobalShortcut()
     init() throws {
         library = try Library()
@@ -55,6 +56,10 @@ import Observation
         schedule.onEnd = { [weak self] in self?.meetings.finish() }
     }
     func startServices() {
+        guard !servicesStarted else { return }
+        servicesStarted = true
+        account.refresh()
+        grokAccount.refresh()
         schedule.beginMonitoring()
         hotkey.register { [weak self] in self?.startVoice() }
     }

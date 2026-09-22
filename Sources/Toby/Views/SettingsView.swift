@@ -26,9 +26,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     SettingsSection(title: "Intelligence") {
-                        Picker("Provider for new tasks", selection: $provider) {
-                            ForEach(CLIProvider.allCases) { Text($0.title).tag($0.rawValue) }
-                        }.disabled(model.agent.isRunning)
+                        ProviderSelector(selection: $provider).disabled(model.agent.isRunning)
                         CLIConnectionView(account: model.account)
                         DefaultModelPicker(account: model.account, selection: $codexModel)
                             .disabled(model.agent.isRunning)
@@ -109,7 +107,7 @@ struct SettingsView: View {
                         LabeledContent(
                             "Version",
                             value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-                                ?? "0.4.0")
+                                ?? "0.4.1")
                         Text(
                             "This fresh app has its own library. Existing Toby data is not imported or modified."
                         )

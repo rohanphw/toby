@@ -31,14 +31,14 @@ struct LibraryView: View {
                 ).font(.system(size: 13)).foregroundStyle(Theme.secondary)
             }
             HStack {
-                TextField("Find a thought, meeting or conversation", text: $query).textFieldStyle(
-                    .roundedBorder
-                ).frame(maxWidth: 350)
+                WorkspaceSearchField(placeholder: "Find a thought, meeting or conversation", text: $query)
+                    .frame(maxWidth: 390)
                 Spacer()
-                Picker("Show", selection: $kind) {
-                    Text("Everything").tag(Optional<ItemKind>.none)
-                    ForEach(ItemKind.allCases) { Text($0.label).tag(Optional($0)) }
-                }.labelsHidden().frame(width: 150)
+                HStack(spacing: 4) {
+                    filterButton("All", value: nil)
+                    ForEach(ItemKind.allCases) { filterButton($0.label, value: $0) }
+                }.padding(4).background(Theme.surface, in: RoundedRectangle(cornerRadius: 12))
+
             }
             if items.isEmpty {
                 EmptyWorkspace(
@@ -54,13 +54,25 @@ struct LibraryView: View {
             }
         }
     }
+    private func filterButton(_ title: String, value: ItemKind?) -> some View {
+        Button {
+            kind = value
+        } label: {
+            Text(title).font(.system(size: 12, weight: .medium))
+                .padding(.horizontal, 10).padding(.vertical, 10)
+                .background(
+                    kind == value ? Color(white: 0.16) : .clear, in: RoundedRectangle(cornerRadius: 8)
+                )
+                .foregroundStyle(kind == value ? Theme.ink : Theme.secondary)
+        }.buttonStyle(.plain).accessibilityAddTraits(kind == value ? .isSelected : [])
+    }
+
 }
 
 struct SearchView: View {
     let model: AppModel
     @Environment(\.dismiss) private var dismiss
     @State private var query = ""
-    @FocusState private var focused: Bool
     private var results: [LibraryItem] {
         guard !query.isEmpty else { return Array(model.library.items.prefix(10)) }
         return model.library.items.filter {
@@ -71,10 +83,7 @@ struct SearchView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack {
-                Image(systemName: "magnifyingglass").foregroundStyle(Theme.secondary)
-                TextField("What are you looking for?", text: $query).textFieldStyle(.plain).font(
-                    .system(size: 20)
-                ).focused($focused)
+                WorkspaceSearchField(placeholder: "What are you looking for?", text: $query, autofocus: true)
                 Button("Done") { dismiss() }.keyboardShortcut(.cancelAction)
             }
             Divider()
@@ -100,6 +109,6 @@ struct SearchView: View {
                 }
             }
         }.padding(28).frame(width: 640, height: 430).background(Theme.canvas).foregroundStyle(Theme.ink)
-            .onAppear { focused = true }
+
     }
 }

@@ -112,7 +112,7 @@ private struct WorkspaceNavigation: View {
                 HStack(spacing: 8) {
                     if let logo = Theme.logo {
                         Image(nsImage: logo).resizable().interpolation(.high)
-                            .scaledToFit().frame(width: 32, height: 32).accessibilityHidden(true)
+                            .scaledToFit().frame(width: 48, height: 48).accessibilityHidden(true)
                     }
                     Text("Toby").font(Theme.heading(25))
                 }
@@ -144,7 +144,7 @@ private struct WorkspaceNavigation: View {
             } label: {
                 Image(systemName: "slider.horizontal.3")
             }.accessibilityLabel("Settings")
-        }.buttonStyle(.plain).padding(.leading, 80).padding(.trailing, 30).frame(height: 64)
+        }.buttonStyle(.plain).padding(.leading, 80).padding(.trailing, 30).frame(height: 76)
     }
 }
 
