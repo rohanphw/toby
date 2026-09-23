@@ -66,6 +66,10 @@ struct MenuBarView: View {
                 model.startMeeting()
                 openWindow(id: "main")
             }.disabled(model.meetings.active || model.voice.active)
+            Button("Quick capture") {
+                model.beginCapture()
+                showWorkspace()
+            }
             Button("Open workspace") { showWorkspace() }
             if model.agent.isRunning {
                 Text(model.agent.phase).font(.caption).foregroundStyle(Theme.secondary)

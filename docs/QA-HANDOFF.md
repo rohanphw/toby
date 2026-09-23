@@ -103,3 +103,7 @@ No app launch, browser sign-in, visual QA or functionality tests were performed 
 - Run Codex and Grok separately. They must operate in their own workspace while attempts to read another workspace, archived files, or Toby's SQLite store fail. Confirm Codex tools avoid nested sandbox failures with externalSandbox; verify auth, ordinary commands and output creation still work. This was not exercised by the agent.
 - After archiving remembered text, send a fresh task and inspect its supplied context; archived text must be absent. Old provider sessions must not resume. Previously copied text in other chats/provider caches is outside retrospective forgetting.
 - Permanently delete archived/active items; verify messages and files disappear without Trash. Simulate database/filesystem failures and interrupted staging to verify rollback/recovery and truthful cleanup errors. No live user data was deleted during development.
+
+## 0.11.0 — workspace rollout (user-run)
+
+See [workspace rollout acceptance checks](workspace-rollout.md) for capture, projects, meeting preparation, task review, cited library answers, daily briefs and saved workflows. Release and test targets compile; tests have not been executed. Runtime, provider, Services, global shortcut, accessibility and visual acceptance remain unverified. The iPhone companion is excluded.

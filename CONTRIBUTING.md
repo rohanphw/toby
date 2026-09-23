@@ -18,7 +18,7 @@ plutil -lint Packaging/Info.plist Packaging/Toby.entitlements
 bash -n scripts/build-app.sh
 ```
 
-There is currently no automated runtime test suite. Describe the behavior you changed, the checks you ran, and any manual checks you did not run. For changes to recording, permissions, provider execution, or persistence, use the relevant cases in [QA-HANDOFF.md](docs/QA-HANDOFF.md). Do not use real private meeting data in bug reports or fixtures.
+Focused workspace tests live in `Tests/TobyTests`. Compile them with `swift build --build-tests`; run `swift test` only when runtime testing is authorized. They use synthetic content and temporary directories. Describe the behavior you changed, the checks you ran, and any manual checks you did not run. For changes to recording, permissions, provider execution, or persistence, use the relevant cases in [QA-HANDOFF.md](docs/QA-HANDOFF.md). Do not use real private meeting data in bug reports or fixtures.
 
 Keep changes scoped and follow the existing SwiftUI and Observation patterns. Update documentation and the changelog when user-visible behavior changes. Maintainers coordinate version bumps and releases.
 

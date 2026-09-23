@@ -90,6 +90,14 @@ struct CalendarPage: View {
                                 StatusLabel(text: "Happening now", tone: .success)
                             }
                             HStack(spacing: 10) {
+                                Menu("Prepare") {
+                                    Button("Find related notes") { model.prepareMeeting(entry) }
+                                    ForEach(model.workspace.data.projects) { project in
+                                        Button("With \(project.name)") {
+                                            model.prepareMeeting(entry, projectID: project.id)
+                                        }
+                                    }
+                                }.disabled(!model.canStartWorkspaceTask)
                                 if let meeting = entry.meeting {
                                     Button("Join") { NSWorkspace.shared.open(meeting.joinURL) }
                                     Button("Join & take notes") {

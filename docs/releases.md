@@ -1,8 +1,16 @@
 # Releases
 
+## v0.11.0
+
+The workspace release adds projects, cited library answers, reviewed commitments, meeting preparation, daily briefs, reusable workflows and quick capture. The installer uses the approved simple light design. App version `0.11.0`, build `20`; Apple Silicon, macOS 14+. Google OAuth verification remains pending.
+
+Download: https://github.com/rohanphw/toby/releases/tag/v0.11.0
+
+Validation: release and test-target compilation, signed package checks, and Apple notarization. Functional tests and visual QA were not run by the agent. The user reviewed and approved the simplified installer. See [workspace rollout](workspace-rollout.md) for feature boundaries and manual checks.
+
 ## v0.10.1
 
-The current public release includes the remembered-context compiler compatibility fix and public source documentation. The `v0.10.1` tag matches the binary source; app version is `0.10.1`, build `19`. Distribution targets Apple Silicon and macOS 14+, with Developer ID signing, hardened runtime, and notarization for both app and DMG. Google OAuth verification remains pending.
+This release includes the remembered-context compiler compatibility fix and public source documentation. The `v0.10.1` tag matches the binary source; app version is `0.10.1`, build `19`. Distribution targets Apple Silicon and macOS 14+, with Developer ID signing, hardened runtime, and notarization for both app and DMG. Google OAuth verification remains pending.
 
 Download: https://github.com/rohanphw/toby/releases/tag/v0.10.1
 
@@ -30,3 +38,24 @@ Update `VERSION`, bundle metadata, and `CHANGELOG.md` together. Build from a kno
 Sign the staged app with Developer ID, hardened runtime, and a secure timestamp. Submit it to Apple, wait for acceptance, staple the ticket, and validate both the ticket and Gatekeeper assessment. Package that app with an Applications shortcut in a DMG, sign the image, and submit/staple/validate the image too. Generate checksums after stapling, since stapling changes the artifact's bytes.
 
 Keep OAuth configuration, signing material, and notarization credentials outside Git. Release assets belong in GitHub Releases, not the source tree. Publish a tag matching the built source, include architecture and system requirements, verify the uploaded bytes, and update the website's explicit versioned download URL.
+
+## Branded installer packaging
+
+The installer is a native Finder drag-to-Applications window with a 640 × 400 point layout and a light background for readable native black icon labels. Its background is rendered as a single 72-dpi PNG by `Packaging/Installer/render-background.swift`. The actual app and Applications shortcut remain normal, accessible Finder items; the background arrow is decorative. Artwork and icon positions are configured together in `Packaging/Installer/settings.py`.
+
+Set up the packaging tool once:
+
+```sh
+python3 -m venv .local/dmg-tools/venv
+.local/dmg-tools/venv/bin/pip install -r Packaging/Installer/requirements.txt
+```
+
+Package an already signed app using absolute paths:
+
+```sh
+scripts/build-dmg.sh /absolute/path/Toby.app /absolute/path/Toby-version-arm64.dmg
+```
+
+The script refuses to overwrite an existing image, verifies the app signature and disk-image integrity, and builds the Finder metadata without opening Finder. It preserves the input app and local signing identity. It does not sign or notarize the resulting DMG; follow the release steps above before distribution. The volume version is read from the input app, not the source checkout.
+
+For the local v0.11.0 preview, packaging and saved layout metadata were checked without visual QA. Before release, manually inspect the mounted window on a Retina display, in light/dark macOS appearance and at larger accessibility text settings. Verify both icon labels, drag installation, window bounds and eject behavior. No installer automation should launch the app or grant permissions.

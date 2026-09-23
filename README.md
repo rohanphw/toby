@@ -17,6 +17,10 @@ Toby gives the things you think about a place to go. Talk through an idea, write
 
 Built in Swift and SwiftUI, with local storage and no third-party Swift dependencies.
 
+## New in v0.11.0
+
+This release adds Projects, Ask your library, task and commitment review, meeting preparation, a daily brief, reusable workflows, and quick capture. See [the rollout guide](docs/workspace-rollout.md) for usage, data boundaries, and manual checks.
+
 ## What Toby does
 
 - **Think out loud.** Start a conversation from the app, menu bar, or Control–Option–Space. Speech is transcribed on your Mac. Replies appear as text.
@@ -29,7 +33,7 @@ Built in Swift and SwiftUI, with local storage and no third-party Swift dependen
 
 ## Availability
 
-**[Download Toby v0.10.1 for Apple Silicon](https://github.com/rohanphw/toby/releases/download/v0.10.1/Toby-0.10.1-arm64.dmg)** · [Release notes and checksum](https://github.com/rohanphw/toby/releases/tag/v0.10.1)
+**[Download Toby v0.11.0 for Apple Silicon](https://github.com/rohanphw/toby/releases/download/v0.11.0/Toby-0.11.0-arm64.dmg)** · [Release notes and checksum](https://github.com/rohanphw/toby/releases/tag/v0.11.0)
 
 Requires **an Apple Silicon Mac running macOS 14 or later**. Open the DMG, drag Toby to Applications, then open Toby from Applications. The app is Developer ID signed and notarized by Apple. Intel builds are not included.
 
@@ -71,6 +75,7 @@ Google accounts connect through the browser from setup or Settings. Calendar acc
 | Shortcut | Action |
 | --- | --- |
 | Control–Option–Space | Start talking |
+| Control–Option–C | Quick capture |
 | Command–K | Search |
 | Command–Return | Send a typed follow-up |
 | Command–Comma | Open settings |
@@ -79,7 +84,7 @@ Google accounts connect through the browser from setup or Settings. Calendar acc
 
 Toby stores its library and workspace files in `~/Library/Application Support/TobyNext/`. Google account tokens are stored in macOS Keychain. Voice-mode audio is not saved; meeting recordings are saved locally.
 
-AI features send prompts, relevant conversation text, remembered content, and files read by the selected CLI to that provider. Meeting summaries send transcript text, not the raw recording. These features are not fully offline. The CLI's own configuration and the provider's policies also apply.
+AI features send prompts, relevant conversation text, remembered content, selected project or library excerpts, calendar details for requested briefs and meeting preparation, and files read by the selected CLI to that provider. Meeting summaries send transcript text, not the raw recording. These features are not fully offline. The CLI's own configuration and the provider's policies also apply.
 
 Remember is explicit. Archiving excludes an item from future app-supplied context and memory. Deleting removes the local item and its workspace; it does not erase provider history, backups, exported files, or documents already saved to Google Drive.
 

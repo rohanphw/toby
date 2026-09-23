@@ -48,6 +48,26 @@ struct ItemDetailView: View {
             TextField("Untitled", text: $item.title, axis: .vertical).font(Theme.heading(28))
                 .textFieldStyle(.plain).lineLimit(1...3)
                 .onChange(of: item.title) { _, _ in model.library.changed(item) }
+            HStack {
+                ProjectPicker(
+                    model: model,
+                    selection: Binding(
+                        get: { model.workspace.project(for: item)?.id },
+                        set: { model.assign(item, projectID: $0) })
+                )
+                .disabled(!model.canOrganizeLibrary)
+                Spacer()
+                Button("Find commitments") { model.suggestTasks(from: item) }
+                    .buttonStyle(QuietButtonStyle()).disabled(!model.canStartWorkspaceTask)
+                Menu("Run workflow") {
+                    ForEach(model.workspace.data.workflows) { workflow in
+                        Button(workflow.name) {
+                            model.runWorkflow(
+                                workflow, itemID: item.id, projectID: model.workspace.project(for: item)?.id)
+                        }
+                    }
+                }.disabled(!model.canStartWorkspaceTask)
+            }
             if model.voice.active, model.voice.item?.id == item.id {
                 VoiceCaptureView(model: model)
             }
@@ -88,7 +108,7 @@ struct ItemDetailView: View {
                 }
             }
             if !item.messages.isEmpty {
-                ConversationContent(messages: item.orderedMessages)
+                ConversationContent(messages: item.orderedMessages, model: model)
             }
             DriveToolsView(model: model, item: item)
             ItemComposer(model: model, item: item)
@@ -222,7 +242,8 @@ private struct ItemComposer: View {
             HStack {
                 Text(
                     model.voice.active
-                        ? "End voice to send a typed message" : "This item, attached files & remembered notes"
+                        ? "End voice to send a typed message"
+                        : "This item, project context, attached files & remembered notes"
                 ).font(.system(size: 10)).foregroundStyle(
                     Theme.secondary)
                 Spacer()

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ConversationContent: View {
     let messages: [Message]
+    var model: AppModel? = nil
     var body: some View {
         LazyVStack(alignment: .leading, spacing: 26) {
             ForEach(messages) { message in
@@ -36,6 +37,15 @@ struct ConversationContent: View {
                         .foregroundStyle(
                             message.state == "failed" && message.text != "Stopped" ? Theme.failure : Theme.ink
                         )
+                    if let model, let sources = model.workspace.data.references[message.id.uuidString],
+                        !sources.isEmpty
+                    {
+                        DisclosureGroup("Sources supplied · \(sources.count)") {
+                            ForEach(Array(sources.enumerated()), id: \.offset) { index, source in
+                                SourceLink(model: model, source: source, label: "[S\(index + 1)] Source")
+                            }
+                        }.font(Theme.caption)
+                    }
                 }
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, alignment: .leading)

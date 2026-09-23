@@ -13,6 +13,9 @@ struct WorkspaceView: View {
                     if let notice = model.notice {
                         ErrorNotice(message: notice, tone: .warning) { model.notice = nil }
                     }
+                    if let error = model.workspace.error {
+                        ErrorNotice(message: error) { model.workspace.error = nil }
+                    }
                     if let error = model.library.error {
                         ErrorNotice(message: error) { model.library.error = nil }
                     }
@@ -48,6 +51,9 @@ struct WorkspaceView: View {
                     } else {
                         switch model.page {
                         case .home: HomeView(model: model)
+                        case .projects: ProjectsView(model: model)
+                        case .tasks: TasksView(model: model)
+                        case .workflows: WorkflowsView(model: model)
                         case .library: LibraryView(model: model, memoryOnly: false)
                         case .meetings: MeetingsView(model: model)
                         case .calendar: CalendarPage(model: model)
@@ -91,12 +97,15 @@ struct WorkspaceView: View {
                 "‘\(model.pendingDeletion?.title ?? "Chat")’ and its local messages, attachments and recordings will be permanently deleted. This cannot be undone."
             )
         }
-        .disabled(model.onboarding.isPresented)
-        .accessibilityHidden(model.onboarding.isPresented)
+        .disabled(model.onboarding.isPresented || model.showCapture)
+        .accessibilityHidden(model.onboarding.isPresented || model.showCapture)
         .font(.system(size: 14))
         .foregroundStyle(Theme.ink).background(WorkspaceBackground())
         .overlay(alignment: .trailing) {
-            if model.showSettings {
+            if model.showCapture, let item = model.captureItem {
+                QuickCaptureView(model: model, item: item).id(item.id)
+                    .overlay(alignment: .leading) { Rectangle().fill(Theme.line).frame(width: 1) }
+            } else if model.showSettings {
                 SettingsView(model: model)
                     .frame(width: 430)
                     .background(Theme.drawer)
@@ -159,14 +168,18 @@ private struct WorkspaceNavigation: View {
                 }
             }.buttonStyle(.plain)
             Rectangle().fill(Theme.line).frame(width: 1, height: 20)
-            ForEach(AppModel.Page.allCases, id: \.self) { page in
-                Button {
-                    model.navigate(to: page)
-                } label: {
-                    Text(page.rawValue).font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(
-                            model.page == page && model.selected == nil ? Theme.ink : Theme.secondary)
-                }.buttonStyle(.plain)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 20) {
+                    ForEach(AppModel.Page.allCases, id: \.self) { page in
+                        Button {
+                            model.navigate(to: page)
+                        } label: {
+                            Text(page.rawValue).font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(
+                                    model.page == page && model.selected == nil ? Theme.ink : Theme.secondary)
+                        }.buttonStyle(.plain)
+                    }
+                }
             }
             Spacer(minLength: 10)
             Button {
@@ -186,6 +199,12 @@ private struct WorkspaceNavigation: View {
             } label: {
                 Image(systemName: "magnifyingglass")
             }.help("Search · ⌘K").accessibilityLabel("Search library")
+            Button {
+                model.beginCapture()
+            } label: {
+                Image(systemName: "square.and.pencil")
+            }
+            .help("Quick capture · ⌃⌥C").accessibilityLabel("Quick capture")
             Button {
                 model.startVoice()
             } label: {

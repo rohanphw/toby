@@ -1,16 +1,25 @@
 import AppKit
+import Carbon
 import Observation
 
 @MainActor @Observable final class AppModel {
     enum Page: String, CaseIterable {
         case home = "Home"
         case library = "Library"
+        case projects = "Projects"
+        case tasks = "Tasks"
+        case workflows = "Workflows"
         case calendar = "Calendar"
         case meetings = "Meetings"
         case memory = "Memory"
     }
     let onboarding = OnboardingState()
     let library: Library
+    let workspace: WorkspaceStore
+    private(set) var selectedProjectID: UUID?
+    var showCapture = false
+    var captureItem: LibraryItem?
+    var contextSources: [UUID: [SourceReference]] = [:]
     let agent: AgentSession
     let voice: VoiceSession
     let meetings: MeetingSession
@@ -26,20 +35,25 @@ import Observation
     private struct Destination: Equatable {
         let page: Page
         let itemID: UUID?
+        var projectID: UUID? = nil
     }
     private var backHistory: [Destination] = []
     private var forwardHistory: [Destination] = []
-    private var destination: Destination { Destination(page: page, itemID: selected?.id) }
+    private var destination: Destination {
+        Destination(page: page, itemID: selected?.id, projectID: selectedProjectID)
+    }
     var canGoBack: Bool { showSettings || !backHistory.isEmpty || selected != nil }
     var canGoForward: Bool { !showSettings && !forwardHistory.isEmpty }
     var navigationEnabled: Bool {
-        !onboarding.isPresented && !showSearch && agent.approvals.isEmpty && agent.question == nil
+        !onboarding.isPresented && !showCapture && !showSearch && agent.approvals.isEmpty
+            && agent.question == nil
     }
     func navigate(to page: Page) { visit(Destination(page: page, itemID: nil)) }
     func openItem(_ item: LibraryItem?) {
         guard let item else { return }
-        visit(Destination(page: page, itemID: item.id))
+        visit(Destination(page: page, itemID: item.id, projectID: selectedProjectID))
     }
+    func openProject(_ id: UUID?) { visit(Destination(page: .projects, itemID: nil, projectID: id)) }
     private func visit(_ next: Destination) {
         guard next != destination else { return }
         backHistory.append(destination)
@@ -49,6 +63,8 @@ import Observation
     }
     private func restore(_ next: Destination) {
         page = next.page
+        selectedProjectID =
+            workspace.data.projects.contains(where: { $0.id == next.projectID }) ? next.projectID : nil
         selected = next.itemID.flatMap { id in library.items.first { $0.id == id } }
     }
     func goBack() {
@@ -117,7 +133,12 @@ import Observation
         pendingDeletion = nil
         let wasSelected = selected === item
         if wasSelected { selected = nil }
-        if library.delete(item) { forgetNavigation(id) } else if wasSelected { selected = item }
+        if library.delete(item) {
+            workspace.reconcile(library: library)
+            forgetNavigation(id)
+        } else if wasSelected {
+            selected = item
+        }
     }
     private func forgetNavigation(_ id: UUID) {
         backHistory.removeAll { $0.itemID == id }
@@ -131,11 +152,30 @@ import Observation
     var revealWorkspace: (() -> Void)?
     private var servicesStarted = false
     private let hotkey = GlobalShortcut()
+    private let captureHotkey = GlobalShortcut(id: 2)
     init() throws {
         library = try Library()
+        workspace = try WorkspaceStore()
+        workspace.reconcile(library: library)
         agent = AgentSession(library: library)
         voice = VoiceSession(library: library)
         meetings = MeetingSession(library: library)
+        agent.additionalContext = { [weak self] item, prompt in
+            guard let self else { return "" }
+            let scope = workspace.data.scopes[item.id.uuidString]
+            let project = workspace.project(for: item)
+            guard scope != nil || project != nil else { return "" }
+            let scopeID = scope.flatMap(UUID.init(uuidString:)) ?? project?.id
+            let items = projectItems(scopeID).filter { $0.id != item.id }
+            let sources = LibraryContext.retrieve(
+                prompt, documents: LibraryContext.documents(items), limit: 12, requireMatch: scope != nil)
+            contextSources[item.id] = sources
+            if scope != nil { item.threadID = nil }
+            let heading =
+                project.map { "Project: \($0.name)\nUser project context: \($0.detail)\n" }
+                ?? "Library search\n"
+            return heading + LibraryContext.citationRule + "\n" + LibraryContext.prompt(sources)
+        }
         voice.onUtterance = { [weak self] item, text in
             guard let self else { return }
             if agent.isRunning {
@@ -145,12 +185,20 @@ import Observation
             }
             agent.send(text, to: item)
         }
+        agent.onResponses = { [weak self] item, messageIDs in
+            guard let self, let sources = contextSources.removeValue(forKey: item.id) else { return }
+            workspace.update { data in
+                for id in messageIDs { data.references[id.uuidString] = sources }
+            }
+        }
         agent.onCompletion = { [weak self] item, _ in
             guard let self else { return }
             if voice.item?.id == item.id { voice.responseCompleted() }
         }
         agent.onFailure = { [weak self] id, message in
-            guard let self, voice.item?.id == id, voice.active else { return }
+            guard let self else { return }
+            contextSources.removeValue(forKey: id)
+            guard voice.item?.id == id, voice.active else { return }
             voice.error = message == "Stopped" ? nil : message
             voice.stop()
         }
@@ -206,6 +254,12 @@ import Observation
         schedule.beginMonitoring()
         callDetection.start()
         hotkey.register { [weak self] in self?.startVoice() }
+        if !captureHotkey.register(
+            keyCode: UInt32(kVK_ANSI_C), action: { [weak self] in self?.beginCapture() })
+        {
+            notice =
+                "The quick capture shortcut is already in use. Capture is still available from Toby’s menu bar or Services."
+        }
     }
     func reopenSetup() {
         guard !voice.active, !meetings.active, !agent.isRunning else {
@@ -334,6 +388,7 @@ import Observation
         callDetection.stop()
         meetingPrompt.hide()
         hotkey.unregister()
+        captureHotkey.unregister()
         account.cancel()
         grokAccount.cancel()
         agent.stop()

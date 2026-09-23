@@ -48,6 +48,8 @@ struct HomeView: View {
                     HomeModelSelector(model: model)
                 }.surface()
             }
+            AskLibraryBox(model: model)
+            DailyBriefView(model: model)
             if let upcoming = model.schedule.upcoming.first {
                 HStack(spacing: 14) {
                     Image(systemName: "calendar").foregroundStyle(Theme.accent)

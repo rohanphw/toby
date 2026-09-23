@@ -5,6 +5,9 @@ let package = Package(
     name: "Toby",
     platforms: [.macOS(.v14)],
     products: [.executable(name: "Toby", targets: ["Toby"])],
-    targets: [.executableTarget(name: "Toby", path: "Sources/Toby", resources: [.copy("Resources/ProviderMarks")])],
+    targets: [
+        .executableTarget(name: "Toby", path: "Sources/Toby", resources: [.copy("Resources/ProviderMarks")]),
+        .testTarget(name: "TobyTests", dependencies: ["Toby"]),
+    ],
     swiftLanguageVersions: [.v5]
 )

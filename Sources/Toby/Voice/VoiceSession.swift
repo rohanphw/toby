@@ -22,6 +22,7 @@ import Observation
     private var operation: Task<Void, Never>?
     private var committed = ""
     private var continuous = false
+    private var captureOnly = false
     private var lastText = ""
     private var token = UUID()
     init(library: Library) {
@@ -39,7 +40,15 @@ import Observation
     }
     func start(item: LibraryItem? = nil) {
         guard phase == .idle else { return }
+        captureOnly = false
         self.item = item ?? library.create(.conversation, title: "A conversation")
+        continuous = true
+        listen()
+    }
+    func startCapture(item: LibraryItem) {
+        guard phase == .idle else { return }
+        self.item = item
+        captureOnly = true
         continuous = true
         listen()
     }
@@ -84,6 +93,15 @@ import Observation
                 listen()
                 return
             }
+            if captureOnly {
+                item.body += (item.body.isEmpty ? "" : "\n\n") + text
+                library.changed(item, immediately: true)
+                continuous = false
+                captureOnly = false
+                phase = .idle
+                partial = ""
+                return
+            }
             if item.messages.isEmpty { item.title = String(text.prefix(70)) }
             partial = text
             committed = ""
@@ -115,7 +133,11 @@ import Observation
             if preserveDraft, let item, !unsent.isEmpty,
                 item.messages.last(where: { $0.role == "user" })?.text != unsent
             {
-                item.draft = unsent
+                if captureOnly {
+                    item.body += (item.body.isEmpty ? "" : "\n\n") + unsent
+                } else {
+                    item.draft = unsent
+                }
                 library.changed(item, immediately: true)
             }
             phase = .idle
@@ -129,7 +151,7 @@ import Observation
         } else {
             partial = text
         }
-        guard phase == .listening, text != lastText else { return }
+        guard phase == .listening, !captureOnly, text != lastText else { return }
         lastText = text
         silence?.cancel()
         silence = Task {

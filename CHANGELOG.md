@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.11.0 — 2026-09-23
+
+- Redesigned the drag-to-install window with a simple light welcome surface, correctly scaled artwork, fixed icon positions, and reproducible DMG packaging.
+
+- Add projects with editable context, item membership, project-scoped questions, and navigation history.
+- Add library answers from locally ranked passages with per-response source excerpts and links. Follow-up searches refresh context; archived sources are excluded and deleted-source citation positions stay stable.
+- Add source-backed commitment suggestions, explicit review/acceptance, editable owners and due dates, completion, dismissal, and project filters.
+- Add calendar meeting preparation with related notes or explicit project scope and accepted commitments.
+- Add a live daily overview of meetings and due/overdue tasks, plus an on-demand AI-written brief.
+- Add reusable editable workflows for individual items or projects; results are drafts in new conversations.
+- Add quick capture through Control–Option–C, the menu bar, and the macOS Capture in Toby Service. Capture text, links, files, and on-device dictation without automatically sending to AI.
+- Store new workspace records atomically in Workspace.json alongside the existing library, without a SwiftData schema migration. Preserve source exclusions and clean related records on deletion.
+- Add compile-checked tests for retrieval, task provenance, persistence and cleanup. Runtime, visual and Services/shortcut validation remain manual.
+
 ## 0.10.1 — 2026-09-23
 
 - Prepare public source distribution with MIT licensing, contributor and security guidance, updated setup instructions, and credential-file exclusions.

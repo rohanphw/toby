@@ -1,7 +1,14 @@
 import SwiftUI
 
 @MainActor final class AppDelegate: NSObject, NSApplicationDelegate {
-    var model: AppModel?
+    let captureService = CaptureService()
+    var model: AppModel? {
+        didSet {
+            captureService.model = model
+            NSApp.servicesProvider = captureService
+            NSUpdateDynamicServices()
+        }
+    }
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard let model else { return .terminateNow }
         Task {
@@ -56,6 +63,8 @@ import SwiftUI
                     .disabled(model?.canGoForward != true || model?.navigationEnabled != true)
             }
             CommandGroup(replacing: .newItem) {
+                Button("Quick Capture") { model?.beginCapture() }.keyboardShortcut(
+                    "c", modifiers: [.control, .option])
                 Button("New Note") { model?.newNote() }.keyboardShortcut("n")
                 Button("Search Your Library") { model?.showSearch = true }.keyboardShortcut("k")
                     .disabled(model?.onboarding.isPresented == true)
