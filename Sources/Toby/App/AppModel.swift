@@ -27,6 +27,7 @@ import Observation
     let drive = GoogleDriveStore()
     let callDetection = CallDetection()
     private let meetingPrompt = MeetingPrompt()
+    let updater = AppUpdater()
     let account = AccountConnection()
     let grokAccount = AccountConnection(provider: .grok)
     private(set) var page: Page = .home
@@ -184,6 +185,10 @@ import Observation
                 return
             }
             agent.send(text, to: item)
+        }
+        updater.canRestart = { [weak self] in
+            guard let self else { return false }
+            return canOrganizeLibrary && !showCapture
         }
         agent.onResponses = { [weak self] item, messageIDs in
             guard let self, let sources = contextSources.removeValue(forKey: item.id) else { return }

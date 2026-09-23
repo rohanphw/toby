@@ -15,7 +15,11 @@ Your voice, notes, and meetings. An open-source second brain for your Mac.
 
 Toby gives the things you think about a place to go. Talk through an idea, write a note, or capture a meeting. Come back later, find the useful parts, and ask your chosen AI provider to help with the follow-through.
 
-Built in Swift and SwiftUI, with local storage and no third-party Swift dependencies.
+Built in Swift and SwiftUI, with local storage and Sparkle for signed app updates.
+
+## New in v0.11.1
+
+Settings → General adds Check for updates, with verified download, installation and restart through Sparkle. The first upgrade from v0.11.0 must be installed manually. This release also improves CLI startup compatibility and Grok model discovery.
 
 ## New in v0.11.0
 
@@ -33,7 +37,7 @@ This release adds Projects, Ask your library, task and commitment review, meetin
 
 ## Availability
 
-**[Download Toby v0.11.0 for Apple Silicon](https://github.com/rohanphw/toby/releases/download/v0.11.0/Toby-0.11.0-arm64.dmg)** · [Release notes and checksum](https://github.com/rohanphw/toby/releases/tag/v0.11.0)
+**[Download Toby v0.11.1 for Apple Silicon](https://github.com/rohanphw/toby/releases/download/v0.11.1/Toby-0.11.1-arm64.dmg)** · [Release notes and checksum](https://github.com/rohanphw/toby/releases/tag/v0.11.1)
 
 Requires **an Apple Silicon Mac running macOS 14 or later**. Open the DMG, drag Toby to Applications, then open Toby from Applications. The app is Developer ID signed and notarized by Apple. Intel builds are not included.
 
@@ -106,6 +110,6 @@ Please report security concerns privately using [SECURITY.md](SECURITY.md).
 
 ## License
 
-Toby's source code is available under the [MIT License](LICENSE). Bundled provider marks retain their [third-party license and attribution](Sources/Toby/Resources/ProviderMarks/NOTICE.md); their inclusion does not imply endorsement.
+Toby's source code is available under the [MIT License](LICENSE). Sparkle retains its [license](https://github.com/sparkle-project/Sparkle/blob/2.10.0/LICENSE), also included in the app bundle. Bundled provider marks retain their [third-party license and attribution](Sources/Toby/Resources/ProviderMarks/NOTICE.md); their inclusion does not imply endorsement.
 
 [Changelog](CHANGELOG.md) · [Architecture](docs/architecture.md) · [Google integration](docs/google-calendar.md)

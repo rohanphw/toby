@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.1 — 2026-09-23
+
+- Add a manual Settings → General update check using Sparkle, an appcast with signed archives pointing to GitHub release downloads, and restart deferral during active work.
+- Launch Codex with default stdio arguments and extend the CLI runtime PATH for common Node installations.
+- Discover Grok models through authenticated ACP session setup rather than a private model-list extension.
+- Classify bounded stderr privately into actionable startup errors without displaying or persisting raw logs.
+- Embed and sign Sparkle helper components during packaging. The signing key stays in Keychain.
+- Compilation and packaging checks only; the reported user failure and end-to-end updating remain unverified.
+
 ## 0.11.0 — 2026-09-23
 
 - Redesigned the drag-to-install window with a simple light welcome surface, correctly scaled artwork, fixed icon positions, and reproducible DMG packaging.

@@ -107,3 +107,9 @@ No app launch, browser sign-in, visual QA or functionality tests were performed 
 ## 0.11.0 — workspace rollout (user-run)
 
 See [workspace rollout acceptance checks](workspace-rollout.md) for capture, projects, meeting preparation, task review, cited library answers, daily briefs and saved workflows. Release and test targets compile; tests have not been executed. Runtime, provider, Services, global shortcut, accessibility and visual acceptance remain unverified. The iPhone companion is excluded.
+
+## 0.11.1 (user-run)
+
+- Check Codex and Grok on a clean Finder launch with Homebrew, npm/nvm and standalone installations. Exercise missing Node, unsupported CLI, bad configuration, cancelled check, offline catalog, signed-out account and unavailable model. Capture versions and Terminal startup errors from the affected user. A compile check is not a reproduction.
+- Install the first updater-enabled build manually into Applications. Test no update, valid signed update, invalid signature, offline feed, cancellation and restart from a writable/read-only location. Start a recording after download begins and verify installation waits, then confirm data survives restart. Do not modify the live user's library to simulate failures.
+- No app launch, CLI authentication check, functionality tests or visual QA was performed by the agent.

@@ -1,5 +1,13 @@
 # Releases
 
+## v0.11.1
+
+Adds Settings → General → Check for updates through Sparkle, CLI startup compatibility improvements, standard Grok session model discovery, and actionable private diagnostics. Build 21; Apple Silicon, macOS 14+. The first upgrade from v0.11.0 is manual. Subsequent published releases can be installed through Settings.
+
+Download: https://github.com/rohanphw/toby/releases/tag/v0.11.1
+
+Release validation includes compilation, package signatures, Apple notarization, and signed update-archive verification. The affected user’s CLI failure and actual updater installation remain unverified; no runtime tests or visual QA were performed.
+
 ## v0.11.0
 
 The workspace release adds projects, cited library answers, reviewed commitments, meeting preparation, daily briefs, reusable workflows and quick capture. The installer uses the approved simple light design. App version `0.11.0`, build `20`; Apple Silicon, macOS 14+. Google OAuth verification remains pending.
@@ -59,3 +67,11 @@ scripts/build-dmg.sh /absolute/path/Toby.app /absolute/path/Toby-version-arm64.d
 The script refuses to overwrite an existing image, verifies the app signature and disk-image integrity, and builds the Finder metadata without opening Finder. It preserves the input app and local signing identity. It does not sign or notarize the resulting DMG; follow the release steps above before distribution. The volume version is read from the input app, not the source checkout.
 
 For the local v0.11.0 preview, packaging and saved layout metadata were checked without visual QA. Before release, manually inspect the mounted window on a Retina display, in light/dark macOS appearance and at larger accessibility text settings. Verify both icon labels, drag installation, window bounds and eject behavior. No installer automation should launch the app or grant permissions.
+
+## Signed in-app updates (from 0.11.1)
+
+Sparkle is pinned through Package.resolved. scripts/build-app.sh embeds its framework and signs nested helpers before the outer app. The updater uses the `toby-sparkle` signing account in the maintainer's login Keychain; never export that private key into the repository. Forks must generate their own key and replace SUPublicEDKey and SUFeedURL.
+
+After app and DMG notarization/stapling, run `scripts/generate-appcast.sh /absolute/path/Toby-VERSION-arm64.dmg VERSION`. Verify the generated version, minimum OS, arm64 requirement, URL, signature and file length. Upload the immutable DMG and checksums to the matching public GitHub release, then commit/push appcast.xml. Never change the archive bytes after generating its signature. Do not publish a feed pointing to a draft or missing asset.
+
+The initial feed is seeded from the already released v0.11.0 (build 20), with its archive signature verified against the embedded public key; v0.11.1 (build 21) will see no newer version until a later release is published. The update signing key remains in Keychain. Feed generation rejects new entries missing their Ed25519 signature or carrying a mismatched URL or length. The first updater-enabled version needs a manual installation. The feed must be published as part of that version's release. User-interface and actual upgrade validation remain pending under the compile-only rule.

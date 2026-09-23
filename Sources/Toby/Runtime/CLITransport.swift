@@ -5,6 +5,7 @@ import Foundation
     var onEvent: ((String, JSONValue, JSONValue?) -> Void)?
     var onExit: ((String) -> Void)?
     private var process: Process?
+    private var diagnostics = CLIDiagnostics()
     private var input: FileHandle?
     private var reader: Task<Void, Never>?
     private var generation = UUID()
@@ -31,15 +32,15 @@ import Foundation
         let stdout = Pipe()
         let stderr = Pipe()
         let token = UUID()
+        let diagnostics = CLIDiagnostics()
+        self.diagnostics = diagnostics
         generation = token
         var environment = ProcessInfo.processInfo.environment
-        environment["PATH"] =
-            binary.deletingLastPathComponent().path + ":/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:"
-            + (environment["PATH"] ?? "")
+        environment["PATH"] = provider.launchPath(binary: binary, inherited: environment["PATH"])
         child.environment = environment
         child.currentDirectoryURL = workspace ?? AppPaths.root
         let arguments =
-            provider == .codex ? ["app-server", "--listen", "stdio://"] : ["agent", "--no-leader", "stdio"]
+            provider == .codex ? ["app-server"] : ["agent", "--no-leader", "stdio"]
         if let workspace {
             // Inherited by CLI tools: prompts alone cannot protect archived data on disk.
             let sandbox = URL(fileURLWithPath: "/usr/bin/sandbox-exec")
@@ -87,7 +88,8 @@ import Foundation
         child.standardInput = stdin
         child.standardOutput = stdout
         child.standardError = stderr
-        stderr.fileHandleForReading.readabilityHandler = { handle in _ = handle.availableData }
+        stderr.fileHandleForReading.readabilityHandler = { handle in diagnostics.append(handle.availableData)
+        }
         let chunks = AsyncStream<Data> { continuation in
             DispatchQueue(label: "toby.codex.stdout.\(token)").async {
                 while true {
@@ -99,12 +101,17 @@ import Foundation
             }
         }
         child.terminationHandler = { [weak self] child in
+            stderr.fileHandleForReading.readabilityHandler = nil
             Task { @MainActor in self?.exited(token, status: child.terminationStatus) }
         }
         do { try child.run() } catch {
             try? stdout.fileHandleForWriting.close()
+            try? stderr.fileHandleForWriting.close()
+            stderr.fileHandleForReading.readabilityHandler = nil
             throw error
         }
+        try? stdout.fileHandleForWriting.close()
+        try? stderr.fileHandleForWriting.close()
         process = child
         input = stdin.fileHandleForWriting
         reader = Task { [weak self] in
@@ -128,7 +135,9 @@ import Foundation
                     [
                         "clientInfo": .object([
                             "name": .string("toby_next"), "title": .string("Toby"),
-                            "version": .string("0.10.0"),
+                            "version": .string(
+                                Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+                                    ?? "development"),
                         ])
                     ])
                 try send(.object(["method": .string("initialized")]))
@@ -137,7 +146,12 @@ import Foundation
                     "initialize",
                     [
                         "protocolVersion": .number(1),
-                        "clientInfo": .object(["name": .string("toby"), "version": .string("0.10.0")]),
+                        "clientInfo": .object([
+                            "name": .string("toby"),
+                            "version": .string(
+                                Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+                                    ?? "development"),
+                        ]),
                         "clientCapabilities": .object([
                             "fs": .object(["readTextFile": .bool(false), "writeTextFile": .bool(false)]),
                             "terminal": .bool(false),
@@ -173,7 +187,10 @@ import Foundation
                     try? await Task.sleep(for: .seconds(timeout))
                     guard !Task.isCancelled else { return }
                     self?.fail(
-                        id, TobyError("\(providerName) did not respond to \(method). You can retry."))
+                        id,
+                        TobyError(
+                            "\(providerName) timed out while \(Self.operationName(method)). Check that it works in Terminal, then retry. If it persists, update the CLI."
+                        ))
                 }
                 do {
                     try send(
@@ -240,11 +257,20 @@ import Foundation
         deadlines.removeValue(forKey: id)?.cancel()
         pending.removeValue(forKey: id)?.resume(throwing: error)
     }
+    private static func operationName(_ method: String) -> String {
+        switch method {
+        case "initialize": return "starting the CLI"
+        case "authenticate", "account/read": return "checking your sign-in"
+        case "session/new", "_x.ai/models/list", "model/list": return "loading available models"
+        default: return "waiting for the CLI"
+        }
+    }
     private func exited(_ token: UUID, status: Int32) {
         guard generation == token else { return }
-        for id in Array(pending.keys) { fail(id, TobyError("\(provider.title) exited (\(status)).")) }
+        let message = diagnostics.failure(provider: provider.title, status: status)
+        for id in Array(pending.keys) { fail(id, TobyError(message)) }
         process = nil
         input = nil
-        onExit?("\(provider.title) exited (\(status)).")
+        onExit?(message)
     }
 }

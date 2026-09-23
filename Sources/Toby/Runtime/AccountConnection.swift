@@ -37,6 +37,7 @@ struct ModelOption: Identifiable {
         isAuthenticated = false
         error = nil
         models = []
+        defaultModelID = nil
         let token = UUID()
         generation = token
         operation = Task {
@@ -81,17 +82,25 @@ struct ModelOption: Identifiable {
                     guard generation == token else { return }
                     isAuthenticated = true
                     status = "Using authenticated Grok CLI"
-                    // ACP extensions carry their own result envelope inside JSON-RPC's result.
-                    let response = try await client.request("_x.ai/models/list")
+                    // Standard ACP session setup exposes the authenticated model catalog.
+                    // No prompt is sent; client tool requests are rejected above.
+                    let directory = FileManager.default.temporaryDirectory.appendingPathComponent(
+                        "toby-model-check-" + UUID().uuidString)
+                    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+                    defer { try? FileManager.default.removeItem(at: directory) }
+                    let response = try await client.request(
+                        "session/new",
+                        [
+                            "cwd": .string(directory.path), "mcpServers": .array([]),
+                            "_meta": .object(["yoloMode": .bool(false), "autoMode": .bool(false)]),
+                        ], timeout: 60)
                     guard generation == token else { return }
-                    if let message = response["error"].string ?? response["error"]["message"].string {
-                        throw TobyError(message)
-                    }
-                    guard let available = response["result"]["availableModels"].array else {
+                    guard let available = response["models"]["availableModels"].array else {
                         throw TobyError(
-                            "Grok did not return a model catalog. Update the Grok CLI, then check again.")
+                            "This Grok CLI did not provide its session model catalog. Update Grok in Terminal, then check again."
+                        )
                     }
-                    defaultModelID = response["result"]["currentModelId"].string
+                    defaultModelID = response["models"]["currentModelId"].string
                     models = available.compactMap {
                         guard let id = $0["modelId"].string else { return nil }
                         return ModelOption(id: id, name: $0["name"].string ?? id)

@@ -189,6 +189,7 @@ struct SettingsView: View {
                 Button("Open library folder") { NSWorkspace.shared.open(AppPaths.root) }
                 Button("Reopen setup") { model.reopenSetup() }
             }
+            AppUpdateView(updater: model.updater, busy: !model.canOrganizeLibrary || model.showCapture)
             SettingsGroup("Navigation") {
                 LabeledContent("Back / forward", value: "⌘[ / ⌘]").font(Theme.caption)
                 Text(
@@ -198,7 +199,8 @@ struct SettingsView: View {
             }
             Divider()
             LabeledContent(
-                "Toby", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.10.0"
+                "Toby",
+                value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.10.0"
             )
             .font(Theme.caption).foregroundStyle(Theme.secondary)
             DisclosureGroup("App details") {

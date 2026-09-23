@@ -51,7 +51,22 @@ cp Sources/Toby/Resources/ProviderMarks/*.png "$APP/Contents/Resources/ProviderM
 cp Sources/Toby/Resources/ProviderMarks/NOTICE.md Sources/Toby/Resources/ProviderMarks/LICENSE "$APP/Contents/Resources/ProviderMarks/"
 cp "$GOOGLE_CLIENT" "$APP/Contents/Resources/GoogleOAuthClient.json"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$APP/Contents/Info.plist"
-codesign --force --sign "$IDENTITY" --entitlements Packaging/Toby.entitlements "$APP"
+# SwiftPM links Sparkle; our custom bundle builder must embed and sign its helpers.
+SPARKLE="$PWD/.build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework"
+[[ -d "$SPARKLE" ]] || { echo "Sparkle framework missing after build." >&2; exit 1; }
+mkdir -p "$APP/Contents/Frameworks"
+cp "$PWD/.build/artifacts/sparkle/Sparkle/LICENSE" "$APP/Contents/Resources/Sparkle-LICENSE"
+ditto "$SPARKLE" "$APP/Contents/Frameworks/Sparkle.framework"
+FRAMEWORK="$APP/Contents/Frameworks/Sparkle.framework"
+for COMPONENT in \
+    "$FRAMEWORK/Versions/B/XPCServices/Downloader.xpc" \
+    "$FRAMEWORK/Versions/B/XPCServices/Installer.xpc" \
+    "$FRAMEWORK/Versions/B/Autoupdate" \
+    "$FRAMEWORK/Versions/B/Updater.app" \
+    "$FRAMEWORK"; do
+    codesign --force --options runtime --timestamp --preserve-metadata=entitlements --sign "$IDENTITY" "$COMPONENT"
+done
+codesign --force --options runtime --timestamp --sign "$IDENTITY" --entitlements Packaging/Toby.entitlements "$APP"
 codesign --verify --deep --strict "$APP"
 # Pin this Mac's successful choice; never silently switch certificates on a later build.
 printf '%s\n' "$IDENTITY" > "$IDENTITY_FILE"

@@ -10,6 +10,27 @@ enum CLIProvider: String, CaseIterable, Identifiable {
                 ? "https://developers.openai.com/codex/cli" : "https://docs.x.ai/build/overview")!
     }
     var loginCommand: String { "\(rawValue) login" }
+    func launchPath(binary: URL, inherited: String?) -> String {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        let nvm = home.appendingPathComponent(".nvm/versions/node")
+        let versions =
+            ((try? FileManager.default.contentsOfDirectory(at: nvm, includingPropertiesForKeys: nil)) ?? [])
+            .sorted {
+                $0.lastPathComponent.compare($1.lastPathComponent, options: .numeric) == .orderedDescending
+            }
+        var paths = [
+            binary.deletingLastPathComponent().path,
+            binary.resolvingSymlinksInPath().deletingLastPathComponent().path,
+        ]
+        paths += (inherited ?? "").split(separator: ":").map(String.init)
+        paths += [".local/bin", ".volta/bin", ".asdf/shims", ".local/share/mise/shims", ".bun/bin"].map {
+            home.appendingPathComponent($0).path
+        }
+        paths += versions.map { $0.appendingPathComponent("bin").path }
+        paths += ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin"]
+        var seen = Set<String>()
+        return paths.filter { $0.hasPrefix("/") && seen.insert($0).inserted }.joined(separator: ":")
+    }
     var executable: URL? {
         let home = FileManager.default.homeDirectoryForCurrentUser
         let configured = UserDefaults.standard.string(forKey: rawValue + "Binary")
@@ -29,7 +50,9 @@ enum CLIProvider: String, CaseIterable, Identifiable {
         let nvm = home.appendingPathComponent(".nvm/versions/node")
         candidates +=
             ((try? FileManager.default.contentsOfDirectory(at: nvm, includingPropertiesForKeys: nil)) ?? [])
-            .sorted { $0.lastPathComponent > $1.lastPathComponent }.map {
+            .sorted {
+                $0.lastPathComponent.compare($1.lastPathComponent, options: .numeric) == .orderedDescending
+            }.map {
                 $0.appendingPathComponent("bin/\(rawValue)").path
             }
         return candidates.first(where: { FileManager.default.isExecutableFile(atPath: $0) }).map(
