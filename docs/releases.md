@@ -1,5 +1,11 @@
 # Releases
 
+## v0.10.1
+
+The current public release includes the remembered-context compiler compatibility fix and public source documentation. The `v0.10.1` tag matches the binary source; app version is `0.10.1`, build `19`. Distribution targets Apple Silicon and macOS 14+, with Developer ID signing, hardened runtime, and notarization for both app and DMG. Google OAuth verification remains pending.
+
+Download: https://github.com/rohanphw/toby/releases/tag/v0.10.1
+
 ## v0.10.0
 
 The first public build targets Apple Silicon and macOS 14 or later.

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.10.1 — 2026-09-23
 
 - Prepare public source distribution with MIT licensing, contributor and security guidance, updated setup instructions, and credential-file exclusions.
 - Split remembered-context string assembly into smaller expressions to avoid a Swift compiler timeout on the macOS CI runner; preserve context selection and limits.

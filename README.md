@@ -29,7 +29,7 @@ Built in Swift and SwiftUI, with local storage and no third-party Swift dependen
 
 ## Availability
 
-**[Download Toby v0.10.0 for Apple Silicon](https://github.com/rohanphw/toby/releases/download/v0.10.0/Toby-0.10.0-arm64.dmg)** · [Release notes and checksum](https://github.com/rohanphw/toby/releases/tag/v0.10.0)
+**[Download Toby v0.10.1 for Apple Silicon](https://github.com/rohanphw/toby/releases/download/v0.10.1/Toby-0.10.1-arm64.dmg)** · [Release notes and checksum](https://github.com/rohanphw/toby/releases/tag/v0.10.1)
 
 Requires **an Apple Silicon Mac running macOS 14 or later**. Open the DMG, drag Toby to Applications, then open Toby from Applications. The app is Developer ID signed and notarized by Apple. Intel builds are not included.
 

@@ -7,8 +7,8 @@
 <key>CFBundleExecutable</key><string>Toby</string>
 <key>CFBundleIconFile</key><string>Toby.icns</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>0.10.0</string>
-<key>CFBundleVersion</key><string>18</string>
+<key>CFBundleShortVersionString</key><string>0.10.1</string>
+<key>CFBundleVersion</key><string>19</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>NSHighResolutionCapable</key><true/>
 <key>NSMicrophoneUsageDescription</key><string>Toby uses your microphone when you start talking or record a meeting.</string>
