@@ -29,9 +29,11 @@ Built in Swift and SwiftUI, with local storage and no third-party Swift dependen
 
 ## Availability
 
-Toby is in early development at **v0.10.0**. The first downloadable DMG is being prepared; there is no public binary release yet. Apple notarization and Google OAuth verification are pending. Follow [Releases](https://github.com/rohanphw/toby/releases) for downloads when they are ready.
+**[Download Toby v0.10.0 for Apple Silicon](https://github.com/rohanphw/toby/releases/download/v0.10.0/Toby-0.10.0-arm64.dmg)** · [Release notes and checksum](https://github.com/rohanphw/toby/releases/tag/v0.10.0)
 
-The current release candidate targets **Apple Silicon and macOS 14 or later**. Intel distribution has not been validated. On-device speech recognition depends on language and system support.
+Requires **an Apple Silicon Mac running macOS 14 or later**. Open the DMG, drag Toby to Applications, then open Toby from Applications. The app is Developer ID signed and notarized by Apple. Intel builds are not included.
+
+This is an early release. **Google OAuth verification is still pending**: connecting Google may show an unverified-app warning or be restricted by Google or your organization. Local notes and provider-backed AI features do not require a Google connection. On-device speech recognition depends on language and system support.
 
 ## Build from source
 

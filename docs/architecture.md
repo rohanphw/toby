@@ -109,3 +109,7 @@ Agent CLITransport receives only its active workspace and wraps the CLI in `/usr
 This boundary applies to CLI processes launched by Toby and their descendants. It does not revoke text already copied into another conversation, provider/CLI caches, user-created exports or access by independent apps/agents outside Toby. Already-sent context cannot be retracted. These limitations must not be represented as guaranteed retrospective forgetting.
 
 Source contract: local CLI-generated TurnStartParams/SandboxPolicy schema; [Codex permissions source](https://github.com/openai/codex/blob/main/codex-rs/app-server-protocol/src/protocol/v2/permissions.rs). Runtime Seatbelt/CLI compatibility remains untested under the user's compile-only constraint.
+
+## Public distribution (0.10.0)
+
+Release packaging uses a separate staged bundle with Developer ID signing, hardened runtime, and notarization. Local development builds retain their existing pinned signing identity. See [release provenance and packaging](releases.md). The bundle identifier and local data directory are unchanged; changing signing identity may require fresh macOS permission grants.

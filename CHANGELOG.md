@@ -7,6 +7,8 @@
 
 ## 0.10.0 — 2026-09-23
 
+- First public Apple Silicon DMG for macOS 14+, with Developer ID signing and Apple notarization. Google OAuth verification remains pending.
+
 - Add Archive/Delete context menus to library, recent, meeting and search rows; add Library → Archive with read-only chat viewing and restore.
 - Exclude archived items from normal lists, search and memory context. Clear their Remember/Pin flags, move workspace files into Archive, block new agent requests and reset saved CLI thread references after archive/delete.
 - Launch agent processes with an inherited macOS Seatbelt rule denying access to Toby’s database, archive and other item workspaces. Codex uses externalSandbox to avoid nested Seatbelt profiles; keep its write scope limited to the current workspace, CLI state and temporary directories.
