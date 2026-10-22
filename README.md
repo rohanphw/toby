@@ -4,7 +4,7 @@
 
 Toby is an open-source desktop workspace for persistent personal agents. Start with Toby, add specialists, and let them coordinate in shared conversations using your existing **ChatGPT/Codex or Grok subscription**. Teammates can use different providers.
 
-[Download for Mac](https://github.com/rohanphw/toby/releases/download/v1.0.6/Toby-1.0.6-arm64.dmg) · [Release notes](https://github.com/rohanphw/toby/releases/tag/v1.0.6) · [Website](https://www.thetoby.app) · [Documentation](docs/README.md)
+[Download for Mac](https://github.com/rohanphw/toby/releases/download/v1.0.7/Toby-1.0.7-arm64.dmg) · [Release notes](https://github.com/rohanphw/toby/releases/tag/v1.0.7) · [Website](https://www.thetoby.app) · [Documentation](docs/README.md)
 
 ## Install
 
@@ -17,7 +17,7 @@ Requires an **Apple Silicon Mac running macOS 14 or later**.
 
 Missing provider runtimes prepare automatically, with actual download and verification progress. No Toby account or API key is needed. Model availability and usage limits depend on your provider subscription.
 
-**Version 1.0.6 is Developer ID signed, but is not Apple-notarized or stapled.** macOS may block opening it. Install future releases manually; no automatic updater is included. This Electron rebuild uses separate storage from earlier Swift versions and does not migrate their data.
+**Version 1.0.7 is Developer ID signed, but is not Apple-notarized or stapled.** macOS may block opening it. Install future releases manually; no automatic updater is included. This Electron rebuild uses separate storage from earlier Swift versions and does not migrate their data.
 
 ## What you can do
 

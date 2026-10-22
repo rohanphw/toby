@@ -25,6 +25,8 @@ The app downloads pinned, checksum-verified Codex/Grok runtimes when necessary. 
 
 `bun run test` runs Bun unit tests plus Node SQLite persistence tests. `bun run typecheck` checks application sources. Build the app before compiled-host checks.
 
+After `bun run build`, run `bun run test:renderer` for hidden-window functional checks of onboarding, roster search, message interactions, mixed-provider group creation, drafts and contextual tools. These use isolated fixture data and do not perform screenshots, visual inspection or real model requests.
+
 The Electron integrations use deterministic providers/protocol fixtures and temporary profiles. For example:
 
 ```sh

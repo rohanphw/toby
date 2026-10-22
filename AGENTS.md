@@ -7,6 +7,8 @@ packaging, a proper drag-to-Applications DMG, and functional verification.
 Rohan separately authorized committing and pushing this new public repository to
 `rohanphw/toby`, publishing the 1.0.6 DMG on GitHub Releases and updating the separate
 `toby-site` checkout on main on 2026-10-22. Preserve older repositories and releases.
+Rohan authorized pushing the approved compact UI changes to main, publishing the
+1.0.7 DMG, and updating the landing page release download on 2026-10-23.
 No visual QA or changes to reference checkouts.
 
 ## Product constraints

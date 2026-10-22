@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.7 — 2026-10-23
+
+- Adopt the approved compact Mac-style design: smaller controls and avatars, restrained header, centered conversation/composer and open assistant text.
+- Add a functional sidebar search for agents and groups, with a clear action and empty-results state.
+- Keep model selection in agent settings while presenting a readable agent role in the conversation header.
+- Preserve message reactions, reply/copy, attachments, streaming, group coordination, approvals and reset in the updated shell.
+
+Installer: [Toby-1.0.7-arm64.dmg](https://github.com/rohanphw/toby/releases/download/v1.0.7/Toby-1.0.7-arm64.dmg). Developer ID signed, not notarized; no visual QA performed.
+
 ## 1.0.6 — 2026-10-22
 
 First public release of the Electron rebuild. Earlier Swift releases are a separate app line; this version does not automatically migrate or update them.

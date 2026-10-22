@@ -1,3 +1,47 @@
+# Build verification: Toby 1.0.7
+
+Date: 23 October 2026. Target: Apple Silicon, macOS 14+.
+
+This build implements the approved latest compact option 2 mockup. The real UI uses
+native CSS dimensions, preserving existing assets and system typography: a 244 px
+sidebar (236 px at narrower widths), 68 px header, up to 760 px reading column,
+14 px transcript text, smaller avatars and a single-row composer. Assistant replies
+remain open text; user messages use content-sized charcoal bubbles. Sidebar search
+filters actual agents and groups independently of conversation search. Model choices
+remain in agent settings and workspace details; unavailable voice is explained in Settings.
+
+TypeScript, production build and 24 focused tests passed. Hidden renderer checks
+cover onboarding, model requirements, reply/copy/reactions, attachment pending states,
+streaming row identity and Markdown sanitation, provider setup progress, readable
+approvals, legacy tool activity, adding a Grok teammate, role/name/group search and
+clear/Escape, per-conversation drafts, mixed-provider group creation and sending,
+attachment submission, and Files/Memory/Skills/Routines/Connectors/Settings actions.
+The reusable check is `bun run test:renderer`, after building the app.
+
+Deterministic backend integration checks passed for cross-provider delegation,
+durable result return, streaming/final persistence, approval cancellation, shutdown,
+workspace confinement, all 19 tool presentations and Grok task-bound permission routing.
+No live model requests, external browser actions or real-user data were used.
+
+The Developer ID signed packaged app passed isolated startup with its preload bridge,
+empty local profile and no renderer errors. The app deep signature, DMG signature,
+checksum, Applications shortcut and Finder layout metadata passed. The first signing
+attempt hit an unavailable Apple timestamp service; retry succeeded with timestamps.
+The build is not notarized or stapled.
+
+Installer: `Toby-1.0.7-arm64.dmg`. SHA-256: `3c8a122d75d6269ad1ce3dafe5e8ee8c53594b62eb225ef2e2e6cf99a0531c43`.
+
+Final packaged app/installer evidence is recorded in
+[compact-1.0.7.json](verification/compact-1.0.7.json) and
+[installer.json](verification/installer.json).
+
+No visual QA, screenshots or browser inspection were performed, as requested.
+Functional checks do not establish pixel-perfect fidelity. Release downloads and
+checksums are available from [GitHub Releases](https://github.com/rohanphw/toby/releases/tag/v1.0.7).
+Voice input remains unavailable. Background work still requires an awake Mac and a running host.
+
+---
+
 # Release verification: Toby 1.0.6
 
 Date: 22 October 2026. Target: Apple Silicon, macOS 14+.

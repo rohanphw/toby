@@ -9,10 +9,10 @@
   ],
   "windowBounds": "{{160, 160}, {640, 400}}",
   "bundleId": "com.toby.desktop.next",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "signed": true,
   "notarized": false,
   "visualQA": false,
-  "sha256": "136f67bc05cfa1fd1b98600bddd0d6b0c9e6f40ddd62665b07f375e1da5e282a",
+  "sha256": "3c8a122d75d6269ad1ce3dafe5e8ee8c53594b62eb225ef2e2e6cf99a0531c43",
   "bundledPublicNotices": true
 }

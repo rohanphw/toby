@@ -1,6 +1,6 @@
 # Voice input
 
-Voice input is unavailable in Toby 1.0.6. The composer shows a disabled microphone
+Voice input is unavailable in the current Toby release. The composer shows a disabled microphone
 control, and all assistant replies are text.
 
 Toby's provider integrations use existing subscriptions. No supported

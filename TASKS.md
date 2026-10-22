@@ -45,3 +45,13 @@ Full parity exceptions and remaining acceptance work are listed in docs/BUILD_RE
 - [x] Attachment pending state and duplicate-action protection
 - [x] Focused tests, real Harness/protocol fixtures and hidden functional renderer checks
 - [x] Verify signed 1.0.6 app and installer
+
+## Approved compact mockup — 1.0.7
+- [x] Implement latest compact option 2 using existing logo, system fonts and black theme
+- [x] Compact real sidebar/header/avatars/reading column/composer
+- [x] Functional independent sidebar search and clear/empty states
+- [x] Preserve agent/group setup, models, drafts, message actions and workspace tools
+- [x] Typecheck, focused tests, protocol/harness checks and hidden renderer integration
+- [x] Verify signed packaged app and drag-to-Applications installer
+
+Visual QA and screenshots are excluded by user instruction. Public 1.0.6 assets remain unchanged.

@@ -1,7 +1,5 @@
 import { createSignal, For, Show } from 'solid-js';
 import { Popover } from '@kobalte/core/popover';
-import { Check, Copy, Reply, SmilePlus } from 'lucide-solid';
-import { IconButton } from './Ui';
 
 const reactions = [
   {emoji:'👍',label:'Like'},
@@ -44,13 +42,13 @@ export function MessageActions(props: {
   }
   return <div class="message-footer" classList={{'actions-open':open(),'has-feedback':props.copied}}>
     <Show when={props.reactions?.length}><div class="message-reactions" role="group" aria-label="Your reactions">
-      <For each={reactions.filter(reaction=>props.reactions?.includes(reaction.emoji))}>{reaction=><button type="button" class="reaction-chip" disabled={reacting()} aria-label={`Remove ${reaction.label} reaction`} aria-pressed="true" title={`${reaction.label} · Click to remove`} onClick={()=>void react(reaction.emoji)}><span aria-hidden="true">{reaction.emoji}</span><Check size={10} aria-hidden="true"/></button>}</For>
+      <For each={reactions.filter(reaction=>props.reactions?.includes(reaction.emoji))}>{reaction=><button type="button" class="reaction-chip" disabled={reacting()} aria-label={`Remove ${reaction.label} reaction`} aria-pressed="true" title={`${reaction.label} · Click to remove`} onClick={()=>void react(reaction.emoji)}><span aria-hidden="true">{reaction.emoji}</span></button>}</For>
     </div></Show>
     <div class="message-actions" role="group" aria-label="Message actions">
-      <IconButton label="Reply to message" active={props.replying} onClick={props.onReply}><Reply size={14}/></IconButton>
-      <IconButton label={props.copied?'Copied':'Copy message'} disabled={!props.canCopy||copying()} onClick={()=>void copy()}><Show when={props.copied} fallback={<Copy size={14}/>}><Check size={14}/></Show></IconButton>
+      <button type="button" class="message-action" classList={{active:props.replying}} aria-label="Reply to message" onClick={props.onReply}>Reply</button>
+      <button type="button" class="message-action" aria-label={props.copied?'Copied':'Copy message'} disabled={!props.canCopy||copying()} onClick={()=>void copy()}>{props.copied?'Copied':'Copy'}</button>
       <Popover open={open()} onOpenChange={value=>{if(!value||!reacting())setOpen(value);}} placement="top" gutter={8}>
-        <Popover.Trigger class="icon-button reaction-trigger" aria-label="Add reaction" title="Add reaction" aria-disabled={reacting()}><SmilePlus size={15}/></Popover.Trigger>
+        <Popover.Trigger class="message-action reaction-trigger" aria-label="Add reaction" title="Add reaction" aria-disabled={reacting()}>React</Popover.Trigger>
         <Popover.Portal><Popover.Content class="reaction-picker">
           <Popover.Title class="reaction-picker-title">React to this message</Popover.Title>
           <div class="reaction-options" role="group" aria-label="Choose a reaction" onKeyDown={navigateReactions}>
@@ -59,6 +57,6 @@ export function MessageActions(props: {
         </Popover.Content></Popover.Portal>
       </Popover>
     </div>
-    <span class="copy-feedback" role="status" aria-live="polite">{props.copied?'Copied':''}</span>
+    <span class="copy-feedback sr-only" role="status" aria-live="polite">{props.copied?'Copied':''}</span>
   </div>;
 }

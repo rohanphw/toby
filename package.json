@@ -1,6 +1,6 @@
 {
   "name": "toby-desktop",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "private": true,
   "description": "Your local team of AI agents on Mac.",
   "author": "Rohan Pahwa",
@@ -11,6 +11,7 @@
     "build": "electron-vite build && bun build src/main/mcp-stdio.ts --target=node --format=cjs --outfile out/main/mcp-stdio.cjs && swiftc packaging/computer.swift -O -o resources/computer-helper",
     "typecheck": "tsc --noEmit",
     "test": "bun test && bun build tests/store.node.ts --target=node --format=esm --outfile .local/store-test.mjs && node --test .local/store-test.mjs",
+    "test:renderer": "electron tests/renderer.integration.cjs",
     "package:app": "bun run build && electron-builder --mac --dir --arm64",
     "package:dmg": "bun run package:app && bash scripts/build-dmg.sh",
     "smoke": "electron out/main/index.js --smoke-test"
