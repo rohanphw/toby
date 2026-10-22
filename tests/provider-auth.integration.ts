@@ -1,0 +1,7 @@
+import {app} from 'electron';
+import assert from 'node:assert/strict';
+import {mkdtemp,mkdir,writeFile,chmod,rm} from 'node:fs/promises';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {Providers} from '../src/main/providers';
+void app.whenReady().then(async()=>{app.dock?.hide();const root=await mkdtemp(join(tmpdir(),'toby-subscription-guard-'));await mkdir(join(root,'runtimes/openai/bin'),{recursive:true});const binary=join(root,'runtimes/openai/bin/codex');await writeFile(binary,`#!/usr/bin/env node\nconst rl=require('node:readline').createInterface({input:process.stdin});rl.on('line',line=>{const m=JSON.parse(line);if(m.id===undefined)return;const result=m.method==='account/read'?{account:{type:'apiKey'}}:{};process.stdout.write(JSON.stringify({id:m.id,result})+'\\n');});`);await chmod(binary,0o755);const providers=new Providers(root,()=>{});try{await assert.rejects(()=>providers.turn({agent:{id:'test',name:'Toby',personality:'',specialization:'',provider:'openai',model:'test',avatar:'toby',status:'idle',workspace:root,createdAt:Date.now()},chatId:'test',prompt:'Never send a model request',instructions:'',signal:new AbortController().signal,onText:()=>{},approve:async()=>false,tools:[],callTool:async()=>{},connectors:[]}),/ChatGPT subscription/);console.log('PROVIDER_SUBSCRIPTION_GUARD_PASS: API-key auth refused before a model request');}finally{providers.dispose();await rm(root,{recursive:true,force:true});}app.exit(0);}).catch(e=>{console.error(e);app.exit(1)});

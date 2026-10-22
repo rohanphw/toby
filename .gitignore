@@ -1,0 +1,14 @@
+node_modules/
+out/
+dist/
+.local/
+*.log
+.DS_Store
+.env
+.env.*
+*.pem
+*.p12
+*.pfx
+*.key
+*.mobileprovision
+resources/computer-helper

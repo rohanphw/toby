@@ -1,0 +1,77 @@
+{
+  "name": "toby-desktop",
+  "version": "1.0.6",
+  "private": true,
+  "description": "Your local team of AI agents on Mac.",
+  "author": "Rohan Pahwa",
+  "main": "out/main/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build && bun build src/main/mcp-stdio.ts --target=node --format=cjs --outfile out/main/mcp-stdio.cjs && swiftc packaging/computer.swift -O -o resources/computer-helper",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test && bun build tests/store.node.ts --target=node --format=esm --outfile .local/store-test.mjs && node --test .local/store-test.mjs",
+    "package:app": "bun run build && electron-builder --mac --dir --arm64",
+    "package:dmg": "bun run package:app && bash scripts/build-dmg.sh",
+    "smoke": "electron out/main/index.js --smoke-test"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "electron": "45.0.0",
+    "electron-builder": "26.15.3",
+    "electron-vite": "6.0.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "vite-plugin-solid": "2.11.14",
+    "@kobalte/core": "0.13.14",
+    "dompurify": "3.4.17",
+    "lucide-solid": "1.61.0",
+    "marked": "18.1.1",
+    "solid-js": "1.9.17"
+  },
+  "build": {
+    "appId": "com.toby.desktop.next",
+    "productName": "Toby",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources",
+        "to": "assets"
+      },
+      {
+        "from": "docs/VOICE.md",
+        "to": "assets/VOICE-NOTICES.md"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "resources/Toby.icns",
+      "target": [
+        "dir"
+      ],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "identity": "Rohan Pahwa (L75A27832H)",
+      "entitlements": "packaging/entitlements.plist",
+      "entitlementsInherit": "packaging/entitlements.plist",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Toby requests microphone access only when a supported voice-input integration is available and you choose to use it.",
+        "NSCameraUsageDescription": "Toby only uses camera access when you explicitly allow a website to use it.",
+        "NSScreenCaptureUsageDescription": "Toby needs Screen Recording permission to understand your screen when you request computer assistance.",
+        "LSMinimumSystemVersion": "14.0",
+        "NSAppleEventsUsageDescription": "Toby uses System Events only when you approve an action to understand or control this Mac."
+      },
+      "sign": "scripts/sign-app.cjs"
+    },
+    "npmRebuild": false
+  },
+  "trustedDependencies": [
+    "electron"
+  ]
+}

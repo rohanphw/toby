@@ -1,0 +1,16 @@
+{
+  "tts": {
+    "loadMs": 441.54708400000004,
+    "inferenceMs": 843.0275409999999
+  },
+  "stt": {
+    "loadMs": 1089.111542,
+    "inferenceMs": 106.84966599999962
+  },
+  "transcript": "Hello Rohan Toby is ready to help you today.",
+  "sampleRate": 44100,
+  "samples": 150968,
+  "electron": "45.0.0",
+  "cancelMs": 46.61233399999992,
+  "cancellation": "Worker exited 0"
+}

@@ -1,0 +1,12 @@
+import { test, afterEach } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { Store } from '../src/main/store.ts';
+const dirs:string[]=[];afterEach(()=>{for(const d of dirs.splice(0))rmSync(d,{recursive:true,force:true});});
+const open=()=>{const dir=mkdtempSync(join(tmpdir(),'toby-store-'));dirs.push(dir);return new Store(dir);};
+const input={name:'Toby',personality:'Direct',specialization:'Research',provider:'openai' as const,model:'test'};
+test('agent identity, local transcript and group membership survive restart independently of model',()=>{let s=open();const root=s.root;const a=s.saveAgent(input);const b=s.saveAgent({...input,name:'Researcher',provider:'grok'});const g=s.saveGroup({name:'Team',instructions:'Work together',members:[a.id,b.id]});s.addMessage({chatId:g.id,senderId:a.id,role:'assistant',text:'Handing this to my colleague',status:'done'});s.saveAgent({...a,model:'replacement'});s.close();s=new Store(root);assert.equal(s.all<any>('agents')[0].id,a.id);assert.equal(s.all<any>('agents')[0].model,'replacement');assert.deepEqual(s.all<any>('groups')[0].members,[a.id,b.id]);assert.equal(s.all<any>('messages')[0].senderId,a.id);s.close();});
+test('uncertain running work becomes interrupted and is never blindly replayed',()=>{let s=open();const root=s.root;const a=s.saveAgent(input);const t=s.task({agentId:a.id,chatId:a.id,prompt:'External side effect'});s.put('tasks',{...t,status:'running'});s.put('agents',{...a,status:'working'});s.addMessage({chatId:a.id,senderId:a.id,role:'assistant',text:'Partial',status:'streaming'});s.close();s=new Store(root);assert.equal(s.get<any>('tasks',t.id).status,'interrupted');assert.equal(s.get<any>('agents',a.id).status,'idle');assert.equal(s.all<any>('messages')[0].status,'failed');s.close();});
+test('transaction rolls back partial delegation state',()=>{const s=open();assert.throws(()=>s.transaction(()=>{s.saveAgent(input);throw Error('Simulated crash')}));assert.deepEqual(s.all('agents'),[]);s.close();});

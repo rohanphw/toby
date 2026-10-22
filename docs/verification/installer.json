@@ -1,0 +1,18 @@
+{
+  "appIcon": [
+    170,
+    230
+  ],
+  "applicationsIcon": [
+    470,
+    230
+  ],
+  "windowBounds": "{{160, 160}, {640, 400}}",
+  "bundleId": "com.toby.desktop.next",
+  "version": "1.0.6",
+  "signed": true,
+  "notarized": false,
+  "visualQA": false,
+  "sha256": "136f67bc05cfa1fd1b98600bddd0d6b0c9e6f40ddd62665b07f375e1da5e282a",
+  "bundledPublicNotices": true
+}

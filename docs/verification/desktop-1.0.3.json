@@ -1,0 +1,31 @@
+{
+  "version": "1.0.3",
+  "uiModel": "gpt-6-astra",
+  "reasoningEffort": "high",
+  "typecheck": true,
+  "productionBuild": true,
+  "focusedTests": 7,
+  "harnessStreamingIntegration": true,
+  "rendererFunctional": {
+    "twoStepSetup": true,
+    "modelRequired": true,
+    "profilePreserved": true,
+    "noVoiceGate": true,
+    "voiceDisabled": true,
+    "conversationSend": true,
+    "stableMessageRows": true,
+    "sanitizedMarkdown": true,
+    "downloadProgress": true,
+    "keyboardDialog": true
+  },
+  "packagedStartup": true,
+  "oldSpeechRuntimeAbsent": true,
+  "dmgSignature": true,
+  "dmgChecksum": true,
+  "applicationsShortcut": true,
+  "finderLayoutMetadata": true,
+  "sha256": "ae0114f52ecfc479b454895b81073ee54156962ec259a1d0570f4ce4162790f4",
+  "notarized": false,
+  "visualQA": false,
+  "microphoneQA": false
+}
