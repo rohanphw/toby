@@ -1,0 +1,264 @@
+{
+  "version": "1.0.20",
+  "date": "2026-10-27",
+  "passed": true,
+  "testSource": "tests/live-channels.e2e.cjs",
+  "productionMainPreloadRenderer": true,
+  "isolatedProfile": true,
+  "realProviderInferenceTested": true,
+  "providers": [
+    {
+      "provider": "openai",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.162.0",
+      "auth": "ChatGPT subscription"
+    },
+    {
+      "provider": "grok",
+      "model": "grok-4.7-build-fast",
+      "runtime": "Grok 1.0.70",
+      "auth": "cached subscription token"
+    }
+  ],
+  "realAppRestarts": 6,
+  "processLifetimes": [
+    {
+      "pid": 93520,
+      "role": "OpenAI lead delegates to Grok"
+    },
+    {
+      "pid": 97993,
+      "role": "restored plan, both ownership directions"
+    },
+    {
+      "pid": 5756,
+      "role": "second restart persistence check"
+    },
+    {
+      "pid": 6782,
+      "role": "Grok normal final recall and live message event"
+    },
+    {
+      "pid": 9748,
+      "role": "existing-message UI surface checks"
+    },
+    {
+      "pid": 12213,
+      "role": "personal memory save, both providers"
+    },
+    {
+      "pid": 15912,
+      "role": "personal memory recall, both providers"
+    }
+  ],
+  "phases": [
+    {
+      "label": "openai-lead-before-restart",
+      "pid": 93520,
+      "rootTaskId": "4479a61c-0290-4585-8e19-a9611eca137d",
+      "taskIds": [
+        "4479a61c-0290-4585-8e19-a9611eca137d",
+        "46c287d1-fba2-4db3-bf6d-798857487d8f"
+      ],
+      "publicAnswer": "Zephyr-0a6022221c — 402",
+      "privateBriefExercised": true,
+      "privateResultExercised": true,
+      "publicReplies": 1,
+      "audit": {
+        "snapshots": 13,
+        "events": 0,
+        "domChecks": 18,
+        "violations": []
+      }
+    },
+    {
+      "label": "openai-lead-after-restart",
+      "pid": 97993,
+      "rootTaskId": "ad17f362-f4e2-497a-a1c4-909fde84a749",
+      "taskIds": [
+        "ad17f362-f4e2-497a-a1c4-909fde84a749",
+        "00dc749f-ea57-445a-ae8f-6bfdc271b83e"
+      ],
+      "publicAnswer": "Zephyr-0a6022221c — 402",
+      "privateBriefExercised": true,
+      "privateResultExercised": true,
+      "publicReplies": 1,
+      "audit": {
+        "snapshots": 12,
+        "events": 0,
+        "domChecks": 16,
+        "violations": []
+      }
+    },
+    {
+      "label": "grok-lead-after-restart",
+      "pid": 97993,
+      "rootTaskId": "c05155c1-cf12-4047-a582-e5806a814a11",
+      "taskIds": [
+        "c05155c1-cf12-4047-a582-e5806a814a11",
+        "3e45830a-a5f0-4678-b89a-8069e6b5fce0"
+      ],
+      "publicAnswer": "Zephyr-0a6022221c — 411",
+      "privateBriefExercised": true,
+      "privateResultExercised": true,
+      "publicReplies": 1,
+      "audit": {
+        "snapshots": 23,
+        "events": 0,
+        "domChecks": 29,
+        "violations": []
+      }
+    },
+    {
+      "label": "second-restart-persistence",
+      "pid": 5756,
+      "leadRetained": true,
+      "revisedMemoryRetained": true,
+      "audit": {
+        "snapshots": 1,
+        "events": 0,
+        "domChecks": 3,
+        "violations": []
+      }
+    },
+    {
+      "label": "grok-recall-after-second-restart",
+      "pid": 6782,
+      "rootTaskId": "b89e4a67-1203-4dd1-94d5-422f069a9af4",
+      "taskIds": [
+        "b89e4a67-1203-4dd1-94d5-422f069a9af4"
+      ],
+      "publicAnswer": "Zephyr-0a6022221c — 411",
+      "privateBriefExercised": false,
+      "privateResultExercised": false,
+      "publicReplies": 1,
+      "audit": {
+        "snapshots": 4,
+        "events": 1,
+        "domChecks": 10,
+        "violations": []
+      }
+    },
+    {
+      "label": "final-public-surfaces",
+      "pid": 9748,
+      "audit": {
+        "snapshots": 5,
+        "events": 0,
+        "domChecks": 13,
+        "violations": []
+      }
+    },
+    {
+      "label": "personal-memory-after-restart",
+      "pid": 15912,
+      "seedHistoryRemoved": true,
+      "openai": true,
+      "grok": true,
+      "audit": {
+        "snapshots": 7,
+        "events": 2,
+        "domChecks": 17,
+        "violations": []
+      }
+    }
+  ],
+  "observations": {
+    "snapshots": 53,
+    "events": 3,
+    "domChecks": 90,
+    "violations": 0
+  },
+  "surfaceChecks": [
+    {
+      "label": "fifth-process",
+      "expandedActivity": true,
+      "memoryInspector": true,
+      "privateSearch": true,
+      "quote": true,
+      "copy": true
+    }
+  ],
+  "finalDatabaseChecks": {
+    "sameAgentIds": true,
+    "sameGroupId": true,
+    "grokLeadRetained": true,
+    "originalMemoryIdsRetained": true,
+    "revisedTotalRetained": true,
+    "sharedSourcesRetained": true,
+    "personalMemoryRows": 2
+  },
+  "liveSearchToolUsageVerified": true,
+  "personalMemory": {
+    "bothProviders": true,
+    "seedChatMessagesRemoved": true,
+    "recallPromptsOmittedValues": true,
+    "ownMemoryIdsRetained": true,
+    "noAlternativeRecallValueInHistoryOrFiles": true,
+    "openaiReadAuditFileWithoutRecallValue": true
+  },
+  "privacyFixes": [
+    "only current running root owner may publish shared memory",
+    "child assistant/system/tool records remain private even if tagged public",
+    "child tool attachments excluded from public IPC"
+  ],
+  "regressions": {
+    "bun": 72,
+    "nodeStore": 8,
+    "conversation": 6,
+    "providerText": 20,
+    "groupMemoryIntegration": true,
+    "rendererWithMalformedPublicChildren": true,
+    "typecheck": true,
+    "diffCheck": true
+  },
+  "artifact": "/Users/rohan/Desktop/harness/toby/dist/Toby-1.0.20-arm64.dmg",
+  "bytes": 133860100,
+  "sha256": "25f55c70aa4f53c252501f600e8eb1d27f1c9a965c6c63b59c39177cf39ac71d",
+  "packagedStartup": {
+    "bridge": true,
+    "agents": 0,
+    "local": true,
+    "body": 424,
+    "errors": []
+  },
+  "packagedCodeMatches": true,
+  "testFilesExcluded": true,
+  "codeHashes": [
+    {
+      "path": "out/main/index.js",
+      "sha256": "1b58c7169a409be9491ce6a8e2fdae43dfe3efd348664d59b8b19c0285158442"
+    },
+    {
+      "path": "out/preload/index.cjs",
+      "sha256": "8486da3026a93787dcd920b6f00f14cbe3e229cef647e8cd1301b3e8b6469bb5"
+    },
+    {
+      "path": "out/renderer/assets/index-BxZITXsQ.js",
+      "sha256": "71aed81d0207206ebcb8506ed5c2540cd1bafd50e61d30b3f08e06f9bc02f472"
+    }
+  ],
+  "appSignature": true,
+  "dmgSignature": true,
+  "dmgChecksum": true,
+  "applicationsShortcut": true,
+  "finderLayoutMetadata": true,
+  "notarized": false,
+  "stapled": false,
+  "liveEvidenceSha256": "287907ae240dcabec6b11b6dc33d678c6e27d360533f538634d03e3d398dba91",
+  "privateEvidencePath": "/Users/rohan/Desktop/harness/toby/.local/live-channel-run-1/live-evidence.json",
+  "testAppProcessesStopped": true,
+  "debugPortsClosed": true,
+  "screenshotsTaken": false,
+  "published": false,
+  "limits": [
+    "Observed live flows and regression cases, not a universal guarantee for arbitrary model prose",
+    "Restarts here followed settled work; interrupted-task recovery remains separately fixture-tested",
+    "Native notification display not part of this run",
+    "Initial coordination ran before the additional malformed child-tool projection guard; that guard passed unit/renderer regressions and later live final delivery/personal-memory checks"
+  ],
+  "packagedMcpTransport": true,
+  "realTobyProfileModified": false,
+  "testProviderProcessesRemaining": 0,
+  "clipboardCheck": "Captured raw public copy payload without changing the system clipboard"
+}

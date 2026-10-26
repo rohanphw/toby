@@ -1,0 +1,106 @@
+{
+  "version": "1.0.19",
+  "date": "2026-10-26",
+  "artifact": "/Users/rohan/Desktop/harness/toby/dist/Toby-1.0.19-arm64.dmg",
+  "bytes": 133859964,
+  "sha256": "57c0115c30afa235103e9711c9a6c500cc95d9dff78b20cd27463c802c5b83ac",
+  "bundleId": "com.toby.desktop.next",
+  "packagedStartup": {
+    "bridge": true,
+    "agents": 0,
+    "local": true,
+    "body": 424,
+    "errors": []
+  },
+  "packagedMainMatches": true,
+  "appDeepSignature": true,
+  "dmgSignature": true,
+  "dmgChecksum": true,
+  "applicationsShortcut": true,
+  "finderLayoutMetadata": true,
+  "typecheck": true,
+  "productionBuild": true,
+  "bunTests": 70,
+  "nodeStoreTests": 8,
+  "electronNodeContextAndLeadTests": 7,
+  "integrationsPassed": [
+    "groups",
+    "group-memory",
+    "harness-startup",
+    "harness",
+    "permission-policy",
+    "grok-approval",
+    "provider-text (10 cases)",
+    "tool-presentation (25 builtins)",
+    "renderer",
+    "onboarding",
+    "workspace-layout"
+  ],
+  "permissions": [
+    "explicit onboarding choice",
+    "workspace default plus per-agent overrides",
+    "inherited specialist defaults",
+    "remembered action categories",
+    "pending matching grant resolution",
+    "effective full revocation stops running full sessions",
+    "opaque requests blocked",
+    "native and host terminal policy shared"
+  ],
+  "channels": [
+    "one owner",
+    "persistent lead",
+    "selected recipient and replied task ownership",
+    "leading exact mention",
+    "membership-scoped cancellation",
+    "max two active group turns",
+    "private child results and joined owner synthesis",
+    "group-targeted routines",
+    "routine-origin guards",
+    "startup failures cannot retry-loop"
+  ],
+  "context": [
+    "membership-scoped internal SQLite FTS5",
+    "shared memory authors/source IDs",
+    "bounded context and explicit omission counts",
+    "paginated history/membership and long message reads",
+    "canonical public projection excludes private children/DMs/personal memory",
+    "transactional index invalidation",
+    "restart/update/delete/isolation tests"
+  ],
+  "nativeNotifications": {
+    "implemented": true,
+    "driverTests": 14,
+    "liveMacDisplayTested": false,
+    "events": [
+      "pending approval",
+      "failed root task",
+      "actual provider failure"
+    ],
+    "clickRoutingTested": true,
+    "refreshFalsePositiveSuppressed": true
+  },
+  "uiCheckedSizes": [
+    [
+      1280,
+      800
+    ],
+    [
+      960,
+      640
+    ]
+  ],
+  "minimumWindowApprovalHeight": 201.7421875,
+  "permissionsSetupRequiresScrolling": false,
+  "ownAppScreenshotsReviewed": [
+    ".local/verification/permissions-960.png",
+    ".local/verification/group-editor-1280.png"
+  ],
+  "openbotReferenceReadOnly": true,
+  "liveProviderInferenceTested": false,
+  "providerQuestionFormsSupported": false,
+  "notarized": false,
+  "stapled": false,
+  "userDataModified": false,
+  "developmentServerStarted": false,
+  "published": false
+}

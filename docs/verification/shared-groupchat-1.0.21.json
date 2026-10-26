@@ -1,0 +1,283 @@
+{
+  "version": "1.0.21",
+  "date": "2026-10-27",
+  "passed": true,
+  "testSource": "tests/live-groupchat.e2e.cjs",
+  "productionMainPreloadRenderer": true,
+  "isolatedProfile": true,
+  "realProviderInferenceTested": true,
+  "providers": [
+    {
+      "provider": "openai",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.162.0",
+      "auth": "ChatGPT subscription"
+    },
+    {
+      "provider": "grok",
+      "model": "grok-4.7-build-fast",
+      "runtime": "Grok 1.0.70",
+      "auth": "existing subscription"
+    }
+  ],
+  "realAppRestarts": 1,
+  "processLifetimes": [
+    {
+      "pid": 58002,
+      "label": "shared-before-restart"
+    },
+    {
+      "pid": 64621,
+      "label": "shared-after-restart"
+    }
+  ],
+  "phases": [
+    {
+      "label": "shared-before-restart",
+      "pid": 58002,
+      "taskIds": [
+        "4fdf2f80-35bf-4e7e-adac-cec4b0d772bc",
+        "625cb6ea-ac40-4327-9b93-9db36acaf022",
+        "ce95c15d-f176-41ac-8e72-dc7feae85b95",
+        "f06169e6-66db-4c89-9883-28d228670a24",
+        "dc9a8f51-c472-44e9-b55b-9c1542c3681d"
+      ],
+      "authors": [
+        "8674686b-9b36-4652-95a0-3e35e3b5f9a1",
+        "3974147a-f01c-495a-9dfe-25345258c938"
+      ],
+      "posts": [
+        {
+          "senderId": "8674686b-9b36-4652-95a0-3e35e3b5f9a1",
+          "text": "Juniper-c21938ebfa: 17 × 23 = 391; adding 11 gives a final total of 402.",
+          "replyTo": "adf7ef14-5355-413e-924e-a38bf1a37dc2"
+        },
+        {
+          "senderId": "3974147a-f01c-495a-9dfe-25345258c938",
+          "text": "Juniper-c21938ebfa: independent check of 17 × 23 + 11 is 402. OpenAI QA’s visible total matches.",
+          "replyTo": "adf7ef14-5355-413e-924e-a38bf1a37dc2"
+        },
+        {
+          "senderId": "8674686b-9b36-4652-95a0-3e35e3b5f9a1",
+          "text": "Peer check: Grok QA’s visible answer agrees with mine: Juniper-c21938ebfa, final total 402.",
+          "replyTo": "0127262f-adc2-473b-9d4a-19f3c4c60b08"
+        }
+      ],
+      "reaction": {
+        "messageId": "a3f00aa8-bfff-45a4-aede-257a7ad96682",
+        "agentId": "3974147a-f01c-495a-9dfe-25345258c938",
+        "emoji": "✅"
+      },
+      "audit": {
+        "snapshots": 18,
+        "events": 0,
+        "domChecks": 17,
+        "violations": []
+      },
+      "privateNativeFinalsExercised": true,
+      "receipts": [
+        {
+          "id": "adf7ef14-5355-413e-924e-a38bf1a37dc2:8674686b-9b36-4652-95a0-3e35e3b5f9a1",
+          "groupId": "c841b361-e8cd-4c77-a092-bd66f2dc66cc",
+          "messageId": "adf7ef14-5355-413e-924e-a38bf1a37dc2",
+          "agentId": "8674686b-9b36-4652-95a0-3e35e3b5f9a1",
+          "taskId": "4fdf2f80-35bf-4e7e-adac-cec4b0d772bc",
+          "state": "done"
+        },
+        {
+          "id": "adf7ef14-5355-413e-924e-a38bf1a37dc2:3974147a-f01c-495a-9dfe-25345258c938",
+          "groupId": "c841b361-e8cd-4c77-a092-bd66f2dc66cc",
+          "messageId": "adf7ef14-5355-413e-924e-a38bf1a37dc2",
+          "agentId": "3974147a-f01c-495a-9dfe-25345258c938",
+          "taskId": "625cb6ea-ac40-4327-9b93-9db36acaf022",
+          "state": "done"
+        },
+        {
+          "id": "a3f00aa8-bfff-45a4-aede-257a7ad96682:3974147a-f01c-495a-9dfe-25345258c938",
+          "groupId": "c841b361-e8cd-4c77-a092-bd66f2dc66cc",
+          "messageId": "a3f00aa8-bfff-45a4-aede-257a7ad96682",
+          "agentId": "3974147a-f01c-495a-9dfe-25345258c938",
+          "taskId": "ce95c15d-f176-41ac-8e72-dc7feae85b95",
+          "state": "done"
+        },
+        {
+          "id": "0127262f-adc2-473b-9d4a-19f3c4c60b08:8674686b-9b36-4652-95a0-3e35e3b5f9a1",
+          "groupId": "c841b361-e8cd-4c77-a092-bd66f2dc66cc",
+          "messageId": "0127262f-adc2-473b-9d4a-19f3c4c60b08",
+          "agentId": "8674686b-9b36-4652-95a0-3e35e3b5f9a1",
+          "taskId": "f06169e6-66db-4c89-9883-28d228670a24",
+          "state": "done"
+        },
+        {
+          "id": "98a3018b-0cc8-46ec-81a4-59b33bbc9fd4:3974147a-f01c-495a-9dfe-25345258c938",
+          "groupId": "c841b361-e8cd-4c77-a092-bd66f2dc66cc",
+          "messageId": "98a3018b-0cc8-46ec-81a4-59b33bbc9fd4",
+          "agentId": "3974147a-f01c-495a-9dfe-25345258c938",
+          "taskId": "dc9a8f51-c472-44e9-b55b-9c1542c3681d",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "label": "shared-after-restart",
+      "pid": 64621,
+      "taskIds": [
+        "61e34f57-30be-424f-befe-6c9201297d4e",
+        "e9d59c88-de5b-4c71-b70d-a14e4f00444b",
+        "67d4af4f-bd03-40b1-9b48-2492a0cf60c8",
+        "cb46466c-e189-44f4-abbd-007166b20ce3",
+        "72915930-5ab4-4aff-b225-68f2ed934551"
+      ],
+      "authors": [
+        "8674686b-9b36-4652-95a0-3e35e3b5f9a1",
+        "3974147a-f01c-495a-9dfe-25345258c938"
+      ],
+      "posts": [
+        {
+          "senderId": "8674686b-9b36-4652-95a0-3e35e3b5f9a1",
+          "text": "Retrieved from saved channel memory and original history: Juniper-c21938ebfa, total 402. My calculation confirms 17 × 23 + 11 = 402.",
+          "replyTo": "224dfe22-1d85-43d1-b2a6-6afdb96da360"
+        },
+        {
+          "senderId": "3974147a-f01c-495a-9dfe-25345258c938",
+          "text": "Independent retrieval: Juniper-c21938ebfa, total 402. Recheck of 17 × 23 + 11 agrees.",
+          "replyTo": "224dfe22-1d85-43d1-b2a6-6afdb96da360"
+        },
+        {
+          "senderId": "8674686b-9b36-4652-95a0-3e35e3b5f9a1",
+          "text": "Peer check: Grok QA’s retrieved answer matches the approved facts: Juniper-c21938ebfa, total 402.",
+          "replyTo": "07b58cae-9c06-4172-92f5-e5c064b453e6"
+        }
+      ],
+      "reaction": {
+        "messageId": "a3f00aa8-bfff-45a4-aede-257a7ad96682",
+        "agentId": "3974147a-f01c-495a-9dfe-25345258c938",
+        "emoji": "✅"
+      },
+      "audit": {
+        "snapshots": 16,
+        "events": 0,
+        "domChecks": 14,
+        "violations": []
+      },
+      "privateNativeFinalsExercised": true,
+      "receipts": [
+        {
+          "id": "224dfe22-1d85-43d1-b2a6-6afdb96da360:8674686b-9b36-4652-95a0-3e35e3b5f9a1",
+          "groupId": "c841b361-e8cd-4c77-a092-bd66f2dc66cc",
+          "messageId": "224dfe22-1d85-43d1-b2a6-6afdb96da360",
+          "agentId": "8674686b-9b36-4652-95a0-3e35e3b5f9a1",
+          "taskId": "61e34f57-30be-424f-befe-6c9201297d4e",
+          "state": "done"
+        },
+        {
+          "id": "224dfe22-1d85-43d1-b2a6-6afdb96da360:3974147a-f01c-495a-9dfe-25345258c938",
+          "groupId": "c841b361-e8cd-4c77-a092-bd66f2dc66cc",
+          "messageId": "224dfe22-1d85-43d1-b2a6-6afdb96da360",
+          "agentId": "3974147a-f01c-495a-9dfe-25345258c938",
+          "taskId": "e9d59c88-de5b-4c71-b70d-a14e4f00444b",
+          "state": "done"
+        },
+        {
+          "id": "14af609c-55df-4235-b436-e59b0fa53d58:3974147a-f01c-495a-9dfe-25345258c938",
+          "groupId": "c841b361-e8cd-4c77-a092-bd66f2dc66cc",
+          "messageId": "14af609c-55df-4235-b436-e59b0fa53d58",
+          "agentId": "3974147a-f01c-495a-9dfe-25345258c938",
+          "taskId": "67d4af4f-bd03-40b1-9b48-2492a0cf60c8",
+          "state": "done"
+        },
+        {
+          "id": "07b58cae-9c06-4172-92f5-e5c064b453e6:8674686b-9b36-4652-95a0-3e35e3b5f9a1",
+          "groupId": "c841b361-e8cd-4c77-a092-bd66f2dc66cc",
+          "messageId": "07b58cae-9c06-4172-92f5-e5c064b453e6",
+          "agentId": "8674686b-9b36-4652-95a0-3e35e3b5f9a1",
+          "taskId": "cb46466c-e189-44f4-abbd-007166b20ce3",
+          "state": "done"
+        },
+        {
+          "id": "fe95fb16-5e3c-45c6-afb5-1016f8a83c0a:3974147a-f01c-495a-9dfe-25345258c938",
+          "groupId": "c841b361-e8cd-4c77-a092-bd66f2dc66cc",
+          "messageId": "fe95fb16-5e3c-45c6-afb5-1016f8a83c0a",
+          "agentId": "3974147a-f01c-495a-9dfe-25345258c938",
+          "taskId": "72915930-5ab4-4aff-b225-68f2ed934551",
+          "state": "done"
+        }
+      ]
+    }
+  ],
+  "surfaceChecks": [
+    {
+      "label": "broadcast-before-restart",
+      "expandedActivity": true,
+      "memoryInspector": true,
+      "privateSearch": true,
+      "quote": true,
+      "copy": true
+    },
+    {
+      "label": "broadcast-after-restart",
+      "expandedActivity": true,
+      "memoryInspector": true,
+      "privateSearch": true,
+      "quote": true,
+      "copy": true
+    }
+  ],
+  "finalReceipts": {
+    "total": 10,
+    "allDone": true,
+    "bothMembersHumanAndPeerTurns": true
+  },
+  "privateNativeFinalsExercised": true,
+  "privateCanaryExposure": false,
+  "cleanup": {
+    "testProcessesExited": true,
+    "debugPortsClosed": [
+      51732,
+      51922,
+      52250
+    ],
+    "developmentServerStarted": false
+  },
+  "checks": {
+    "typecheck": true,
+    "bunTests": 68,
+    "storageTests": 8,
+    "groupSqliteTests": 9,
+    "rendererFunctional": true,
+    "groupsIntegration": true,
+    "sharedMemoryIntegration": true,
+    "harnessIntegration": true,
+    "permissionPolicyIntegration": true,
+    "grokApprovalIntegration": true,
+    "providerTextIntegration": true,
+    "startupIntegration": true,
+    "packagedSmoke": {
+      "bridge": true,
+      "local": true,
+      "agents": 0,
+      "errors": []
+    },
+    "packagedMcpTransport": true,
+    "packagedProductionFilesMatchBuild": 19,
+    "testAndDebugFilesExcluded": true,
+    "mainSha256": "5519b62a463f56bb63b259178b4b77f69f1597bca0ffdacbdcf19bc6455cfb34",
+    "appSignature": true,
+    "dmgSignature": true,
+    "installerLayout": true
+  },
+  "artifact": {
+    "path": "dist/Toby-1.0.21-arm64.dmg",
+    "bytes": 133859309,
+    "sha256": "7954d41b72194a48bea97d820fb57c35431885cbf3c089e867314ea58be6a0bc",
+    "developerIdSigned": true,
+    "notarized": false,
+    "stapled": false
+  },
+  "limitations": [
+    "Model-authored deliberate public posts still require instruction following; this is not a universal semantic confidentiality guarantee.",
+    "Live scenario used two members and one orderly restart. Mid-turn recovery and larger-group loop limits use deterministic fixtures.",
+    "No screenshot or visual QA, fresh account login, OS notification delivery or external side effects were exercised.",
+    "Historical 1.0.20 sole-owner live test does not verify current broadcast group semantics."
+  ]
+}

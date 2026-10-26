@@ -14,7 +14,15 @@ offline inference.
 The first agent is Toby. Users can edit its personality and specialization, choose
 its provider/model, and add more persistent agents. Optional automatic creation
 lets agents create specialists; otherwise creation prompts for approval. Groups
-and delegated tasks support collaboration across the two providers.
+support public conversation across the two providers: every active member receives
+human messages and peer replies, and can reply, react or stay quiet. Private
+delegation is separate. Channels keep a coordinating lead, scoped shared memory
+and searchable history across provider turns.
+Members are instructed to contribute useful new information, react or pass when
+a point is covered, and let casual greetings settle without unsolicited assignments.
+See [Channel collaboration rules](docs/CHANNELS.md) for ownership, access and
+context boundaries. Fresh onboarding offers an explicit access choice; Settings
+provides workspace defaults, per-agent overrides and remembered action categories.
 
 The workspace includes conversation search, attachments, visible activity and
 approvals, local files, a shared browser, permission-gated Mac actions, text memory,
@@ -29,8 +37,10 @@ or a paid voice API fallback.
 ## Design direction
 
 Toby should feel welcoming, capable and calm. Conversation and agent identity are
-central. The desktop uses the existing Toby artwork, black and neutral surfaces,
-and macOS system typography, with OpenBot as a layout reference.
+central. The desktop reserves the existing Toby artwork for app branding, with stable
+editable emoji avatars for agents and locally bundled Nunito Sans typography.
+The approved 26 October chat design uses a continuous neutral charcoal canvas,
+softly rounded controls and explicit user-controlled pinning.
 
 - Keep ongoing work, downloads, approvals and errors visible without dominating chat.
 - Preserve the reader's position during streaming and make prior work easy to find.

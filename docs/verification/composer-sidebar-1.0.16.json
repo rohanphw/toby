@@ -1,0 +1,47 @@
+{
+  "version": "1.0.16",
+  "date": "2026-10-26",
+  "artifact": "/Users/rohan/Desktop/harness/toby/dist/Toby-1.0.16-arm64.dmg",
+  "bytes": 133591544,
+  "sha256": "985d155c10b72e3a3cd59805f40d4facdce7f325f7445df3e1b8f537d069cac1",
+  "architecture": "arm64",
+  "bundleId": "com.toby.desktop.next",
+  "packagedStartup": {
+    "bridge": true,
+    "agents": 0,
+    "local": true,
+    "body": 702,
+    "errors": []
+  },
+  "appDeepSignature": true,
+  "dmgSignature": true,
+  "dmgChecksum": true,
+  "applicationsShortcut": true,
+  "finderLayoutMetadata": true,
+  "typecheck": true,
+  "productionBuild": true,
+  "bunTests": 45,
+  "storageTests": 4,
+  "harnessIntegration": true,
+  "rendererFunctional": true,
+  "composerApprovalDraftReplyAttachmentSafety": true,
+  "approvalQueueScopePendingRetry": true,
+  "sidebarSearchCollapseDraftSafety": true,
+  "minimumWindowControlsReachable": true,
+  "visualQA": {
+    "scope": "Own-app isolated fixture screenshots, animations disabled for deterministic capture, reviewed against user-provided references",
+    "sizes": [
+      [
+        1280,
+        800
+      ],
+      [
+        960,
+        640
+      ]
+    ],
+    "realUserData": false
+  },
+  "notarized": false,
+  "published": false
+}

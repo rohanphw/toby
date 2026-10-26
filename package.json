@@ -1,6 +1,6 @@
 {
   "name": "toby-desktop",
-  "version": "1.0.7",
+  "version": "1.0.24",
   "private": true,
   "description": "Your local team of AI agents on Mac.",
   "author": "Rohan Pahwa",
@@ -17,18 +17,19 @@
     "smoke": "electron out/main/index.js --smoke-test"
   },
   "devDependencies": {
+    "@fontsource-variable/nunito-sans": "5.3.0",
+    "@kobalte/core": "0.13.14",
     "@types/node": "^24.0.0",
+    "dompurify": "3.4.17",
     "electron": "45.0.0",
     "electron-builder": "26.15.3",
     "electron-vite": "6.0.0",
-    "typescript": "7.0.2",
-    "vite": "8.3.5",
-    "vite-plugin-solid": "2.11.14",
-    "@kobalte/core": "0.13.14",
-    "dompurify": "3.4.17",
     "lucide-solid": "1.61.0",
     "marked": "18.1.1",
-    "solid-js": "1.9.17"
+    "solid-js": "1.9.17",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "vite-plugin-solid": "2.11.14"
   },
   "build": {
     "appId": "com.toby.desktop.next",

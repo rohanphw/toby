@@ -1,0 +1,49 @@
+{
+  "version": "1.0.15",
+  "date": "2026-10-26",
+  "scope": "Local review DMG from 1.0.7 plus current chat hardening; missing 1.0.8\u20131.0.14 work is not included.",
+  "artifact": "/Users/rohan/Desktop/harness/toby/dist/Toby-1.0.15-arm64.dmg",
+  "bytes": 133584303,
+  "sha256": "46532a1fff7fc347774ca80081ea78b5e5f45eb2d0295e9ea53c475a2ac396ce",
+  "architecture": "arm64",
+  "minimumMacOS": "14.0",
+  "bundleId": "com.toby.desktop.next",
+  "appDeepSignature": true,
+  "dmgSignature": true,
+  "dmgChecksum": true,
+  "mountedAppMatchesPackagedApp": true,
+  "applicationsShortcut": true,
+  "finderLayoutMetadata": true,
+  "appIcon": [
+    170,
+    230
+  ],
+  "applicationsIcon": [
+    470,
+    230
+  ],
+  "windowBounds": "{{160, 160}, {640, 400}}",
+  "packagedStartup": {
+    "bridge": true,
+    "agents": 0,
+    "local": true,
+    "body": 749,
+    "errors": []
+  },
+  "typecheck": true,
+  "productionBuild": true,
+  "bunTests": 45,
+  "bunAssertions": 199,
+  "storageTests": 4,
+  "providerFixtureScenarios": 10,
+  "coordinationIntegration": true,
+  "grokApprovalIntegration": true,
+  "nineteenToolPresentations": true,
+  "hiddenRendererFunctional": true,
+  "notarized": false,
+  "visualQA": false,
+  "screenshots": false,
+  "liveProviderInferenceThisPass": false,
+  "realUserDataModified": false,
+  "published": false
+}

@@ -1,33 +1,41 @@
 export type Provider = 'openai' | 'grok';
 export type AgentStatus = 'idle' | 'queued' | 'working' | 'waiting' | 'failed';
-export interface Agent { id: string; name: string; personality: string; specialization: string; provider: Provider; model: string; avatar: string; status: AgentStatus; workspace: string; createdAt: number; pinned?: boolean; hidden?: boolean; }
-export interface Group { id: string; name: string; instructions: string; members: string[]; createdAt: number; }
+export interface Agent { id: string; name: string; personality: string; specialization: string; provider: Provider; model: string; avatar: string; status: AgentStatus; workspace: string; createdAt: number; pinned?: boolean; hidden?: boolean; permissionMode?: PermissionMode; }
+export interface Group { id: string; pinned?: boolean; name: string; instructions: string; members: string[]; leadAgentId?: string; createdAt: number; }
 export interface Attachment { id: string; name: string; path: string; bytes: number; agentId: string; }
-export interface SendOptions { voice?: boolean; replyTo?: string; attachments?: string[]; }
-export interface Message { id: string; chatId: string; senderId: string; role: 'user' | 'assistant' | 'system' | 'tool'; text: string; createdAt: number; status?: 'streaming' | 'done' | 'failed'; correlationId?: string; activity?: { title: string; detail?: string }; replyTo?: string; attachments?: Attachment[]; reactions?: string[]; }
-export interface Task { id: string; chatId: string; agentId: string; prompt: string; displayPrompt?: string; status: 'queued' | 'running' | 'done' | 'failed' | 'interrupted'; parentId?: string; rootId?: string; hops?: number; result?: string; createdAt: number; }
-export interface Routine { id: string; name: string; agentId: string; prompt: string; intervalMinutes: number; nextRun: number; enabled: boolean; }
+export interface SendOptions { voice?: boolean; replyTo?: string; attachments?: string[]; /** @deprecated Group messages reach every active member. */ recipientAgentId?: string; }
+export interface Message { id: string; chatId: string; senderId: string; role: 'user' | 'assistant' | 'system' | 'tool'; text: string; createdAt: number; audience?: 'public' | 'internal'; status?: 'streaming' | 'done' | 'failed'; correlationId?: string; activity?: { title: string; detail?: string }; replyTo?: string; attachments?: Attachment[]; reactions?: string[]; agentReactions?: { agentId: string; emoji: string }[]; groupRoundId?: string; routineId?: string; }
+export interface Task { id: string; chatId: string; agentId: string; prompt: string; historyMessageIds?: string[]; displayPrompt?: string; channelParticipation?: boolean; sourceMessageIds?: string[]; groupRoundId?: string; status: 'queued' | 'running' | 'waiting' | 'done' | 'failed' | 'interrupted'; source?: 'user' | 'routine' | 'peer'; parentId?: string; rootId?: string; hops?: number; result?: string; createdAt: number; }
+export interface GroupDelivery { id: string; groupId: string; messageId: string; agentId: string; taskId: string; state: 'queued' | 'processing' | 'done' | 'interrupted'; }
+export interface Routine { id: string; name: string; agentId: string; chatId?: string; prompt: string; intervalMinutes: number; nextRun: number; enabled: boolean; }
 export interface Skill { id: string; name: string; instructions: string; }
 export interface Memory { id: string; agentId: string; text: string; }
+export interface GroupMemory { id: string; groupId: string; authorId: string; text: string; sourceMessageIds?: string[]; createdAt: number; }
+export interface GroupMemoryInput { id?: string; groupId: string; text: string; sourceMessageIds?: string[]; }
 export interface Connector { id: string; name: string; command: string; args: string[]; enabled: boolean; }
-export interface Approval { id: string; agentId: string; title: string; detail: string; technicalDetails?: string; canApprove?: boolean; }
+export type PermissionCategory = 'terminal' | 'browser' | 'computer' | 'files' | 'network' | 'connectors' | 'agents' | 'routines';
+export type PermissionMode = 'ask' | 'full';
+export interface Approval { id: string; agentId: string; chatId?: string; title: string; detail: string; technicalDetails?: string; canApprove?: boolean; permission?: PermissionCategory; }
 export interface ProviderSetup { phase: 'downloading' | 'verifying' | 'failed'; progress: number; downloadedBytes: number; totalBytes: number; error?: string; }
 export interface ProviderState { provider: Provider; installed: boolean; connected: boolean; models: { id: string; name: string }[]; error?: string; authUrl?: string; setup?: ProviderSetup; }
-export interface Preferences { onboardingComplete: boolean; autoCreateAgents: boolean; maxConcurrency: number; voice: string; }
+export interface Preferences { onboardingComplete: boolean; autoCreateAgents: boolean; maxConcurrency: number; voice: string; permissionMode?: PermissionMode; allowedActions?: PermissionCategory[]; notifyOnIntervention?: boolean; }
 export interface PermissionState { microphone: string; accessibility: boolean; screen: string; }
 export interface VoiceModelState { ready: boolean; downloading: boolean; progress: number; error?: string; }
-export interface Snapshot { agents: Agent[]; groups: Group[]; messages: Message[]; tasks: Task[]; routines: Routine[]; skills: Skill[]; memories: Memory[]; connectors: Connector[]; approvals: Approval[]; providers: ProviderState[]; preferences: Preferences; permissions: PermissionState; voiceModels: VoiceModelState; dataPath: string; }
-export type AgentInput = Pick<Agent,'name' | 'personality' | 'specialization' | 'provider' | 'model'> & { avatar?: string; id?: string };
+export interface Snapshot { agents: Agent[]; groups: Group[]; messages: Message[]; tasks: Task[]; routines: Routine[]; skills: Skill[]; memories: Memory[]; groupMemories?: GroupMemory[]; connectors: Connector[]; approvals: Approval[]; providers: ProviderState[]; preferences: Preferences; permissions: PermissionState; voiceModels: VoiceModelState; dataPath: string; }
+export type AgentInput = Pick<Agent,'name' | 'personality' | 'specialization' | 'provider' | 'model'> & { avatar?: string; id?: string; permissionMode?: PermissionMode | null };
 export interface VoiceAudio { samples: number[]; sampleRate: number; }
 export interface TobyAPI {
  snapshot(): Promise<Snapshot>;
+ saveGroupMemory(input: GroupMemoryInput): Promise<GroupMemory>;
+ deleteGroupMemory(groupId: string, id: string): Promise<void>;
  onSuspend(callback: () => void): () => void;
  onChange(callback: (snapshot: Snapshot) => void): () => void;
  onMessage?(callback: (message: Message) => void): () => void;
  saveAgent(input: AgentInput): Promise<Agent>;
  deleteAgent(id: string): Promise<void>;
- saveGroup(input: { id?: string; name: string; instructions: string; members: string[] }): Promise<Group>;
+ saveGroup(input: { id?: string; name: string; instructions: string; members: string[]; leadAgentId?: string }): Promise<Group>;
  send(chatId: string, text: string, options?: SendOptions): Promise<void>;
+ setChatPinned(id: string, pinned: boolean): Promise<void>;
  setAgentVisibility(id: string, options: { pinned?: boolean; hidden?: boolean }): Promise<void>;
  chooseAttachments(chatId: string): Promise<Attachment[]>;
  openAttachment(id: string): Promise<void>;
@@ -51,7 +59,8 @@ export interface TobyAPI {
  deleteRoutine(id: string): Promise<void>;
  saveConnector(input: Omit<Connector,'id'> & { id?: string }): Promise<void>;
  deleteConnector(id: string): Promise<void>;
- resolveApproval(id: string, approved: boolean): Promise<void>;
+ resolveApproval(id: string, approved: boolean, alwaysAllow?: boolean): Promise<void>;
+ onAttention?(callback: (chatId?: string) => void): () => void;
  openWorkspace(agentId?: string): Promise<void>;
  openExternal(url: string): Promise<void>;
  chooseWorkspace(agentId: string): Promise<void>;

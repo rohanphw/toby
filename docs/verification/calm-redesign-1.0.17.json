@@ -1,0 +1,69 @@
+{
+  "version": "1.0.17",
+  "date": "2026-10-26",
+  "artifact": "/Users/rohan/Desktop/harness/toby/dist/Toby-1.0.17-arm64.dmg",
+  "bytes": 133828800,
+  "sha256": "16d5c0b1352d004c1a931cba22a496bbadb441950535177390815dd5f35fa43b",
+  "bundleId": "com.toby.desktop.next",
+  "packagedStartup": {
+    "bridge": true,
+    "agents": 0,
+    "local": true,
+    "body": 485,
+    "errors": []
+  },
+  "appDeepSignature": true,
+  "dmgSignature": true,
+  "dmgChecksum": true,
+  "applicationsShortcut": true,
+  "finderLayoutMetadata": true,
+  "typecheck": true,
+  "productionBuild": true,
+  "bunTests": 45,
+  "storageTests": 5,
+  "rendererFunctional": true,
+  "welcomeBeforeFields": true,
+  "welcomeLoopProgresses": true,
+  "welcomeCTAReachableWithDownloadStatus": true,
+  "onboardingDraftAndModelGate": true,
+  "reducedMotionVerified": true,
+  "explicitAgentAndGroupPinning": true,
+  "pinPersistenceAndGroupEdit": true,
+  "emptyComposerIdentity": true,
+  "progressiveLibraries": true,
+  "modalSaveVisible": true,
+  "minimumWindowPermissionControlsReachable": true,
+  "typeface": "Nunito Sans Variable",
+  "typefacePackage": "@fontsource-variable/nunito-sans@5.3.0",
+  "bundledFontFiles": 10,
+  "fontLicenseBundled": true,
+  "visualQA": {
+    "scope": "Isolated own-app screenshots reviewed against the user request",
+    "sizes": [
+      [
+        1280,
+        800
+      ],
+      [
+        960,
+        640
+      ]
+    ],
+    "screens": [
+      "welcome",
+      "profile",
+      "subscription",
+      "chat and composer approval",
+      "empty chat",
+      "pinned chats",
+      "settings",
+      "memory editor",
+      "agent editor",
+      "group editor"
+    ]
+  },
+  "notarized": false,
+  "liveProviderRequests": false,
+  "realUserDataModified": false,
+  "published": false
+}

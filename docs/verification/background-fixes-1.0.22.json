@@ -1,0 +1,62 @@
+{
+  "version": "1.0.22",
+  "date": "2026-10-27",
+  "scope": "local install-and-test DMG",
+  "passed": true,
+  "artifact": {
+    "path": "dist/Toby-1.0.22-arm64.dmg",
+    "bytes": 133852862,
+    "sha256": "3d074ed9f2c4677ad6be0a06b75a41a8bbd2a1ef356f66e620504c9000314db4",
+    "developerIdSigned": true,
+    "notarized": false,
+    "stapled": false
+  },
+  "checks": {
+    "version": "1.0.22",
+    "productionFilesMatchBuild": 19,
+    "testAndDebugFilesExcluded": true,
+    "mainSha256": "a2e98fb85b341b83b644a6903850c2676c3efaf60ccf058cbd5ef5cb3ef1e5c5",
+    "packagedSmoke": {
+      "bridge": true,
+      "agents": 0,
+      "local": true,
+      "body": 424,
+      "errors": []
+    },
+    "packagedMcpTransport": true,
+    "appSignature": true,
+    "dmgSignature": true,
+    "imageChecksum": true,
+    "mountedVersion": "1.0.22",
+    "mountedAsarMatchesPackagedApp": true,
+    "applicationsShortcut": true,
+    "finderLayout": true
+  },
+  "implementationVerification": {
+    "typecheck": true,
+    "bunTests": 68,
+    "storageTests": 8,
+    "groupSqliteTests": 9,
+    "groupFirstPostRegression": true,
+    "sameAgentConcurrencyRegression": true,
+    "existingHostIntegrations": 6,
+    "rendererFunctional": true,
+    "rendererWorkflow": true,
+    "workspaceLayout": true,
+    "isolatedViewports": [
+      [
+        1280,
+        800
+      ],
+      [
+        960,
+        640
+      ]
+    ]
+  },
+  "limitations": [
+    "No new live-provider throughput test; current changes use deterministic fixtures.",
+    "Concurrent jobs share the agent workspace and existing workspace task limit.",
+    "No real-profile mutation, installation, commit, push or publication."
+  ]
+}

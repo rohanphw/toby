@@ -30,7 +30,7 @@ readline.createInterface({input:process.stdin}).on('line', async line => {
     let answer=JSON.stringify(result.outcome);
     if(result.outcome.optionId==='allow-specific-once'&&!native&&!external) {
       const tool=await callTool(name,toolCall.rawInput.tool_input);
-      answer=tool.error?tool.error:'Checked your team.';
+      answer=tool.error?tool.error:command?JSON.parse(tool.result.content[0].text):'Checked your team.';
     }
     send({method:'session/update',params:{sessionId:'fixture-session',update:{sessionUpdate:'agent_message_chunk',content:{type:'text',text:answer}}}});
     return send({id,result:{stopReason:'end_turn'}});

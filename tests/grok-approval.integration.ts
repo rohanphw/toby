@@ -23,7 +23,7 @@ void app.whenReady().then(async () => {
     const agent=harness.saveAgent({name:'Toby',personality:'',specialization:'',provider:'grok',model:'fixture-grok'});
     await assert.rejects(()=>providers.turn({agent,chatId:agent.id,prompt:'Never start',instructions:'',signal:new AbortController().signal,onText:()=>{},approve:async()=>{throw Error('Must not ask');},tools:[],callTool:async()=>{},connectors:[{id:'shadow',name:'Toby__shadow',command:'/unused',args:[],enabled:true}]}),/reserved Toby name/);
     const wait=(check:()=>boolean)=>new Promise<void>((resolve,reject)=>{let timer:ReturnType<typeof setTimeout>;const update=()=>{if(check()){clearTimeout(timer);listeners.delete(update);resolve();}};listeners.add(update);timer=setTimeout(()=>{listeners.delete(update);reject(Error('Approval fixture timed out'));},5000);update();});
-    const task=(prompt:string)=>store.all<Task>('tasks').find(task=>task.prompt===prompt)!;
+    const task=(prompt:string)=>store.all<Task>('tasks').findLast(task=>task.prompt===prompt)!;
     const done=(prompt:string)=>wait(()=>task(prompt)?.status==='done');
 
     await harness.send(agent.id,'case:list');await done('case:list');
@@ -50,6 +50,17 @@ void app.whenReady().then(async () => {
     for(const prompt of ['case:wrong-session','case:no-once']){await harness.send(agent.id,prompt);await done(prompt);assert.match(task(prompt).result!,/cancelled/);}
     assert.equal(approvals.size,count);
     await harness.send(agent.id,'case:cancel');await wait(()=>harness.pendingApprovals.length===1);await harness.stop(agent.id);await wait(()=>task('case:cancel')?.status==='interrupted');assert.equal(harness.pendingApprovals.length,0);
+    // A user-saved native terminal grant also covers the task-bound Toby command.
+    await harness.send(agent.id,'case:native');await wait(()=>harness.pendingApprovals.length===1);
+    harness.resolveApproval(harness.pendingApprovals[0].id,true,true);await done('case:native');assert.deepEqual(store.preferences.allowedActions,['terminal']);
+    const grantedCount=approvals.size;
+    await harness.send(agent.id,'case:command');await done('case:command');assert.match(task('case:command').result!,/Exit 0.*MUST_NOT_EXECUTE/s);assert.equal(approvals.size,grantedCount);
+    await harness.send(agent.id,'case:native');await done('case:native');assert.equal(approvals.size,grantedCount);assert.match(task('case:native').result!,/allow-specific-once/);
+    store.setPreferences({permissionMode:'full',allowedActions:[]});harness.refreshPermissions();
+    await harness.send(agent.id,'case:external');await done('case:external');assert.equal(approvals.size,grantedCount);
+    await harness.send(agent.id,'case:opaque');await wait(()=>harness.pendingApprovals.length===1);harness.resolveApproval(harness.pendingApprovals[0].id,true,true);await done('case:opaque');assert.match(task('case:opaque').result!,/deny-specific-once/);
+    store.setPreferences({permissionMode:'ask',allowedActions:[]});harness.refreshPermissions();
+    await harness.send(agent.id,'case:native');await wait(()=>harness.pendingApprovals.length===1);harness.resolveApproval(harness.pendingApprovals[0].id,false);await done('case:native');
     console.log('GROK_APPROVAL_PASS: exact reported lookup without prompt; command denied at Harness once; native/connector actions retain readable approval; exact option IDs, session isolation and once-only scope and cancellation preserved');
   } finally {if(harness!)await harness.shutdown();await providers.shutdown();await mcp.dispose();store.close();await rm(root,{recursive:true,force:true});}
   app.exit(0);

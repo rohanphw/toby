@@ -1,7 +1,9 @@
+import type { PermissionCategory } from '../shared/contracts';
 const managedTools = new Set([
   'toby_list_agents', 'toby_create_agent', 'toby_send_message', 'toby_create_group',
-  'toby_add_group_member', 'toby_post_group', 'toby_remember', 'toby_learn_skill',
+  'toby_add_group_member', 'toby_post_group', 'toby_group_react', 'toby_group_pass', 'toby_remember', 'toby_learn_skill',
   'toby_schedule', 'toby_list_files', 'toby_read_file', 'toby_write_file',
+  'toby_list_groups', 'toby_group_members', 'toby_group_history', 'toby_group_message', 'toby_group_search', 'toby_remember_group',
   'toby_share_file', 'toby_run_command', 'toby_browser_open', 'toby_browser_read',
   'toby_browser_click', 'toby_browser_type', 'toby_computer',
 ]);
@@ -22,7 +24,7 @@ export function managedTobyCall(toolCall: unknown, registeredNames: readonly str
   return registeredNames.some(tool => managedTools.has(tool) && name === `toby__${tool}`);
 }
 
-export interface ApprovalSummary { title: string; detail: string; technicalDetails: string; canApprove: boolean; }
+export interface ApprovalSummary { title: string; detail: string; technicalDetails: string; canApprove: boolean; permission?: PermissionCategory; }
 
 const inputLabels: Record<string,string> = {
   name:'Name', title:'Title', description:'Description', message:'Message', text:'Text', prompt:'Task',
@@ -68,30 +70,30 @@ export function providerApproval(params: unknown, permissions = false): Approval
   const technicalDetails=JSON.stringify(params,null,2)??'';
   const unknown={title:'This action needs more detail',detail:'Toby could not identify the complete action being requested. Deny it and ask the agent to try again with a specific action.',technicalDetails,canApprove:false};
   if(permissions) {
-    const requested=record(request.permissions),lines:string[]=[];let complete=true;
+    const requested=record(request.permissions),lines:string[]=[];const categories=new Set<PermissionCategory>();let complete=true;
     for(const [kind,value] of Object.entries(requested)) {
       const access=record(value);
-      if(kind==='network'&&typeof access.enabled==='boolean'&&Object.keys(access).every(k=>k==='enabled')) lines.push(`Network access: ${access.enabled?'Allowed for this task':'Not requested'}`);
-      else if(kind==='fileSystem'||kind==='filesystem') {const details=inputDetails(access);lines.push(details.detail);complete&&=details.complete;}
+      if(kind==='network'&&typeof access.enabled==='boolean'&&Object.keys(access).every(k=>k==='enabled')) {lines.push(`Network access: ${access.enabled?'Allowed for this task':'Not requested'}`);if(access.enabled)categories.add('network');}
+      else if(kind==='fileSystem'||kind==='filesystem') {const paths=Object.entries(access);if(!paths.length||paths.some(([key,value])=>!['read','write','readOnly','readWrite'].includes(key)||(value!==null&&(!Array.isArray(value)||value.some(path=>typeof path!=='string')))))complete=false;const details=inputDetails(Object.fromEntries(paths.filter(([,value])=>value!==null)));lines.push(details.detail);complete&&=details.complete;categories.add('files');}
       else complete=false;
     }
-    return lines.filter(Boolean).length&&complete?{title:'Allow additional access?',detail:lines.filter(Boolean).join('\n'),technicalDetails,canApprove:true}:unknown;
+    return lines.filter(Boolean).length&&complete?{title:'Allow additional access?',detail:lines.filter(Boolean).join('\n'),technicalDetails,canApprove:true,permission:categories.size===1?[...categories][0]:undefined}:unknown;
   }
   const command=typeof raw.command==='string'?raw.command:Array.isArray(raw.command)&&raw.command.every(value=>typeof value==='string')?raw.command.map(value=>/^[\w./:=+-]+$/.test(value)?value:JSON.stringify(value)).join(' '):'';
-  if(command)return {title:'Run a terminal command?',detail:`Run this command on your Mac${text(raw.cwd)?` in ${text(raw.cwd)}`:''}:\n\n${command}`,technicalDetails,canApprove:true};
+  if(command)return {title:'Run a terminal command?',detail:`Run this command on your Mac${text(raw.cwd)?` in ${text(raw.cwd)}`:''}:\n\n${command}`,technicalDetails,canApprove:true,permission:'terminal'};
   if(raw.variant==='UseTool'&&text(raw.tool_name)) {
     if(!/^[a-zA-Z0-9_.:/-]+$/.test(text(raw.tool_name))||!raw.tool_input||typeof raw.tool_input!=='object'||Array.isArray(raw.tool_input))return unknown;
     const name=text(raw.tool_name),split=name.indexOf('__'),connection=split<0?'a connected app':label(name.slice(0,split)),action=connectedAction(name);
     if(!action)return unknown;
     const inputs=inputDetails(record(raw.tool_input));
-    return {title:`${action}?`,detail:`${action} using ${connection}.${inputs.detail?'\n\n'+inputs.detail:''}${!inputs.complete?'\n\nSome requested details could not be explained. Deny this request and ask the agent to be more specific.':''}`,technicalDetails,canApprove:inputs.complete};
+    return {title:`${action}?`,detail:`${action} using ${connection}.${inputs.detail?'\n\n'+inputs.detail:''}${!inputs.complete?'\n\nSome requested details could not be explained. Deny this request and ask the agent to be more specific.':''}`,technicalDetails,canApprove:inputs.complete,permission:inputs.complete?'connectors':undefined};
   }
   const kind=text(call.kind),path=text(raw.path)||text(raw.file_path),url=text(raw.url);
-  if(url&&/^https?:\/\//i.test(url))return {title:'Open a website?',detail:`Open this address:\n${url}`,technicalDetails,canApprove:true};
+  if(url&&/^https?:\/\//i.test(url))return {title:'Open a website?',detail:`Open this address:\n${url}`,technicalDetails,canApprove:true,permission:'network'};
   if(path&&['read','edit','delete','move'].includes(kind)) {
     const action=({read:'Read',edit:'Edit',delete:'Delete',move:'Move'} as Record<string,string>)[kind];
     if(kind==='move'&&!text(raw.destination))return unknown;
-    return {title:`${action} a file?`,detail:`${action} this file:\n${path}${kind==='move'?`\nDestination: ${text(raw.destination)}`:''}`,technicalDetails,canApprove:true};
+    return {title:`${action} a file?`,detail:`${action} this file:\n${path}${kind==='move'?`\nDestination: ${text(raw.destination)}`:''}`,technicalDetails,canApprove:true,permission:'files'};
   }
   return unknown;
 }

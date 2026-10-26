@@ -4,7 +4,7 @@
 
 Toby is an open-source desktop workspace for persistent personal agents. Start with Toby, add specialists, and let them coordinate in shared conversations using your existing **ChatGPT/Codex or Grok subscription**. Teammates can use different providers.
 
-[Download for Mac](https://github.com/rohanphw/toby/releases/download/v1.0.7/Toby-1.0.7-arm64.dmg) · [Release notes](https://github.com/rohanphw/toby/releases/tag/v1.0.7) · [Website](https://www.thetoby.app) · [Documentation](docs/README.md)
+[Download for Mac](https://github.com/rohanphw/toby/releases/download/v1.0.24/Toby-1.0.24-arm64.dmg) · [Release notes](https://github.com/rohanphw/toby/releases/tag/v1.0.24) · [Website](https://www.thetoby.app) · [Documentation](docs/README.md)
 
 ## Install
 
@@ -17,15 +17,15 @@ Requires an **Apple Silicon Mac running macOS 14 or later**.
 
 Missing provider runtimes prepare automatically, with actual download and verification progress. No Toby account or API key is needed. Model availability and usage limits depend on your provider subscription.
 
-**Version 1.0.7 is Developer ID signed, but is not Apple-notarized or stapled.** macOS may block opening it. Install future releases manually; no automatic updater is included. This Electron rebuild uses separate storage from earlier Swift versions and does not migrate their data.
+**Version 1.0.24 is Developer ID signed, but is not Apple-notarized or stapled.** macOS may block opening it. Install future releases manually; no automatic updater is included. This Electron rebuild uses separate storage from earlier Swift versions and does not migrate their data.
 
 ## What you can do
 
 - Create agents with their own avatar, personality, specialization, model and workspace. Optionally allow Toby to create specialists.
-- Coordinate across providers through direct messages and persistent local group chats. Delegated results return to the requesting agent.
-- Read streaming Markdown, attach files, reply, search, copy answers and add reactions. Tool activity uses readable descriptions.
-- Save memories and written workflows, and schedule recurring tasks while Toby runs on an awake Mac. Stop, continue or reassign work.
-- Use workspace files, approved commands, an embedded browser and approved Mac actions. Configure local stdio MCP connectors for additional tools.
+- Chat with a whole group across providers. Every active member receives public messages and can reply, react or stay quiet. Shared facts and conversation history survive restarts; delegated work stays private.
+- Read formatted Markdown, attach files, reply, search, copy answers and add reactions. Related replies share a clear conversation hierarchy; internal decision text stays out of public chat.
+- Save personal and shared memories and written workflows, and schedule recurring tasks while Toby runs on an awake Mac. Run independent jobs concurrently, including several jobs for the same agent, within the workspace limit.
+- Choose asking before actions or full access during setup, set per-agent overrides, and remember approval categories. Receive Mac notifications when intervention is needed. Use workspace files, commands, an embedded browser, Mac actions and local stdio MCP connectors within those controls.
 
 **Voice input is unavailable.** Replies are always text. There are no speech models, meeting recordings, Apple speech recognition, spoken replies or separately billed speech API fallbacks. See [voice availability](docs/VOICE.md).
 

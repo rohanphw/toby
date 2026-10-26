@@ -1,0 +1,69 @@
+{
+  "version": "1.0.18",
+  "date": "2026-10-26",
+  "artifact": "/Users/rohan/Desktop/harness/toby/dist/Toby-1.0.18-arm64.dmg",
+  "bytes": 133828865,
+  "sha256": "a5b9c0ed7c26849466e2d13e54c8feed95c491a82d0f2cdeef70988158df0f4d",
+  "bundleId": "com.toby.desktop.next",
+  "packagedStartup": {
+    "bridge": true,
+    "agents": 0,
+    "local": true,
+    "body": 424,
+    "errors": []
+  },
+  "appDeepSignature": true,
+  "dmgSignature": true,
+  "dmgChecksum": true,
+  "applicationsShortcut": true,
+  "finderLayoutMetadata": true,
+  "typecheck": true,
+  "productionBuild": true,
+  "bunTests": 47,
+  "nodeStoreTests": 6,
+  "rendererFunctionalSuite": true,
+  "onboardingFunctionalSuite": true,
+  "workspaceLayoutSuite": true,
+  "workspaceSizes": [
+    [
+      1280,
+      800
+    ],
+    [
+      960,
+      640
+    ]
+  ],
+  "layoutChecks": [
+    "Flush shell with no outer padding or gutters",
+    "Grayscale sidebar, conversation and inspector",
+    "No independent rounded full-height panels",
+    "Agent avatars exclude branded logo",
+    "Permissions at input with reachable buttons beside inspector",
+    "Suggestions below composer",
+    "Persistent composer across pin and chat states"
+  ],
+  "ownAppScreenshotsReviewed": [
+    ".local/verification/empty-1280.png",
+    ".local/verification/workspace-960.png"
+  ],
+  "agentAvatars": {
+    "tobyDefault": "🦊",
+    "stableFallback": true,
+    "editable": true,
+    "explicitChoicesPreserved": true,
+    "newDefaultsPersisted": true,
+    "legacyLoadMigration": false
+  },
+  "onboarding": {
+    "topLeftBrandRemoved": true,
+    "illustrationRedesignApproved": false,
+    "existingIllustrationRetained": true
+  },
+  "notarized": false,
+  "stapled": false,
+  "liveProviderInferenceTested": false,
+  "userDataModified": false,
+  "developmentServerStarted": false,
+  "published": false
+}

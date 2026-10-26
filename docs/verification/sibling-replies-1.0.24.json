@@ -1,0 +1,73 @@
+{
+  "version": "1.0.24",
+  "date": "2026-10-27",
+  "passed": true,
+  "problem": "Same-parent sibling replies received inconsistent indentation and quoting.",
+  "regressionFailedBeforeFix": true,
+  "checks": {
+    "typecheck": true,
+    "bunTests": 79,
+    "storageTests": 8,
+    "replyLayoutTests": 11,
+    "replyLayoutAssertions": 64,
+    "rendererFunctional": true,
+    "rendererWorkflow": true,
+    "workspaceLayout": true,
+    "replyClusterGeometry": true,
+    "isolatedDesignCapture": true,
+    "responsiveWidths": [
+      1280,
+      960
+    ],
+    "longMarkdownRows": true,
+    "wrappedReactionsAndAttachments": true,
+    "stableHoverGeometry": true,
+    "sameAuthorContinuations": true,
+    "groupedRootParentAnchor": true,
+    "searchContextBreaks": true,
+    "chronologyPreserved": true,
+    "noDanglingStem": true,
+    "designQa": "design-qa.md",
+    "designQaPassed": true,
+    "packagedSmoke": {
+      "bridge": true,
+      "local": true,
+      "agents": 0,
+      "errors": []
+    },
+    "packagedMcpTransport": true,
+    "packagedProductionFilesMatchBuild": 19,
+    "testAndDebugFilesExcluded": true,
+    "hostAndPreloadUnchangedFrom1_0_23": true,
+    "mainSha256": "daed404975ac1ffe257c8eea89052a89f8566b63b43a3e6f5553518385d28018",
+    "appSignature": true,
+    "dmgSignature": true,
+    "imageChecksum": true,
+    "applicationsShortcutAndFinderLayout": true
+  },
+  "evidence": {
+    "sourceReference": "docs/design/conversation-reference.png",
+    "before": ".local/verification/1.0.24/before-conversation.png",
+    "after": ".local/verification/1.0.24/approved-conversation.png",
+    "comparison": ".local/verification/1.0.24/comparison.png",
+    "detail": ".local/verification/1.0.24/comparison-detail.png"
+  },
+  "artifact": {
+    "path": "dist/Toby-1.0.24-arm64.dmg",
+    "bytes": 133848172,
+    "sha256": "9e730e5986ecf650896d6c6353ece090f8384abd1935bf8af2a54efb4649235a",
+    "developerIdSigned": true,
+    "notarized": false,
+    "stapled": false
+  },
+  "cleanup": {
+    "allTestProcessesExited": true,
+    "developmentServerStarted": false,
+    "installedAppModified": false,
+    "realUserDataModified": false
+  },
+  "limits": [
+    "Renderer-only correction; no new live-provider test. Host/preload match1.0.23, whose live inference evidence remains historical.",
+    "Visual comparison covers the reported public exchange and responsive/long-content fixtures; no animation frame-rate certification."
+  ]
+}

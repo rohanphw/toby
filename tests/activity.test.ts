@@ -39,3 +39,11 @@ test('failed messages are readable across display, search, copy and quoted previ
   expect(messageText({role:'user',status:'failed',text:diagnostic})).toBe(diagnostic);
   expect(messageText({role:'tool',status:'done',text:'list agents\n[{"id":"agent-123"}]'})).toBe('Checked your team');
 });
+
+
+test('internal channel retrieval shows an action summary without lookup text or memory contents', () => {
+  const summary=describeActivity('toby_group_search',{query:'PRIVATE_COORDINATION_QUERY'},'done');
+  expect(summary.title).toBe('Found shared context');
+  expect(summary.detail).toBeUndefined();
+  expect(JSON.stringify(describeActivity('toby_remember_group',{text:'PRIVATE_SHARED_FACT'},'done'))).not.toContain('PRIVATE_SHARED_FACT');
+});

@@ -58,3 +58,28 @@ test('additional access describes exact known scope or remains blocked', () => {
   expect(summary.canApprove).toBe(true);expect(summary.detail).toContain('Network access');expect(summary.detail).toContain('/workspace/output');
   expect(providerApproval({permissions:{unknownScope:{all:true}}},true).canApprove).toBe(false);
 });
+
+test('known requests carry the actual action category without trusting provider metadata', () => {
+  expect(providerApproval({command:'pwd',_meta:{permission:'files'}}).permission).toBe('terminal');
+  expect(providerApproval({toolCall:{kind:'read',rawInput:{path:'/notes'}}}).permission).toBe('files');
+  expect(providerApproval({permissions:{network:{enabled:true}}},true).permission).toBe('network');
+  expect(providerApproval({permissions:{fileSystem:{write:['/notes']}}},true).permission).toBe('files');
+  expect(providerApproval({permissions:{network:{enabled:true},fileSystem:{write:['/notes']}}},true).permission).toBeUndefined();
+  expect(providerApproval({toolCall:{rawInput:{variant:'UseTool',tool_name:'calendar__delete_event',tool_input:{event_id:'123'}}}}).permission).toBe('connectors');
+  expect(providerApproval({_meta:{permission:'terminal'},title:'Run a command'}).canApprove).toBe(false);
+});
+
+test('file permission grants cannot conceal unrelated access or malformed paths',()=>{
+ for(const fileSystem of [{network:true},{write:true},{write:[{path:'/secret'}]},{read:['/notes'],domains:['example.com']}])expect(providerApproval({permissions:{fileSystem}},true).canApprove).toBe(false);
+ expect(providerApproval({permissions:{fileSystem:{read:null,write:['/notes']}}},true).permission).toBe('files');
+});
+
+
+test('group reactions and quiet passes use only the registered task-bound internal policy', () => {
+  for(const tool of ['toby_group_react','toby_group_pass']) {
+    const request={rawInput:{variant:'UseTool',tool_name:`toby__${tool}`,tool_input:{}}};
+    expect(managedTobyCall(request,[tool],'toby')).toBe(true);
+    expect(managedTobyCall(request,[],'toby')).toBe(false);
+    expect(managedTobyCall(request,[tool],'other')).toBe(false);
+  }
+});

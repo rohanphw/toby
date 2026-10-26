@@ -7,6 +7,12 @@ const labels: Record<string, [string, string, string]> = {
   'list agents': ['Checking your team', 'Checked your team', 'Couldn’t check your team'],
   'create agent': ['Creating a teammate', 'Created a teammate', 'Couldn’t create a teammate'],
   'send message': ['Sending a message', 'Sent a message', 'Couldn’t send the message'],
+  'list groups': ['Checking your channels', 'Checked your channels', 'Couldn’t check your channels'],
+  'group members': ['Checking channel members', 'Checked channel members', 'Couldn’t check channel members'],
+  'group history': ['Reading channel history', 'Read channel history', 'Couldn’t read channel history'],
+  'group message': ['Reading an earlier message', 'Read an earlier message', 'Couldn’t read the message'],
+  'group search': ['Finding shared context', 'Found shared context', 'Couldn’t search shared context'],
+  'remember group': ['Saving a shared fact', 'Saved a shared fact', 'Couldn’t save the shared fact'],
   'create group': ['Creating a group', 'Created a group', 'Couldn’t create the group'],
   'add group member': ['Adding a group member', 'Added a group member', 'Couldn’t add the group member'],
   'post group': ['Posting to the group', 'Posted to the group', 'Couldn’t post to the group'],
@@ -45,7 +51,7 @@ export function describeActivity(name: string, args: unknown = {}, status: Messa
   const input = args && typeof args === 'object' && !Array.isArray(args) ? args as Record<string, unknown> : {};
   const action = key === 'computer' && typeof input.action === 'string' ? labels[`computer ${input.action}`] : undefined;
   const title = (action ?? labels[key] ?? ['Using a connected service', 'Completed a connected action', 'Couldn’t complete the connected action'])[status === 'failed' ? 2 : status === 'streaming' ? 0 : 1];
-  const context = ['path', 'url', 'query', 'name', 'title'].flatMap(field => {
+  const context = (key.startsWith('group ')||key==='list groups'||key==='remember group')?[]:['path', 'url', 'query', 'name', 'title'].flatMap(field => {
     const value = contextValue(input[field]);
     if (!value) return [];
     const prefix = {path:'File',url:'Website',query:'Search',name:'Name',title:'Title'}[field];

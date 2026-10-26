@@ -1,0 +1,306 @@
+{
+  "version": "1.0.23",
+  "date": "2026-10-27",
+  "passed": true,
+  "source": "tests/live-participation.e2e.cjs",
+  "productionMainPreloadRenderer": true,
+  "isolatedProfile": true,
+  "realProviders": [
+    {
+      "provider": "openai",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.162.0",
+      "auth": "existing ChatGPT subscription"
+    },
+    {
+      "provider": "grok",
+      "model": "grok-4.7-build-fast",
+      "runtime": "Grok 1.0.70",
+      "auth": "existing subscription"
+    }
+  ],
+  "realAppRestarts": 1,
+  "phases": [
+    {
+      "label": "casual-greeting",
+      "pid": 28304,
+      "taskIds": [
+        "4354e93a-72b0-4b6a-9af0-4fe3dd074e61",
+        "efecb08a-d9d0-4935-973a-f1d9c6a7863f",
+        "151e5075-bc84-428b-80c8-2d1e701c9213"
+      ],
+      "posts": [
+        {
+          "id": "23d5653a-4a55-47ed-b1db-d2b4a539106f",
+          "correlationId": "efecb08a-d9d0-4935-973a-f1d9c6a7863f",
+          "senderId": "9944fa32-0e67-48bb-a9e8-e2304ef5b448",
+          "text": "Hey.",
+          "replyTo": "0fdf2536-0de6-4074-9ad2-c06437fa78e7",
+          "source": "user"
+        }
+      ],
+      "receipts": [
+        {
+          "id": "0fdf2536-0de6-4074-9ad2-c06437fa78e7:de310710-ab84-44d9-958d-1133930f1d7e",
+          "groupId": "3c966af5-b3e1-4048-8d36-ff2fe15ecbe3",
+          "messageId": "0fdf2536-0de6-4074-9ad2-c06437fa78e7",
+          "agentId": "de310710-ab84-44d9-958d-1133930f1d7e",
+          "taskId": "4354e93a-72b0-4b6a-9af0-4fe3dd074e61",
+          "state": "done"
+        },
+        {
+          "id": "0fdf2536-0de6-4074-9ad2-c06437fa78e7:9944fa32-0e67-48bb-a9e8-e2304ef5b448",
+          "groupId": "3c966af5-b3e1-4048-8d36-ff2fe15ecbe3",
+          "messageId": "0fdf2536-0de6-4074-9ad2-c06437fa78e7",
+          "agentId": "9944fa32-0e67-48bb-a9e8-e2304ef5b448",
+          "taskId": "efecb08a-d9d0-4935-973a-f1d9c6a7863f",
+          "state": "done"
+        },
+        {
+          "id": "23d5653a-4a55-47ed-b1db-d2b4a539106f:de310710-ab84-44d9-958d-1133930f1d7e",
+          "groupId": "3c966af5-b3e1-4048-8d36-ff2fe15ecbe3",
+          "messageId": "23d5653a-4a55-47ed-b1db-d2b4a539106f",
+          "agentId": "de310710-ab84-44d9-958d-1133930f1d7e",
+          "taskId": "151e5075-bc84-428b-80c8-2d1e701c9213",
+          "state": "done"
+        }
+      ],
+      "audit": {
+        "snapshots": 12,
+        "events": 0,
+        "domChecks": 14,
+        "violations": []
+      }
+    },
+    {
+      "label": "useful-public-review",
+      "pid": 28304,
+      "taskIds": [
+        "7fb4a639-de96-4043-bcf5-c8f842eccf64",
+        "01917845-e70c-49e7-a479-ef6e9835ec7d",
+        "601eeeee-3e3b-4994-9f67-fc4242b01070",
+        "55575343-3370-4040-85d2-7e4549c179f5",
+        "042cd026-6044-40a5-87e9-978d84990e15"
+      ],
+      "posts": [
+        {
+          "id": "3707173f-b2a1-4811-8751-552902c01547",
+          "correlationId": "7fb4a639-de96-4043-bcf5-c8f842eccf64",
+          "senderId": "de310710-ab84-44d9-958d-1133930f1d7e",
+          "text": "Proposed release checks for Willow-dd3bd29b1e:\n\n1. Installation validation: install the release DMG into Applications and confirm the app launches successfully.\n2. Shared-context retention: save a shared fact, restart Toby, and confirm both agents can retrieve it and the group history.",
+          "replyTo": "785a1b4f-588f-4dca-91ef-e9e289affc7b",
+          "source": "user"
+        },
+        {
+          "id": "f892c5a4-f4ca-410c-aba5-9b31ca135e6a",
+          "correlationId": "01917845-e70c-49e7-a479-ef6e9835ec7d",
+          "senderId": "9944fa32-0e67-48bb-a9e8-e2304ef5b448",
+          "text": "Missing practical release check for Willow-dd3bd29b1e:\n\n3. Upgrade retention: install this release over an existing copy that already has shared facts and group history, then confirm membership, the prior facts, and history survive and a new group post still reaches both agents.",
+          "replyTo": "3707173f-b2a1-4811-8751-552902c01547",
+          "source": "user"
+        },
+        {
+          "id": "36348b22-3c85-4319-96df-192ee3a42b84",
+          "correlationId": "55575343-3370-4040-85d2-7e4549c179f5",
+          "senderId": "de310710-ab84-44d9-958d-1133930f1d7e",
+          "text": "Final release checklist for Willow-dd3bd29b1e, incorporating Grok’s addition:\n\n1. Installation validation: install the release DMG into Applications and confirm Toby launches successfully.\n2. Shared-context retention after restart: save a shared fact, restart Toby, and confirm both agents can retrieve it and the group history.\n3. Upgrade retention: install the release over an existing copy with shared facts and group history; confirm membership, facts, and history survive and a new group post reaches both agents.",
+          "replyTo": "785a1b4f-588f-4dca-91ef-e9e289affc7b",
+          "source": "peer"
+        }
+      ],
+      "receipts": [
+        {
+          "id": "785a1b4f-588f-4dca-91ef-e9e289affc7b:de310710-ab84-44d9-958d-1133930f1d7e",
+          "groupId": "3c966af5-b3e1-4048-8d36-ff2fe15ecbe3",
+          "messageId": "785a1b4f-588f-4dca-91ef-e9e289affc7b",
+          "agentId": "de310710-ab84-44d9-958d-1133930f1d7e",
+          "taskId": "7fb4a639-de96-4043-bcf5-c8f842eccf64",
+          "state": "done"
+        },
+        {
+          "id": "785a1b4f-588f-4dca-91ef-e9e289affc7b:9944fa32-0e67-48bb-a9e8-e2304ef5b448",
+          "groupId": "3c966af5-b3e1-4048-8d36-ff2fe15ecbe3",
+          "messageId": "785a1b4f-588f-4dca-91ef-e9e289affc7b",
+          "agentId": "9944fa32-0e67-48bb-a9e8-e2304ef5b448",
+          "taskId": "01917845-e70c-49e7-a479-ef6e9835ec7d",
+          "state": "done"
+        },
+        {
+          "id": "3707173f-b2a1-4811-8751-552902c01547:9944fa32-0e67-48bb-a9e8-e2304ef5b448",
+          "groupId": "3c966af5-b3e1-4048-8d36-ff2fe15ecbe3",
+          "messageId": "3707173f-b2a1-4811-8751-552902c01547",
+          "agentId": "9944fa32-0e67-48bb-a9e8-e2304ef5b448",
+          "taskId": "601eeeee-3e3b-4994-9f67-fc4242b01070",
+          "state": "done"
+        },
+        {
+          "id": "f892c5a4-f4ca-410c-aba5-9b31ca135e6a:de310710-ab84-44d9-958d-1133930f1d7e",
+          "groupId": "3c966af5-b3e1-4048-8d36-ff2fe15ecbe3",
+          "messageId": "f892c5a4-f4ca-410c-aba5-9b31ca135e6a",
+          "agentId": "de310710-ab84-44d9-958d-1133930f1d7e",
+          "taskId": "55575343-3370-4040-85d2-7e4549c179f5",
+          "state": "done"
+        },
+        {
+          "id": "36348b22-3c85-4319-96df-192ee3a42b84:9944fa32-0e67-48bb-a9e8-e2304ef5b448",
+          "groupId": "3c966af5-b3e1-4048-8d36-ff2fe15ecbe3",
+          "messageId": "36348b22-3c85-4319-96df-192ee3a42b84",
+          "agentId": "9944fa32-0e67-48bb-a9e8-e2304ef5b448",
+          "taskId": "042cd026-6044-40a5-87e9-978d84990e15",
+          "state": "done"
+        }
+      ],
+      "audit": {
+        "snapshots": 30,
+        "events": 0,
+        "domChecks": 25,
+        "violations": []
+      }
+    },
+    {
+      "label": "quiet-review-after-restart",
+      "pid": 44300,
+      "taskIds": [
+        "e8f6edb7-a861-4a54-8ae0-1126ee631900",
+        "efd8f28c-1b4b-4400-9b43-365e8120c9b8",
+        "c5a5dc23-441d-4d24-9535-e4eb5d426fdd"
+      ],
+      "posts": [
+        {
+          "id": "d94ef06c-22aa-46a1-b8a9-46b114eed63e",
+          "correlationId": "e8f6edb7-a861-4a54-8ae0-1126ee631900",
+          "senderId": "de310710-ab84-44d9-958d-1133930f1d7e",
+          "text": "Saved approved codename: Willow-dd3bd29b1e.\n\n1. Installation validation: install the release DMG into Applications and confirm Toby launches successfully.\n2. Shared-context retention after restart: save a shared fact, restart Toby, and confirm both agents can retrieve it and the group history.\n3. Upgrade retention: install the release over an existing copy with shared facts and group history; confirm membership, facts, and history survive and a new group post reaches both agents.\n\nThese are planned checks, not executed verification.",
+          "replyTo": "470e182f-d32a-4df6-b5c0-99024296e963",
+          "source": "user"
+        }
+      ],
+      "receipts": [
+        {
+          "id": "470e182f-d32a-4df6-b5c0-99024296e963:de310710-ab84-44d9-958d-1133930f1d7e",
+          "groupId": "3c966af5-b3e1-4048-8d36-ff2fe15ecbe3",
+          "messageId": "470e182f-d32a-4df6-b5c0-99024296e963",
+          "agentId": "de310710-ab84-44d9-958d-1133930f1d7e",
+          "taskId": "e8f6edb7-a861-4a54-8ae0-1126ee631900",
+          "state": "done"
+        },
+        {
+          "id": "470e182f-d32a-4df6-b5c0-99024296e963:9944fa32-0e67-48bb-a9e8-e2304ef5b448",
+          "groupId": "3c966af5-b3e1-4048-8d36-ff2fe15ecbe3",
+          "messageId": "470e182f-d32a-4df6-b5c0-99024296e963",
+          "agentId": "9944fa32-0e67-48bb-a9e8-e2304ef5b448",
+          "taskId": "efd8f28c-1b4b-4400-9b43-365e8120c9b8",
+          "state": "done"
+        },
+        {
+          "id": "d94ef06c-22aa-46a1-b8a9-46b114eed63e:9944fa32-0e67-48bb-a9e8-e2304ef5b448",
+          "groupId": "3c966af5-b3e1-4048-8d36-ff2fe15ecbe3",
+          "messageId": "d94ef06c-22aa-46a1-b8a9-46b114eed63e",
+          "agentId": "9944fa32-0e67-48bb-a9e8-e2304ef5b448",
+          "taskId": "c5a5dc23-441d-4d24-9535-e4eb5d426fdd",
+          "state": "done"
+        }
+      ],
+      "audit": {
+        "snapshots": 12,
+        "events": 0,
+        "domChecks": 11,
+        "violations": []
+      }
+    }
+  ],
+  "surfaceChecks": [
+    {
+      "label": "rules-before-restart",
+      "expandedActivity": true,
+      "memoryInspector": true,
+      "privateSearch": true,
+      "quote": true,
+      "copy": true
+    },
+    {
+      "label": "rules-after-restart",
+      "expandedActivity": true,
+      "memoryInspector": true,
+      "privateSearch": true,
+      "quote": true,
+      "copy": true
+    }
+  ],
+  "behavior": {
+    "greetingSettledWithoutPeerChatter": true,
+    "purposefulProposalReviewSynthesis": true,
+    "recalledSharedFactsAfterRestart": true,
+    "quietReviewReaction": true,
+    "allMembersReceiveHumanMessages": true
+  },
+  "privacy": {
+    "nativeFinalCanariesExercisedBothProviders": true,
+    "publicCanaryExposure": false,
+    "allReceiptsDone": 11,
+    "taskPromptsAndResultsRedacted": true
+  },
+  "checks": {
+    "typecheck": true,
+    "bunTests": 74,
+    "storageTests": 8,
+    "groupSqliteTests": 13,
+    "hostIntegrations": [
+      "harness",
+      "groups",
+      "group-memory",
+      "group-first-post",
+      "task-concurrency",
+      "permission-policy",
+      "provider-text",
+      "grok-approval",
+      "harness-startup"
+    ],
+    "rendererFunctional": true,
+    "rendererWorkflow": true,
+    "responsiveLayout": true,
+    "isolatedDesignCapture": true,
+    "visualComparison": "design-qa.md",
+    "designQaPassed": true,
+    "packagedSmoke": {
+      "bridge": true,
+      "agents": 0,
+      "local": true,
+      "errors": []
+    },
+    "packagedMcpTransport": true,
+    "productionFilesMatchBuild": 19,
+    "testAndDebugFilesExcluded": true,
+    "mainSha256": "daed404975ac1ffe257c8eea89052a89f8566b63b43a3e6f5553518385d28018",
+    "appSignature": true,
+    "dmgSignature": true,
+    "installerChecksum": true,
+    "applicationsShortcutAndFinderLayout": true
+  },
+  "artifact": {
+    "path": "dist/Toby-1.0.23-arm64.dmg",
+    "bytes": 133848183,
+    "sha256": "c703e8e4fe5004e1ed93257234400ec71a0861cec897d0130f934347bdb694c9",
+    "developerIdSigned": true,
+    "notarized": false,
+    "stapled": false
+  },
+  "cleanup": {
+    "testProcessesExited": true,
+    "closedDebugPorts": [
+      58345,
+      59049,
+      60132
+    ],
+    "developmentServersStarted": false,
+    "realProfileModified": false,
+    "installedAppModified": false
+  },
+  "limitations": [
+    "Useful contributions and natural stopping are model instructions, with host-enforced privacy, duplicate suppression and loop backstops.",
+    "Two live members, controlled release-planning request, one orderly restart; arbitrary model prose or live crashes are not universally certified.",
+    "Initial live test required final synthesis to quote the reviewer; corrected to allow a valid reply to the original human request while incorporating peer evidence, then reran from a fresh profile.",
+    "A final post_group description clarification permits necessary requested work questions while forbidding status-check invitations from casual greetings; host regression passed and restored live phase used the final build.",
+    "No fresh provider login, OS notification-delivery certification, installed-profile upgrade or real external side effects were exercised."
+  ]
+}
